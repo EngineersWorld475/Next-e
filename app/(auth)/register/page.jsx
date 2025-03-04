@@ -5,7 +5,7 @@ import React from 'react'
 
 const RegisterPage = () => {
 
-  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (e) => {
     e.preventDefault()
   }
   return (

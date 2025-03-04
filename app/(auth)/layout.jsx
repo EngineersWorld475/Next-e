@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 
-const AuthLayout = ({ children }: { children: ReactNode }) => {
+const AuthLayout = ({ children }) => {
   return (
     <div
       className="relative flex min-h-screen items-center justify-center bg-cover bg-center bg-[#f3f4f6]"

@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 const UserProfile = () => {
     const [openEdit, setOpenEdit] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e) => {
         console.log(e.target.value);
     };
 

@@ -9,24 +9,24 @@ export default {
   ],
   theme: {
   	extend: {
-		fontFamily: {
-			sans: [
-			  "Nunito",
-			  "-apple-system",
-			  "BlinkMacSystemFont",
-			  '"Segoe UI"',
-			  "Roboto",
-			  '"Helvetica Neue"',
-			  "Arial",
-			  "sans-serif",
-			  '"Apple Color Emoji"',
-			  '"Segoe UI Emoji"',
-			  '"Segoe UI Symbol"',
-			  '"Noto Color Emoji"',
-			],
-		  },
+  		fontFamily: {
+  			sans: [
+  				'Nunito',
+  				'-apple-system',
+  				'BlinkMacSystemFont',
+  				'Segoe UI"',
+  				'Roboto',
+  				'Helvetica Neue"',
+  				'Arial',
+  				'sans-serif',
+  				'Apple Color Emoji"',
+  				'Segoe UI Emoji"',
+  				'Segoe UI Symbol"',
+  				'Noto Color Emoji"'
+  			]
+  		},
   		colors: {
-			customGrayBlue: "#858796",
+  			customGrayBlue: '#858796',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

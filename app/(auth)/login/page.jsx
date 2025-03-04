@@ -16,8 +16,8 @@ const LoginPage = () => {
             <div>
               <label htmlFor='username' className='block text-sm font-medium text-gray-700'>Username</label>
               <input type='text' id='username' name='username' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' required />
-            </div>
-            <div>
+            </div> 
+            <div>  
               <label htmlFor='password' className='block text-sm font-medium text-gray-700'>Password</label>
               <input type='password' id='password' name='password' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' required />
             </div>
