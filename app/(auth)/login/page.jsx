@@ -14,8 +14,8 @@ const LoginPage = () => {
       <h1 className='text-black text-center mb-2'>Login to your account</h1>
       <form className='flex flex-col space-y-4 text-black'>
             <div>
-              <label htmlFor='username' className='block text-sm font-medium text-gray-700'>Username</label>
-              <input type='text' id='username' name='username' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' required />
+              <label htmlFor='email' className='block text-sm font-medium text-gray-700'>Email</label>
+              <input type='email' id='email' name='email' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' required />
             </div> 
             <div>  
               <label htmlFor='password' className='block text-sm font-medium text-gray-700'>Password</label>
@@ -25,7 +25,10 @@ const LoginPage = () => {
             </form>
             <div className='flex justify-center mt-4 text-blue-500'>
             <p>you don't have an account?</p>
-            <Link href='/register' className='mx-2 hover:underline'>Register</Link>
+            <Link href='/register' className='mx-2 hover:underline'>Create an Account</Link>
+            </div>
+            <div className='flex justify-center mt-1 text-blue-500'>
+            <Link href='/' className='mx-2 hover:underline'>Go Back To Home</Link>
             </div>
         </div>
 

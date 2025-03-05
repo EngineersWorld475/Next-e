@@ -25,7 +25,7 @@ const CarouselComponent = () => {
     setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
   };
   return (
-    <div className="bg-gray-200 flex justify-center py-10 h-full md:h-auto lg:h-auto p-3">
+    <div className="bg-gray-200 flex justify-center py-10 h-full md:h-auto lg:h-auto p-3 z-10">
         <div className="w-full max-w-4xl relative">
           <Carousel>
             <CarouselContent
