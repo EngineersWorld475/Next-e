@@ -3,7 +3,11 @@
 import { registerUser } from '@/store/auth-slice';
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { Inter } from "next/font/google";
+const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
+
+
 
 const RegisterPage = () => {
 
@@ -18,6 +22,8 @@ const RegisterPage = () => {
 
   const [formData, setFormData] = useState(initialState);
   const [passwordError, setPasswordError] = useState('')
+  const { isLoading } = useSelector((state) => state.auth)
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,8 +62,8 @@ const RegisterPage = () => {
           <img src="/images/register-image.jpg" alt="register-image" className='md:rounded-lg' />
         </div>
         <div className='w-full md:w-1/2 p-4'>
-          <h1 className='text-black text-center mb-2'>Register here</h1>
-          <form className='flex flex-col space-y-4 text-black' onSubmit={handleRegister}>
+          <h1 className={`${inter.className} text-black text-center mb-2`}>Register here</h1>
+          <form className={`${inter.className} flex flex-col space-y-4 text-black`} onSubmit={handleRegister}>
             <div className='flex flex-row gap-2 '>
               <div className='w-1/2'>
                 <label htmlFor='FirstName' className='block text-sm font-medium text-gray-700'>Firstname</label>
@@ -75,7 +81,7 @@ const RegisterPage = () => {
             <div>
               <label htmlFor='Password' className='block text-sm font-medium text-gray-700'>Password</label>
               <input type='password' id='Password' name='Password' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' value={formData?.Password} onChange={handleChange} required />
-              <p style={{color:'red'}}>
+              <p style={{ color: 'red' }}>
                 {passwordError}
               </p>
             </div>
@@ -88,9 +94,9 @@ const RegisterPage = () => {
                 <option value='O'>Other</option>
               </select>
             </div>
-            <button type='submit' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300'>Register</button>
+            <button type='submit' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300'>{isLoading ? 'Loading...' : 'Register'}</button>
           </form>
-          <div className='flex justify-center mt-4 text-blue-500'>
+          <div className={`${inter.className} flex justify-center mt-4 text-blue-500 text-sm`}>
             <p>Already have an account?</p>
             <Link href='/login' className='mx-2 hover:underline'>Login!</Link>
           </div>

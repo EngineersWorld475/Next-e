@@ -1,6 +1,8 @@
 import React from 'react'
 import { useEffect, useState } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
+import { Inter } from "next/font/google";
+const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 const CarouselComponent = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -34,10 +36,10 @@ const CarouselComponent = () => {
             >
               <CarouselItem className="flex flex-col px-6 w-full">
                 <div className="flex flex-col gap-3 justify-center items-center">
-                  <h1 className='text-3xl font-semibold text-[#ff6347]'>Why should we use Scholarly?</h1>
-                  <p className='text-gray-600 mb-3'>Research articles are the source of knowledge in respective field of study. The information these research studies encompass shapes our understanding or lay foundation for future studies. Scientists and researchers read through hundreds of articles over their careers in the process of writing reviews, grants or publish their research findings. Unknowingly throughout this research career a vast information has been imbibed but at the same time some challenges are left unaddressed</p>
+                  <h1 className={`${inter.className} text-3xl font-semibold text-[#ff6347]`}>Why should we use Scholarly?</h1>
+                <p className={`${inter.className} text-gray-600 mb-3`}>Research articles are the source of knowledge in respective field of study. The information these research studies encompass shapes our understanding or lay foundation for future studies. Scientists and researchers read through hundreds of articles over their careers in the process of writing reviews, grants or publish their research findings. Unknowingly throughout this research career a vast information has been imbibed but at the same time some challenges are left unaddressed</p>
                 </div>
-                <ul className="list-disc pl-5 text-customGrayBlue">
+                <ul className={`${inter.className} list-disc pl-5 text-customGrayBlue`}>
                   <li>Pulling out an old article with specific content is a herculean task. Can this be made easier?</li>
                   <li>There is a gap in understanding an article information between an experienced PI and his enthusiastic student? Can we reduce the knowledge gap?</li>
                   <li>Readers highlight article content that interests them, the reason behind their highlight just stays in his/her thought while reading the article and when he revisits the article it’s hard to recollect the reason he highlighted the content? Can user track their reasoning?</li>
@@ -53,8 +55,8 @@ const CarouselComponent = () => {
                 </ul>
               </CarouselItem >
               <CarouselItem className="flex flex-col gap-3 px-6 w-full">
-                <h1 className='text-3xl font-semibold text-[#ff6347] text-center'>How should I use Scholarly?</h1>
-                <ul className="list-disc pl-5 text-customGrayBlue">
+                <h1 className={`${inter.className} text-3xl font-semibold text-[#ff6347] text-center`}>How should I use Scholarly?</h1>
+                <ul className={`${inter.className} list-disc pl-5 text-customGrayBlue`}>
                   <li>Sign-in with your basic information</li>
                   <li>Upload a PDF file of the article ( If full text of the article is available on Pubmed enter the required information to pull the full text of the article)</li>
                   <li>Using mouse select text to highlight the content and right click to enter relevant annotation and tags.

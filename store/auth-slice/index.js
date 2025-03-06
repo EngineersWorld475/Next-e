@@ -10,14 +10,14 @@ const initialState = {
 }
 
 export const registerUser = createAsyncThunk('/api/user', async (formData) => {
-    const response = await axios.post(`http://scholarlyapi.glitzit.com/api/user`, formData, {
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`, formData, {
         withCredentials: true
     });
-    return response.data;
+    return response.data;  
 })
-
+ 
 export const loginUser = createAsyncThunk('/account/login', async (formData) => {
-    const response = await axios.post(`http://scholarlyapi.glitzit.com/api/account/login`, formData, {
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/account/login`, formData, {
         withCredentials: true
     })
     return response.data;
