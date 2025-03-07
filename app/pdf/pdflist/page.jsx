@@ -7,7 +7,7 @@ import React from 'react'
 const PdfList = () => {
   return (
     <div className="flex flex-col gap-5 h-screen">
-      <h1 className='text-3xl text-customGrayBlue mb-3'>Dashboard</h1>
+      <h1 className='text-3xl text-customGrayBlue'>Dashboard</h1>
       <div className="flex-1 bg-white shadow-lg flex items-center px-7">
         <UploadPdf />
       </div>
