@@ -9,8 +9,8 @@ const Navbar = () => {
     <nav className='bg-[#ff6347] text-white p-3 flex justify-between items-center px-5 md:px-20 fixed top-0 left-0 w-full z-20'>
         <Image src={'/images/scholarly-logo.png'} alt="scholarly-logo" width={150} height={150} />
         <div className='flex space-x-5 text-white font-semibold'>
-            <Link href={'/login'} className={`${inter.className} hover:text-black font-mono`}>Log In</Link>
-            <Link href={'/register'} className={`${inter.className} hover:text-black font-mono`}>Sign Up</Link>
+            <Link href={'/login'} className='hover:text-black'>Log In</Link>
+            <Link href={'/register'} className='hover:text-black'>Sign Up</Link>
         </div>
     </nav>
   )

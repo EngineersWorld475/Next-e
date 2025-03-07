@@ -4,9 +4,7 @@ import { registerUser } from '@/store/auth-slice';
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { Inter } from "next/font/google";
 import Image from 'next/image';
-const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 
 
@@ -63,8 +61,8 @@ const RegisterPage = () => {
           <Image src="/images/register-image.jpg" alt="register-image" className='md:rounded-lg' height={600} width={600}/>
         </div>
         <div className='w-full md:w-1/2 p-4'>
-          <h1 className={`${inter.className} text-black text-center mb-2`}>Register here</h1>
-          <form className={`${inter.className} flex flex-col space-y-4 text-black`} onSubmit={handleRegister}>
+          <h1 className='text-black text-center mb-2'>Register here</h1>
+          <form className='flex flex-col space-y-4 text-black' onSubmit={handleRegister}>
             <div className='flex flex-row gap-2 '>
               <div className='w-1/2'>
                 <label htmlFor='FirstName' className='block text-sm font-medium text-gray-700'>Firstname</label>
@@ -97,7 +95,7 @@ const RegisterPage = () => {
             </div>
             <button type='submit' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300'>{isLoading ? 'Loading...' : 'Register'}</button>
           </form>
-          <div className={`${inter.className} flex justify-center mt-4 text-blue-500 text-sm`}>
+          <div className='flex justify-center mt-4 text-blue-500 text-sm'>
             <p>Already have an account?</p>
             <Link href='/login' className='mx-2 hover:underline'>Login!</Link>
           </div>
