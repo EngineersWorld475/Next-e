@@ -9,8 +9,8 @@ const SearchPdf = () => {
       <div className='flex flex-col md:flex-row lg:flex-row gap-3 md:gap-2 lg:gap-2'>
         <Input type="text" placeholder="Search your collections" className="w-56 md:w-96 lg:w-96" />
         <div className='flex flex-row gap-1'>
-          <Button>Search</Button>
-          <Button>Clear</Button>
+          <Button className="text-xs px-2 md:text-base md:px-4 md:py-2">Search</Button>
+          <Button className="text-xs px-2 md:text-base md:px-4 md:py-2">Clear</Button>
         </div>
       </div>
     </div>

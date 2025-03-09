@@ -11,12 +11,12 @@ const UserProfile = () => {
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">User Profile</h1>
-            <div className="relative bg-white shadow-lg rounded-xl p-6 w-full max-w-lg">
+            <h1 className="font-bold text-gray-800 mb-6 text-lg md:text-3xl lg:text-3xl">User Profile</h1>
+            <div className="relative bg-white shadow-lg rounded-xl p-6 w-full max-w-lg overflow-hidden">
                 {/* Edit Button */}
                 {!openEdit && (
                     <button 
-                        className="absolute top-4 right-4 px-3 py-1.5 bg-gray-700 text-white rounded-lg text-sm hover:bg-black transition"
+                        className="absolute top-4 right-4 px-3 py-1.5 bg-gray-700 text-white rounded-lg text-xs hover:bg-black transition  md:text-base lg:text-base"
                         onClick={() => setOpenEdit(true)}
                     >
                         Edit
@@ -24,21 +24,21 @@ const UserProfile = () => {
                 )}
 
                 {/* Profile Display */}
-                <div className="grid grid-cols-2 gap-y-5 text-gray-700">
+                <div className="grid grid-cols-2 gap-y-5 text-sm md:text-base lg:text-base text-gray-600">
                     <p className="font-semibold">Username:</p>
-                    <p className="text-gray-600">Sanjay G Nair</p>
+                    <p>Sanjay G Nair</p>
 
                     <p className="font-semibold">Email:</p>
-                    <p className="text-gray-600">sanjaygnair777@gmail.com</p>
+                    <p>sanjaygnair777@gmail.com</p>
 
                     <p className="font-semibold">Education:</p>
-                    <p className="text-gray-600">BCA (Bachelor of Computer Application)</p>
+                    <p>BCA (Bachelor of Computer Application)</p>
 
                     <p className="font-semibold">Blood Group:</p>
-                    <p className="text-gray-600">B +ve</p>
+                    <p>B +ve</p>
 
                     <p className="font-semibold">Gender:</p>
-                    <p className="text-gray-600">Male</p>
+                    <p>Male</p>
                 </div>
             </div>
 

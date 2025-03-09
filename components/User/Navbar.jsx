@@ -7,51 +7,57 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 const Navbar = () => {
   return (
     <nav className="flex justify-between items-center px-3 md:px-10 lg:px-10 py-3 bg-white shadow-md">
-        <Link href={'/pdf/pdflist'}>
-        <Image 
-          src="/images/scholarly-logo-auth.png" 
-          width={120} 
-          height={40} 
-          alt="Scholarly Logo" 
+      <Link href={'/pdf/pdflist'}>
+        <Image
+          src="/images/scholarly-logo-auth.png"
+          width={120}
+          height={40}
+          alt="Scholarly Logo"
           className="object-contain"
         />
-        </Link>
-        
-        <div className="flex gap-6 text-gray-600 font-medium">
-          <Link href={'/pdf/manage-groups'} className='cursor-pointer hover:text-gray-500 transition'>Manage Groups</Link>
-          <div className='flex flex-row gap-3 justify-center items-center'>
-            <p className='text-xs'>Sanjay</p>
+      </Link>
+
+      <div className="flex gap-6 text-gray-600 font-medium">
+        <Link href={'/pdf/manage-groups'} className='cursor-pointer hover:text-gray-500 transition text-sm md:text-base lg:text-base'>Manage Groups</Link>
+        <div className='flex flex-row gap-3 justify-center items-center'>
+          <p className='text-xs'>Sanjay</p>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-            <CircleUser className='cursor-pointer'/>
+              <CircleUser className='cursor-pointer' />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
-                <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
-                  <UserIcon className='text-gray-400' />
+                <Link href={'/user/add-profile'}>
+                  <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
+                    <UserIcon className='text-gray-400' />
                     Profile
-                </DropdownMenuItem>
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
-                <UserIcon  className='text-gray-400' />
+                <Link href={'/user/feedback'}>
+                  <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
+                    <UserIcon className='text-gray-400' />
                     Feedback
-                </DropdownMenuItem>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <Link href={'/user/change-password'}>
+                  <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
+                    <UserIcon className='text-gray-400' />
+                    Change Password 
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
-                <UserIcon  className='text-gray-400' />
-                    Change Password
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
-                  <LogOutIcon  className='text-gray-400' />
-                    Logout
+                  <LogOutIcon className='text-gray-400' />
+                  Logout
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          </div>
         </div>
-      </nav>
+      </div>
+    </nav>
   )
 }
 

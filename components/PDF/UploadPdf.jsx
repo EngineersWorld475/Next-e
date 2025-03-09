@@ -44,7 +44,7 @@ const UploadPdf = () => {
                 
                 <div className='flex flex-row gap-2'>
                     <Input type="text" placeholder="Article Name" />
-                    <Button>Upload</Button>
+                    <Button className="text-xs px-2 md:text-base md:px-4 md:py-2">Upload</Button>
                 </div>
             </div>
         </div>

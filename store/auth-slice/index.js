@@ -10,14 +10,14 @@ const initialState = {
 }
 
 export const registerUser = createAsyncThunk('/api/user', async (formData) => {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user`, formData, {
+    const response = await fetch(`/api/user`, formData, {
         withCredentials: true
     });
     return response.data;  
 })
  
 export const loginUser = createAsyncThunk('/account/login', async (formData) => {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/account/login`, formData, {
+    const response = await axios.post(`/api/account/login`, formData, {
         withCredentials: true
     })
     return response.data;
