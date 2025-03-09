@@ -31,7 +31,7 @@ const UploadPdf = () => {
                 </RadioGroup>
             </div>
 
-            <div className='flex flex-row gap-5 justify-center items-center'>
+            <div className='flex flex-col md:flex-row lg:flex-row gap-5 justify-center items-center'>
                 {uploadType === "file" ? (
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Input id="fileUpload" type="file" className="cursor-pointer" />

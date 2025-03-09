@@ -17,8 +17,8 @@ export default function Home() {
         <Navbar />
         <Button onClick={() => setOpenFeedbackDialogue(true)} className='fixed top-1/3 right-10 transform -translate-y-1/3 rotate-90 bg-[#ff6347] origin-bottom-right z-20'>🚀 Feedback</Button>
         {/* section 1 */}
-        <div className="flex flex-col justify-center items-center h-72 gap-3 shadow-md">
-          <h1 className="text-4xl text-gray-700 font-semibold text-center mt-14 md:mt-10">
+        <div className="flex flex-col justify-center items-center overflow-hidden h-72 gap-3 shadow-md">
+          <h1 className="text-4xl text-gray-700 font-semibold text-center mt-24 md:mt-10">
             <span className='block sm:inline'>Welcome to</span>
             <span className='block sm:inline'> Scholarly</span>
           </h1>
