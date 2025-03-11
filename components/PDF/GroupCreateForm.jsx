@@ -7,6 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X } from "lucide-react";
+import { Textarea } from "../ui/textarea";
 
 const groupSchema = z.object({
   name: z.string().min(3, "Group name must be at least 3 characters"),
@@ -88,7 +89,7 @@ const CreateGroup = () => {
                     </button>
                   </div>
                 ))}
-                <textarea
+                <Textarea
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
                   onKeyDown={addEmail}

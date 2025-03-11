@@ -10,7 +10,7 @@ const initialState = {
 }
 
 export const registerUser = createAsyncThunk('/api/user', async (formData) => {
-    const response = await fetch(`/api/user`, formData, {
+    const response = await axios.post(`/api/user`, formData, {
         withCredentials: true
     });
     return response.data;  
@@ -22,7 +22,6 @@ export const loginUser = createAsyncThunk('/account/login', async (formData) => 
     })
     return response.data;
 })
-
 
 
 const authSlice = createSlice({

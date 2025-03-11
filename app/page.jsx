@@ -23,9 +23,9 @@ export default function Home() {
             <span className='block sm:inline'> Scholarly</span>
           </h1>
           <p className="text-customGrayBlue px-4">
-            <span className='block sm:inline'>"A good scientist (or student) knows the</span>
+            <span className='block sm:inline'>"A good scientist (or student) knows the </span>
             <span className='block sm:inline'>right answers. A great scientist (or student)</span>
-            <span className='block sm:inline'> knows the right questions." Author unknown</span>
+            <span className='block sm:inline'> knows the right questions." - Claude Lévi-Strauss</span>
           </p>
         </div>
         {/* section 2 */}
