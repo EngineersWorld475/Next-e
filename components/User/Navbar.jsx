@@ -41,7 +41,7 @@ const Navbar = () => {
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
-                <Link href={'/user/change-password'}>
+                <Link href={'/auth/reset-password'}>
                   <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
                     <UserIcon className='text-gray-400' />
                     Change Password 
