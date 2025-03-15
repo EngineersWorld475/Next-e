@@ -65,27 +65,27 @@ const RegisterPage = () => {
             <div className='flex flex-row gap-2 '>
               <div className='w-1/2'>
                 <label htmlFor='FirstName' className='block text-sm font-medium text-gray-700'>Firstname</label>
-                <input type='text' id='FirstName' name='FirstName' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' value={formData?.FirstName} onChange={handleChange} required />
+                <input type='text' id='FirstName' name='FirstName' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' value={formData?.FirstName} onChange={handleChange} required />
               </div>
               <div className='w-1/2'>
                 <label htmlFor='LastName' className='block text-sm font-medium text-gray-700'>Lastname</label>
-                <input type='text' id='LastName' name='LastName' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' value={formData?.LastName} onChange={handleChange} required />
+                <input type='text' id='LastName' name='LastName' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' value={formData?.LastName} onChange={handleChange} required />
               </div>
             </div>
             <div>
               <label htmlFor='EmailID' className='block text-sm font-medium text-gray-700'>Email</label>
-              <input type='email' id='EmailID' name='EmailID' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' value={formData?.EmailID} onChange={handleChange} required />
+              <input type='email' id='EmailID' name='EmailID' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' value={formData?.EmailID} onChange={handleChange} required />
             </div>
             <div>
               <label htmlFor='Password' className='block text-sm font-medium text-gray-700'>Password</label>
-              <input type='password' id='Password' name='Password' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' value={formData?.Password} onChange={handleChange} required />
+              <input type='password' id='Password' name='Password' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' value={formData?.Password} onChange={handleChange} required />
               <p style={{ color: 'red' }}>
                 {passwordError}
               </p>
             </div>
             <div>
               <label htmlFor='Gender' className='block text-sm font-medium text-gray-700'>Gender</label>
-              <select id='Gender' name='Gender' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' value={formData?.Gender} onChange={handleChange} required>
+              <select id='Gender' name='Gender' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' value={formData?.Gender} onChange={handleChange} required>
                 <option value=''>Select Gender</option>
                 <option value='M'>Male</option>
                 <option value='F'>Female</option>

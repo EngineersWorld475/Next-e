@@ -75,8 +75,8 @@ const CarouselComponent = () => {
             </CarouselContent>
 
             {/* Navigation Buttons (Now Fully Working) */}
-            <CarouselPrevious onClick={goToPrevSlide} />
-            <CarouselNext onClick={goToNextSlide} />
+            <CarouselPrevious onClick={goToPrevSlide} className="bg-gray-500 border-none" />
+            <CarouselNext onClick={goToNextSlide} className="bg-gray-500  border-none" />
           </Carousel>
         </div>
       </div>

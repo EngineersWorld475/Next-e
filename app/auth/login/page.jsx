@@ -59,7 +59,7 @@ const LoginPage = () => {
           <form className='flex flex-col space-y-4 text-black' onSubmit={handleLogin}>
             <div>
               <label htmlFor='email' className='block text-sm font-medium text-gray-700'>Email</label>
-              <input type='email' id='EmailID' name='EmailID' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' onChange={handleChange} required />
+              <input type='email' id='EmailID' name='EmailID' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' onChange={handleChange} required />
             </div>
             <div>
               <label htmlFor='password' className='block text-sm font-medium text-gray-700'>Password</label>
@@ -68,7 +68,7 @@ const LoginPage = () => {
                   type={showPassword ? "text" : "password"}
                   id="Password"
                   name="Password"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 pr-10"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 pr-10 bg-white"
                   onChange={handleChange}
                   required
                 />

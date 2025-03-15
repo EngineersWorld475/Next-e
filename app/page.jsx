@@ -15,9 +15,9 @@ export default function Home() {
     <>
       <div className="relative">
         <Navbar />
-        <Button onClick={() => setOpenFeedbackDialogue(true)} className='fixed top-1/3 right-10 transform -translate-y-1/3 rotate-90 bg-[#ff6347] origin-bottom-right z-20'>🚀 Feedback</Button>
+        <Button onClick={() => setOpenFeedbackDialogue(true)} className='fixed top-1/3 right-10 transform -translate-y-1/3 rotate-90 bg-[#ff6347] origin-bottom-right z-20 text-white hover:bg-gray-800'>🚀 Feedback</Button>
         {/* section 1 */}
-        <div className="flex flex-col justify-center items-center overflow-hidden h-72 gap-3 shadow-md">
+        <div className="flex flex-col justify-center bg-white items-center overflow-hidden h-72 gap-3 shadow-md">
           <h1 className="text-4xl text-gray-700 font-semibold text-center mt-24 md:mt-10">
             <span className='block sm:inline'>Welcome to</span>
             <span className='block sm:inline'> Scholarly</span>
@@ -43,7 +43,7 @@ export default function Home() {
         {/* carousel section */}
         <CarouselComponent />
         {/* section 3 */}
-        <div className=" h-full md:h-72 lg:h-72 flex flex-col md:flex-row">
+        <div className=" h-full md:h-72 lg:h-72 flex flex-col md:flex-row bg-white">
           <div className="flex justify-center items-center w-full md:w-1/3 md:py-10 md:px-28 overflow-hidden px-5 py-5 object-cover">
             <Image src="/images/searching-img.jpg" alt="searching-img" width={600} height={600} />
           </div>
@@ -69,7 +69,7 @@ export default function Home() {
           </div>
         </div>
         {/* section 5 */}
-        <div className=" h-full md:h-72 lg:h-72 flex flex-col md:flex-row">
+        <div className=" h-full md:h-72 lg:h-72 flex flex-col md:flex-row bg-white">
           <div className="flex justify-center items-center w-full md:w-1/3 md:py-7 md:px-10 overflow-hidden px-5 py-5 object-cover">
             <Image src="/images/helpful-sign-img.jpg" alt="searching-img" width={500} height={500} />
           </div>
@@ -88,11 +88,11 @@ export default function Home() {
       <Sheet open={openFeedbackDialogue} onOpenChange={() => (
         setOpenFeedbackDialogue(false)
       )}>
-        <SheetContent side="right" className="overflow-auto bg-white transition-all duration-500 ease-in-out transform" aria-describedby="feedback-description" >
+        <SheetContent side="right" className="overflow-auto bg-white transition-all duration-500 ease-in-out transform text-black" aria-describedby="feedback-description" >
           <SheetTitle className='text-[#ff6347] text-2xl'>Feedback</SheetTitle>
           <form action="" className="flex flex-col gap-3">
             <div>
-              <select id='message_type' name='message_type' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' required>
+              <select id='message_type' name='message_type' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' required>
                 <option value=''>Select</option>
                 <option value='suggestion'>Suggestion</option>
                 <option value='request_new_feature'>Request New Feature</option>
@@ -102,16 +102,16 @@ export default function Home() {
               </select>
             </div>
             <div>  
-              <input type='text' id='name' name='name' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' placeholder="Name" required />
+              <input type='text' id='name' name='name' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' placeholder="Name" required />
             </div>
             <div>  
-              <input type='text' id='name' name='name' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' placeholder="Email or UID" required />
+              <input type='text' id='name' name='name' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' placeholder="Email or UID" required />
             </div>
             <div>
-              <textarea className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Message">
+              <textarea className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Message">
               </textarea>
             </div>
-            <Button>Send</Button>
+            <Button className="bg-black text-white">Send</Button>
           </form>
         </SheetContent>
       </Sheet>

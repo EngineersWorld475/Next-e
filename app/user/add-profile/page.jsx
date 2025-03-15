@@ -10,9 +10,9 @@ const UserProfile = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6">
-            <h1 className="font-bold text-gray-800 mb-6 text-lg md:text-3xl lg:text-3xl">User Profile</h1>
-            <div className="relative bg-white shadow-lg rounded-xl p-6 w-full max-w-lg overflow-hidden">
+        <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6 dark:bg-black dark:text-white">
+            <h1 className="font-bold text-customGrayBlue mb-6 text-lg md:text-3xl lg:text-3xl">User Profile</h1>
+            <div className="relative bg-white shadow-lg rounded-xl p-6 w-full max-w-lg overflow-hidden dark:bg-gray-800 dark:text-white">
                 {/* Edit Button */}
                 {!openEdit && (
                     <button 
@@ -24,7 +24,7 @@ const UserProfile = () => {
                 )}
 
                 {/* Profile Display */}
-                <div className="grid grid-cols-2 gap-y-5 text-sm md:text-base lg:text-base text-gray-600">
+                <div className="grid grid-cols-2 gap-y-5 text-sm md:text-base lg:text-base text-gray-600 dark:bg-gray-800 dark:text-white">
                     <p className="font-semibold">Username:</p>
                     <p>Sanjay G Nair</p>
 
@@ -45,8 +45,8 @@ const UserProfile = () => {
             {/* Edit Form Modal */}
             {openEdit && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                    <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Edit Profile</h2>
+                    <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg dark:bg-gray-800 dark:text-white">
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Edit Profile</h2>
                         
                         <div className="space-y-4">
                             <input type="text" defaultValue="Sanjay G Nair" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500" onChange={handleChange} />

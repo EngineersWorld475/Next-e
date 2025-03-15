@@ -20,7 +20,7 @@ const UploadPdf = () => {
 
 
     return (
-        <div className='flex flex-col gap-3'>
+        <div className='flex flex-col gap-3 bg-white dark:bg-gray-900 dark:text-white'>
             <h1 className='font-semibold text-blue-600'>Upload PDF</h1>
 
             <div className='flex flex-row gap-3'>

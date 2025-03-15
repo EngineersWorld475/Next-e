@@ -6,6 +6,7 @@ import store, { persistor } from "@/store/store";
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { PersistGate } from "redux-persist/integration/react";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -29,7 +30,9 @@ export default function RootLayout({
       >
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
+          </ThemeProvider>
           </PersistGate>
         </Provider>
         <Toaster />
