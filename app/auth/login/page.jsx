@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = () => {
   const initialState = {
@@ -15,9 +16,9 @@ const LoginPage = () => {
   }
   const dispatch = useDispatch()
   const [formData, setFormData] = useState(initialState);
+  const [showPassword, setShowPassword] = useState(false)
   const { isLoading } = useSelector((state) => state.auth)
   const router = useRouter();
-
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
@@ -32,14 +33,14 @@ const LoginPage = () => {
     e.preventDefault()
     try {
       const result = await dispatch(loginUser(formData)).unwrap();
-      if(result?.status === true) {
+      if (result?.status === true) {
         router.push('/pdf/pdflist')
       } else {
-      toast.error(
-        <span className="text-red-500 font-semibold text-center">
-        {result?.Message}
-      </span>
-      )
+        toast.error(
+          <span className="text-red-500 font-semibold text-center">
+            {result?.Message}
+          </span>
+        )
 
       }
     } catch (error) {
@@ -62,7 +63,23 @@ const LoginPage = () => {
             </div>
             <div>
               <label htmlFor='password' className='block text-sm font-medium text-gray-700'>Password</label>
-              <input type='password' id='Password' name='Password' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2' onChange={handleChange} required />
+              <div className="relative w-full">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="Password"
+                  name="Password"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 pr-10"
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 top-0 text-gray-500 justify-end py-2 px-2"
+                >
+                  {!showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             <button type='submit' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300'>{isLoading ? 'Loading...' : 'Login'}</button>
           </form>

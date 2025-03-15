@@ -68,6 +68,7 @@ const CreateGroup = () => {
                       className="w-full border p-2 rounded-md"
                       placeholder="Enter group name"
                       {...field}
+                      required
                     />
                   </FormControl>
                   <FormMessage />

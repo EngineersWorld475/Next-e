@@ -17,7 +17,7 @@ const Navbar = () => {
         />
       </Link>
 
-      <div className="flex gap-6 text-gray-600 font-medium">
+      <div className="flex gap-3 md:gap-6 lg:gap-6 text-gray-600 font-medium">
         <Link href={'/pdf/manage-groups'} className='cursor-pointer hover:text-gray-500 transition text-sm md:text-base lg:text-base'>Manage Groups</Link>
         <div className='flex flex-row gap-3 justify-center items-center'>
           <p className='text-xs'>Sanjay</p>
