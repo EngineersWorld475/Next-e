@@ -10,7 +10,7 @@ const UserFeedback = () => {
       <div className="flex flex-col justify-center items-center relative w-full md:w-max lg:w-max bg-white p-6 md:rounded-lg shadow-md md:mx-20 lg:mx-20 md:my-10 lg:my-10">
         <div className='flex flex-col md:flex-row mt-3 justify-center items-center gap-7'>
           <div className='bg-cover bg-center overflow-hidden w-full md:w-1/2 '>
-            <Image src="/images/feedback-img.svg" alt="login_image" className='md:rounded-lg' width={600} height={600} />
+            <Image src="/images/feedback-img.jpg" alt="feedback_image" className='md:rounded-lg' width={600} height={600} />
           </div>
           <div className='w-full md:w-1/2 p-4'>
             <h1 className='text-center mb-2 text-gray-600 text-xl md:text-2xl lg:text-2xl'>Feedback</h1>

@@ -13,7 +13,7 @@ const AuthLayout = ({ children }) => {
       {/* Auth Card (remains fully visible) */}
       <div className="flex flex-col justify-center items-center relative w-full md:w-max lg:w-max bg-white p-6 md:rounded-lg shadow-md md:mx-20 lg:mx-20 md:my-10 lg:my-10">
         <div className="object-cover mb-3">
-          <Image src={'/images/scholarly-logo-auth.png'} alt="scholarly-logo-auth" width={200} height={200} />
+          <Image src="/images/scholarly-logo-auth.png" alt="scholarly-logo-auth" width={200} height={200} />
         </div>
         {children}
       </div>
