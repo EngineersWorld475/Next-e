@@ -12,11 +12,10 @@ app.prepare().then(() => {
     const parsedUrl = parse(req.url, true);
     handle(req, res, parsedUrl);
   }).listen(port, (err) => {
-    if (err) throw err;
+    if (err) throw err; 
     console.log(`> Ready on http://localhost:${port}`);
   });
 });
-
 
 // const { createServer } = require("https");
 // const { parse } = require("url");

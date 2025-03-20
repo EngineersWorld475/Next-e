@@ -14,6 +14,7 @@ const ThemeToggle = () => {
   }, [])
 
   if (!mounted) return null;
+
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
