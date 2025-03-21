@@ -8,11 +8,15 @@ const initialState = {
     error: null
 }
 
-export const registerUser = createAsyncThunk('/api/user', async (formData) => {
-    const response = await axios.post(`/api/user`, formData, {
-        withCredentials: true
-    });
-    return response.data;  
+export const registerUser = createAsyncThunk('/api/user', async (formData, { rejectWithValue }) => {
+    try {
+        const response = await axios.post(`/api/user`, formData, {
+            withCredentials: true
+        });
+        return response.data;  
+    } catch (error) {
+        return rejectWithValue(error.response?.data || 'Registration failed');
+    }
 })
  
 export const loginUser = createAsyncThunk('/account/login', async (formData) => {
