@@ -33,7 +33,7 @@ const LoginPage = () => {
     e.preventDefault()
     try {
       const result = await dispatch(loginUser(formData)).unwrap();
-      if (result?.status === true) {
+      if (result?.status) {
         router.push('/pdf/pdflist')
       } else {
         toast.error(
@@ -81,7 +81,7 @@ const LoginPage = () => {
                 </button>
               </div>
             </div>
-            <button type='submit' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300'>{isLoading ? 'Loading...' : 'Login'}</button>
+            <button type='submit' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300'>Login</button>
           </form>
           <div className='flex flex-col md:flex-row lg:flex-row justify-center items-center gap-3 md:gap-0 lg:gap-0 mt-4 text-blue-500 text-sm w-full'>
             <p>you don't have an account?</p>

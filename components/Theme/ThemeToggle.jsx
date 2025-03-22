@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon } from 'lucide-react';
 
 const ThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme("light");
   const [mounted, setMounted] = useState(false);
 
+  // To prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
   }, [])

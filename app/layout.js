@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Provider } from "react-redux";
@@ -7,6 +7,7 @@ import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "next-themes";
+import AuthGuard from "@/components/Auth/AuthGuard";
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -30,9 +31,11 @@ export default function RootLayout({
       >
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          </ThemeProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <AuthGuard>
+                {children}
+              </AuthGuard>
+            </ThemeProvider>
           </PersistGate>
         </Provider>
         <Toaster />
@@ -40,4 +43,3 @@ export default function RootLayout({
     </html>
   );
 }
- 

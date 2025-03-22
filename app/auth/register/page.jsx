@@ -5,6 +5,8 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import Image from 'next/image';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 
 const RegisterPage = () => {
@@ -25,13 +27,14 @@ const RegisterPage = () => {
   const [formData, setFormData] = useState(initialState);
   const [passwordError, setPasswordError] = useState('')
   const { isLoading } = useSelector((state) => state.auth)
+  const router = useRouter();
 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'password' && value.length < 8) {
-      setPasswordError('Password must be at least 8 characters long.');
+    if (name === 'password' && value.length < 5) {
+      setPasswordError('Password must be at least 5 characters long.');
     } else {
       setPasswordError('')
     }
@@ -43,16 +46,20 @@ const RegisterPage = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (formData.password.length < 8) {
-      setPasswordError('Password must be at least 8 characters long.');
+    if (formData.password.length < 5) {
+      setPasswordError('Password must be at least 5 characters long.');
       return;
     }
 
-    try { 
+    try {
       const result = await dispatch(registerUser(formData)).unwrap();
-      console.log(result)
+      router.push('/auth/login')
     } catch (error) {
-      console.error('Registration error:', error);
+      toast.error(
+        <span className="text-red-600 font-semibold text-center">
+          {error}
+        </span>
+      )
     }
   }
 
@@ -61,7 +68,7 @@ const RegisterPage = () => {
     <>
       <div className='flex flex-col md:flex-row mt-3'>
         <div className='flex bg-cover bg-center overflow-hidden w-full md:w-1/2 justify-center items-center'>
-          <Image src="/images/register-image.jpg" alt="register-image" className='md:rounded-lg' height={600} width={600} />
+          <Image src="/images/register-BW.jpg" alt="register-image" className='md:rounded-lg' height={600} width={600} />
         </div>
         <div className='w-full md:w-1/2 p-4'>
           <h1 className='text-black text-center mb-5'>Register here</h1>
@@ -100,7 +107,7 @@ const RegisterPage = () => {
             <div className='flex flex-row gap-2'>
               <div className='w-1/2'>
                 <label htmlFor='CurrentLocation' className='block text-sm font-medium text-gray-700'>University</label>
-                <input type='text' id='university' name='university' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' value={formData?.university } onChange={handleChange} required />
+                <input type='text' id='university' name='university' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' value={formData?.university} onChange={handleChange} required />
               </div>
               <div className='w-1/2'>
                 <label htmlFor='CurrentPosition' className='block text-sm font-medium text-gray-700'>Speacialization</label>
@@ -121,7 +128,7 @@ const RegisterPage = () => {
           </form>
           <div className='flex justify-center mt-4 text-blue-500 text-sm'>
             <p>Already have an account?</p>
-            <Link href='/auth/login' className='mx-2 hover:underline'>Login!</Link> 
+            <Link href='/auth/login' className='mx-2 hover:underline'>Login!</Link>
           </div>
         </div>
 

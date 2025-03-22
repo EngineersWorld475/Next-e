@@ -13,17 +13,24 @@ export const registerUser = createAsyncThunk('/api/user', async (formData, { rej
         const response = await axios.post(`/api/user`, formData, {
             withCredentials: true
         });
-        return response.data;  
+        return response.data;
     } catch (error) {
-        return rejectWithValue(error.response?.data || 'Registration failed');
+        if (axios.isAxiosError(error) && error.response) {
+            return rejectWithValue(error.response.data?.Warning || "Registration failed");
+        }
+        return rejectWithValue("Network error. Please try again.");
     }
 })
- 
-export const loginUser = createAsyncThunk('/account/login', async (formData) => {
-    const response = await axios.post(`/api/account/login`, formData, {
-        withCredentials: true
-    })
-    return response.data;
+
+export const loginUser = createAsyncThunk('/account/login', async (formData, { rejectWithValue }) => {
+    try {
+        const response = await axios.post(`/api/account/login`, formData, {
+            withCredentials: true
+        })
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
 })
 
 
@@ -31,7 +38,10 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setUser: (state, action) => {
+        logout: (state) => {
+            state.isAuthenticated = false;
+            state.user = null;
+            state.error = null;
         }
     },
     extraReducers: (builder) => {
@@ -46,20 +56,27 @@ const authSlice = createSlice({
             state.isLoading = false;
             state.user = null;
             state.isAuthenticated = false;
-            state.error= action.payload || 'Registration failed';
+            state.error = action.payload || 'Registration failed';
         }).addCase(loginUser.pending, (state) => {
-            state.isLoading = true
-        }).addCase(loginUser.fulfilled, (state, action) => {
-            state.isLoading = false;
-            state.user = action.payload;
-            state.isAuthenticated = true;
-            state.error = null
-        }).addCase(loginUser.rejected, (state, action) => {
-            state.isLoading = false;
+            state.isLoading = true;
+            state.isAuthenticated = false;
             state.user = null;
-            state.error = action.payload || 'Login failed'
+            state.error = null
+        }).addCase(loginUser.fulfilled, (state, action) => {
+            if (action.payload?.token) {
+                state.isLoading = false;
+                state.user = action.payload;
+                state.isAuthenticated = true;
+                state.error = null;
+            } else {
+                state.isAuthenticated = false;
+                state.isLoading = false;
+                state.user = null;
+                state.error = action.payload || 'Login failed'
+            }
         })
     }
 })
 
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

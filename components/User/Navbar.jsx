@@ -1,11 +1,24 @@
+'use client'
 import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { CircleUser, LogOutIcon, UserIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ThemeToggle from '../Theme/ThemeToggle';
+import { useDispatch } from 'react-redux';
+import { useRouter } from 'next/navigation';
+import { logout } from '@/store/auth-slice';
 
 const Navbar = () => {
+  const dispatch = useDispatch();
+  const router =  useRouter()
+
+  const handleLogout = () => {
+    dispatch(logout()); 
+    localStorage.clear(); 
+    router.push('/auth/login'); 
+  };
+
   return (
     <nav className="flex justify-between items-center px-3 md:px-10 lg:px-10 py-3 shadow-md bg-white dark:bg-gray-900 dark:text-white">
       <Link href={'/pdf/pdflist'}>
@@ -49,7 +62,7 @@ const Navbar = () => {
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
+                <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs' onClick={handleLogout}>
                   <LogOutIcon className='text-gray-400' />
                   Logout
                 </DropdownMenuItem>

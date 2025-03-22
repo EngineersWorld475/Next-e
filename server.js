@@ -12,6 +12,6 @@ app.prepare().then(() => {
     handle(req, res, parsedUrl);
   }).listen(process.env.PORT || 3000, (err) => {
     if (err) throw err;
-    console.log(`> Ready on HTTP`);
+    console.log(`> Ready on HTTP (Handled by IIS for HTTPS)`);
   });
 });
