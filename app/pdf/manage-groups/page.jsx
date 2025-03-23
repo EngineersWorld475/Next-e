@@ -6,7 +6,7 @@ import React from 'react'
 const GroupList = () => {
   return (
     <div className='bg-white text-black dark:bg-black dark:text-white'>
-      <h1 className='text-3xl text-customGrayBlue mb-4'>Manage Groups</h1>
+      <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue mb-4'>Manage Groups</h1>
       <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-white p-4 shadow-lg rounded-xl dark:bg-gray-900 dark:text-white'>
         <div className='w-full md:w-2/3 lg:w-2/3 bg-white dark:bg-black dark:text-white dark:rounded-lg px-3 py-2'>
           <h1 className='font-semibold text-gray-500 mt-2'>Groups</h1>

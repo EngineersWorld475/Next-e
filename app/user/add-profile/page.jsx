@@ -10,8 +10,10 @@ const page = () => {
 
 
   useEffect(() => {
-    dispatch(getUserDetails(23)) // userid hardcoded beacouse userid is not available in logined user's data
-  }, [])
+    if (!userData) { // Fetch only if data is not available in userData
+      dispatch(getUserDetails(23));
+    }
+  }, [dispatch, userData])
 
   return (
     <div className='flex flex-col justify-center items-center mt-2'>

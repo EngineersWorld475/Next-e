@@ -1,27 +1,39 @@
 'use client'
-import React, { useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
-import { Pencil } from 'lucide-react'
+import { Loader2, Pencil } from 'lucide-react'
 import { useDispatch } from 'react-redux'
 import { getUserDetails, saveUserDetails } from '@/store/user-slice'
 import { toast } from 'sonner'
 
 const EditProfileModal = ({ editProfileData }) => {
-    const [formData, setFormData] = useState({
+    
+    const dispatch = useDispatch();
+    const [isOpen, setIsOpen] = useState(false);
+
+    //  Memoize form data initialization
+    const initialFormData = useMemo(() => ({
         FirstName: editProfileData?.FirstName || '',
         LastName: editProfileData?.LastName || '',
         EmailID: editProfileData?.EmailID || '',
         CurrentLocation: editProfileData?.CurrentLocation || '',
         CurrentPosition: editProfileData?.CurrentPosition || '',
         University: editProfileData?.University || '',
-        AreaOfExpertise: editProfileData?.AreaOfExpertise || 'Computer programming' 
-    });
+        AreaOfExpertise: editProfileData?.AreaOfExpertise || 'Computer programming'
+    }), [editProfileData]);
 
-    const [isOpen, setIsOpen] = useState(false);
-    const dispatch = useDispatch();
+    const [formData, setFormData] = useState(initialFormData)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(initialFormData);
+        }
+    }, [isOpen, initialFormData]);
+
 
     const handleChange = (e) => {
         setFormData({
@@ -30,9 +42,14 @@ const EditProfileModal = ({ editProfileData }) => {
         });
     };
 
-    const handleEditUserProfile = async (e) => {
-        e.preventDefault(); 
+    // disabling the button if no changes have made in the edit modal
+    const isFormChanged = useMemo(() => {
+        return JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    }, [formData, initialFormData]);
 
+    const handleEditUserProfile = useCallback(async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true)
         try {
             await dispatch(
                 saveUserDetails({
@@ -44,23 +61,25 @@ const EditProfileModal = ({ editProfileData }) => {
                     firstName: formData.FirstName,
                     lastName: formData.LastName,
                 })
-            ).unwrap(); 
+            ).unwrap();
 
-            dispatch(getUserDetails(23)); 
-            setIsOpen(false); 
+            dispatch(getUserDetails(23));
+            setIsOpen(false);
             toast.success(
                 <span className="text-green-500 font-semibold text-center">
                     User updated successfully
                 </span>
             )
+            setIsSubmitting(false);
         } catch (error) {
             toast.error(
                 <span className="text-red-500 font-semibold text-center">
                     {error}
                 </span>
             )
+            setIsSubmitting(false)
         }
-    };
+    }, [dispatch, formData])
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -110,11 +129,22 @@ const EditProfileModal = ({ editProfileData }) => {
                         <Input type="text" name="AreaOfExpertise" placeholder="Enter area of expertise" value={formData.AreaOfExpertise} onChange={handleChange} />
                     </div>
 
-                    <Button type="submit">Save changes</Button>
+                    <Button type="submit"  disabled={!isFormChanged || isSubmitting}>
+                        {
+                            isSubmitting ? (
+                                <>
+                                    <Loader2 className="animate-spin h-5 w-5 text-center" />
+                                    Loading...
+                                </>
+                            ) : (
+                                'Save changes'
+                            )
+                        }
+                    </Button>
                 </form>
             </DialogContent>
         </Dialog>
     );
 };
 
-export default EditProfileModal;
+export default React.memo(EditProfileModal);
