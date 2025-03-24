@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const LoginPage = () => {
   const initialState = {
@@ -17,7 +17,7 @@ const LoginPage = () => {
   const dispatch = useDispatch()
   const [formData, setFormData] = useState(initialState);
   const [showPassword, setShowPassword] = useState(false)
-  const { isLoading } = useSelector((state) => state.auth)
+  const [ submitting, setSubmitting ] = useState(false)
   const router = useRouter();
 
   const handleChange = async (e) => {
@@ -31,6 +31,7 @@ const LoginPage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault()
+    setSubmitting(true)
     try {
       const result = await dispatch(loginUser(formData)).unwrap();
       if (result?.status) {
@@ -41,10 +42,12 @@ const LoginPage = () => {
             {result?.Message}
           </span>
         )
+        setSubmitting(false)
 
       }
     } catch (error) {
       console.error('Login error:', error);
+      setSubmitting(false)
     }
   }
 
@@ -81,7 +84,14 @@ const LoginPage = () => {
                 </button>
               </div>
             </div>
-            <button type='submit' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300'>Login</button>
+            <button type='submit' className='mt-1 w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300 flex justify-center items-center gap-2' disabled={submitting}>{submitting ? (
+              <>
+              <Loader2 className="animate-spin h-5 w-5 text-center" />
+              Loading...
+              </>
+            ) : (
+              'Login'
+            ) }</button>
           </form>
           <div className='flex flex-col md:flex-row lg:flex-row justify-center items-center gap-3 md:gap-0 lg:gap-0 mt-4 text-blue-500 text-sm w-full'>
             <p>you don't have an account?</p>

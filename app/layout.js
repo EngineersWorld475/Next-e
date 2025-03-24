@@ -31,7 +31,7 @@ export default function RootLayout({
       >
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
               <AuthGuard>
                 {children}
               </AuthGuard>

@@ -8,6 +8,7 @@ import ThemeToggle from '../Theme/ThemeToggle';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { logout } from '@/store/auth-slice';
+import { persistor } from '@/store/store';
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -15,7 +16,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     dispatch(logout()); 
-    localStorage.clear(); 
+    persistor.purge()
     router.push('/auth/login'); 
   };
 
