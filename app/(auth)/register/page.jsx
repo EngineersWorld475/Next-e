@@ -5,6 +5,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Inter } from "next/font/google";
+import Image from 'next/image';
 const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 
@@ -59,7 +60,7 @@ const RegisterPage = () => {
     <>
       <div className='flex flex-col md:flex-row mt-3'>
         <div className='flex bg-cover bg-center overflow-hidden w-full md:w-1/2 justify-center items-center'>
-          <img src="/images/register-image.jpg" alt="register-image" className='md:rounded-lg' />
+          <Image src="/images/register-image.jpg" alt="register-image" className='md:rounded-lg' height={600} width={600}/>
         </div>
         <div className='w-full md:w-1/2 p-4'>
           <h1 className={`${inter.className} text-black text-center mb-2`}>Register here</h1>

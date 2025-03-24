@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useState } from "react";
 import { Inter } from "next/font/google";
+import Image from "next/image";
 const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 export default function Home() {
@@ -38,7 +39,7 @@ export default function Home() {
             </p>
           </div>
           <div className="w-full md:w-1/3 overflow-hidden object-cover">
-            <img src={'/images/annotation-img.svg'} alt="annotation-img" className="px-10 py-5" />
+            <Image src={'/images/annotation-img.svg'} alt="annotation-img" className="px-10 py-5" width={500} height={500} />
           </div>
         </div>
         {/* carousel section */}
@@ -46,7 +47,7 @@ export default function Home() {
         {/* section 3 */}
         <div className=" h-full md:h-72 lg:h-72 flex flex-col md:flex-row">
           <div className="flex justify-center items-center w-full md:w-1/3 md:py-10 md:px-28 overflow-hidden px-5 py-5 object-cover">
-            <img src={'/images/searching-img.svg'} alt="searching-img" className="" />
+            <Image src={'/images/searching-img.svg'} alt="searching-img" width={600} height={600} />
           </div>
           <div className="flex flex-col gap-3 justify-center w-full md:w-2/3 overflow-hidden w-30 px-5 py-5">
             <h1 className={`${inter.className} text-gray-600`}>Who should use Scholarly?</h1>
@@ -66,13 +67,13 @@ export default function Home() {
             </p>
           </div>
           <div className="w-full md:w-1/3 overflow-hidden object-cover">
-            <img src={'/images/personal-website-wp-img.svg'} alt="personal-website-weap-img" className="px-10 py-5" />
+            <Image src={'/images/personal-website-wp-img.svg'} alt="personal-website-weap-img" className="px-10 py-5" width={500} height={500} />
           </div>
         </div>
         {/* section 5 */}
         <div className=" h-full md:h-72 lg:h-72 flex flex-col md:flex-row">
           <div className="flex justify-center items-center w-full md:w-1/3 md:py-7 md:px-10 overflow-hidden px-5 py-5 object-cover">
-            <img src={'/images/helpful-sign-img.svg'} alt="searching-img" className="" />
+            <Image src={'/images/helpful-sign-img.svg'} alt="searching-img" width={500} height={500} />
           </div>
           <div className="flex flex-col gap-3 justify-center w-full md:w-2/3 overflow-hidden w-30 px-5 py-5">
             <h1 className={`${inter.className} text-gray-600`}>The tool is helpful, but …?</h1>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Inter } from "next/font/google";
+import Image from 'next/image';
 const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 const LoginPage = () => {
@@ -40,7 +41,7 @@ const LoginPage = () => {
     <>
       <div className='flex flex-col md:flex-row mt-3 justify-center items-center'>
         <div className='bg-cover bg-center overflow-hidden w-full md:w-1/2 '>
-          <img src="/images/login-image.jpg" alt="login_image" className='md:rounded-lg' />
+          <Image src="/images/login-image.jpg" alt="login_image" className='md:rounded-lg' width={600} height={600} />
         </div>
         <div className='w-full md:w-1/2 p-4'>
       <h1 className={`${inter.className} text-black text-center mb-2`}>Login to your account</h1>
