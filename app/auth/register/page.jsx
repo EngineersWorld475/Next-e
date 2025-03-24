@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 
 const RegisterPage = () => {
@@ -27,6 +28,7 @@ const RegisterPage = () => {
   const [formData, setFormData] = useState(initialState);
   const [passwordError, setPasswordError] = useState('')
   const { isLoading } = useSelector((state) => state.auth)
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
 
@@ -50,7 +52,7 @@ const RegisterPage = () => {
       setPasswordError('Password must be at least 5 characters long.');
       return;
     }
-
+    setIsSubmitting(true)
     try {
       const result = await dispatch(registerUser(formData)).unwrap();
       router.push('/auth/login')
@@ -60,6 +62,7 @@ const RegisterPage = () => {
           {error}
         </span>
       )
+      setIsSubmitting(false)
     }
   }
 
@@ -124,7 +127,10 @@ const RegisterPage = () => {
                 <option value='O'>Other</option>
               </select>
             </div>
-            <button type='submit' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300'>{isLoading ? 'Loading...' : 'Register'}</button>
+            <button type='submit' className='mt-1 w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-indigo-500 text-white hover:bg-indigo-600 transition duration-300 flex justify-center items-center gap-2' disabled={isSubmitting}>{isSubmitting ? <>
+              <Loader2 className="animate-spin h-5 w-5 text-center" />
+              Loading...
+            </> : 'Register'}</button>
           </form>
           <div className='flex justify-center mt-4 text-blue-500 text-sm'>
             <p>Already have an account?</p>
