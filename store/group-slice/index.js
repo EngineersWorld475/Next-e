@@ -4,24 +4,24 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 const initialState = {
     isLoading: false,
     group: null,
-    email: null,
     error: null
 }
 
-export const addGroup = createAsyncThunk('/pdf/addgroup', async (userId, groupName, tagsText, authToken, {}, { rejectWithValue }) => {
+export const addGroup = createAsyncThunk("pdf/addGroup", async (groupData, { rejectWithValue }) => {
     try {
-        const response = await axios.post(`/api/PDF/addgroup?UserId=${userId}&GroupName=${groupName}&TagsText=${tagsText}`, {
-            headers: {
-                Authorization: `Bearer ${authToken}`
-            }
+        const response = await axios.post(`/api/PDF/addgroup?UserId=${groupData?.userid}&GroupName=${groupData?.groupName}&TagsText=${groupData?.tagsText}`, {}, {
+            headers: { Authorization: `Bearer ${groupData?.authToken}` },
         });
-        return response?.data;
-    } catch (error) {
-        return rejectWithValue(error.response?.data?.message || 'Can not save group')
-    }
-})
 
-export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async (userId, groupId, authToken, {}, { rejectWithValue }) => {
+        return response.data;
+    } catch (error) {
+        console.error("API error:", error.response?.data || error.message);
+        return rejectWithValue(error.response?.data || "An error occurred");
+    }
+});
+
+
+export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async (userId, groupId, authToken, { }, { rejectWithValue }) => {
     try {
         const response = await axios.delete(`/api/PDF/deletegroup?UserId=${userId}&GroupId=${groupId}`, {
             headers: {
@@ -34,7 +34,7 @@ export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async (userId, g
     }
 })
 
-export const addNewEmail = createAsyncThunk('/pdf/addnewEmail', async (userId, email, groupId, authToken, {}, {
+export const addNewEmail = createAsyncThunk('/pdf/addnewEmail', async (userId, email, groupId, authToken, { }, {
     rejectWithValue
 }) => {
     try {
@@ -62,7 +62,7 @@ const groupDataSlice = createSlice({
             state.error = null;
         }).addCase(addGroup.rejected, (state, action) => {
             state.isLoading = false;
-            state.user = null;
+            state.group = null;
             state.error = action?.payload;
         }).addCase(deleteGroup.pending, (state) => {
             state.isLoading = true

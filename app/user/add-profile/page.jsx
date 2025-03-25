@@ -1,5 +1,6 @@
 'use client'
 import ProfileCard from '@/components/User/ProfileCard'
+import useUserId from '@/hooks/useUserId';
 import { getUserDetails } from '@/store/user-slice';
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -7,13 +8,11 @@ import { useDispatch, useSelector } from 'react-redux'
 const page = () => {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.userprofile);
-
+  const userId = useUserId();
 
   useEffect(() => {
-    if (!userData) { // Fetch only if data is not available in userData
-      dispatch(getUserDetails(23));
-    }
-  }, [dispatch, userData])
+      dispatch(getUserDetails(userId)); 
+  }, [dispatch])
 
   return (
     <div className='flex flex-col justify-center items-center mt-2'>

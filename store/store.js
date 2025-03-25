@@ -7,22 +7,20 @@ import { thunk } from "redux-thunk";
 import { persistReducer, persistStore } from "redux-persist";
 import sessionStorage from "redux-persist/es/storage/session";
 
-const persistConfig = {
-    key: 'scholarly_root',
+const authPersistConfig = {
+    key: 'scholarly_auth',
     storage: sessionStorage
 } 
  
 // combine all reducers 
 const rootReducer = combineReducers({
-    auth: authReducer,
+    auth: persistReducer(authPersistConfig, authReducer),
     userprofile: profileReducer
 })
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
-
 // configure store
 const store = configureStore({
-    reducer: persistedReducer,
+    reducer: rootReducer,
     middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }).concat(thunk),
 
 }) 

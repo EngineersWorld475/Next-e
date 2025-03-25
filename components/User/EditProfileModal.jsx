@@ -8,11 +8,13 @@ import { Loader2, Pencil } from 'lucide-react'
 import { useDispatch } from 'react-redux'
 import { getUserDetails, saveUserDetails } from '@/store/user-slice'
 import { toast } from 'sonner'
+import useUserId from '@/hooks/useUserId'
 
 const EditProfileModal = ({ editProfileData }) => {
-    
+
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
+    const userId = useUserId();
 
     //  Memoize form data initialization
     const initialFormData = useMemo(() => ({
@@ -53,7 +55,7 @@ const EditProfileModal = ({ editProfileData }) => {
         try {
             await dispatch(
                 saveUserDetails({
-                    userid: 23,
+                    userid: userId,
                     specializationId: 1,
                     university: formData.University,
                     currentPosition: formData.CurrentPosition,
@@ -63,7 +65,7 @@ const EditProfileModal = ({ editProfileData }) => {
                 })
             ).unwrap();
 
-            dispatch(getUserDetails(23));
+            dispatch(getUserDetails(userId));
             setIsOpen(false);
             toast.success(
                 <span className="text-green-500 font-semibold text-center">
@@ -80,6 +82,8 @@ const EditProfileModal = ({ editProfileData }) => {
             setIsSubmitting(false)
         }
     }, [dispatch, formData])
+
+
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -129,7 +133,7 @@ const EditProfileModal = ({ editProfileData }) => {
                         <Input type="text" name="AreaOfExpertise" placeholder="Enter area of expertise" value={formData.AreaOfExpertise} onChange={handleChange} />
                     </div>
 
-                    <Button type="submit"  disabled={!isFormChanged || isSubmitting}>
+                    <Button type="submit" disabled={!isFormChanged || isSubmitting}>
                         {
                             isSubmitting ? (
                                 <>
