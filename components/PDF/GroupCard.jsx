@@ -7,7 +7,7 @@ import { Badge } from '../ui/badge';
 import { TrashIcon } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTrigger, DialogTitle } from '../ui/dialog';
+import ConfirmDialog from '@/common/ConfirmDialog';
 
 const GroupCard = ({ groupName, count }) => {
     return (
@@ -40,22 +40,14 @@ const GroupCard = ({ groupName, count }) => {
                                     <Input type="text" className="w-full md:w-1/3 lg:w-1/3" placeholder="Enter email" />
                                     <Button>Add</Button>
                                 </div>
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <span>
-                                            <Button variant="outline" className="absolute right-0 bottom-0">Delete</Button>
-                                        </span>
-                                    </DialogTrigger>
-                                    <DialogContent className="flex flex-col justify-center items-center">
-                                        <DialogHeader>
-                                            <DialogTitle>Are you sure you want to delete this group?</DialogTitle>
-                                        </DialogHeader>
-                                        <div className='flex flex-row gap-3 justify-center items-center'>
-                                            <Button>Cancel</Button>
-                                            <Button>Yes</Button>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                                {/* confirm dialog box */}
+                                <ConfirmDialog
+                                    triggerText="Delete"
+                                    title="Are you sure you want to delete this group?"
+                                    onConfirm={() => console.log("Deleted")}
+                                    onCancel={() => console.log("Cancelled")}
+                                    ButtonStyle={'absolute right-0 bottom-0'}
+                                />
                             </CardContent>
                         </AccordionContent>
                     </Card>

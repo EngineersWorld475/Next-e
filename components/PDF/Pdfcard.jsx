@@ -1,11 +1,12 @@
 'use client'
 import { DownloadIcon, EditIcon, GlobeIcon, TrashIcon } from 'lucide-react'
-import React, { useState } from 'react'
+import React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Form } from '../ui/form'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Button } from '../ui/button'
+import ConfirmDialog from '@/common/ConfirmDialog'
 
 const Pdfcard = () => {
   return (
@@ -20,22 +21,15 @@ const Pdfcard = () => {
       <div className='flex-1'>
         <div className='flex flex-col gap-2 px-4 py-4'>
           <div className='flex flex-row gap-7 items-center'>
-            {/* delete dialog */}
-            <Dialog>
-              <DialogTrigger asChild>
-              <TrashIcon size={20} className='cursor-pointer' />
-              </DialogTrigger>
-             <DialogContent className="flex flex-col justify-center items-center">
-             <DialogHeader>
-                <DialogTitle>Do you want to delete this collection?</DialogTitle>
-              </DialogHeader>
-              <div className='flex justify-start items-center gap-3'>
-                <Button>Cancel</Button>
-                <Button>Ok</Button>
-              </div>
-             </DialogContent>
-             {/* edit dialog */}
-            </Dialog>
+            {/* confirm delete dialog */}
+            <ConfirmDialog 
+             iconTrigger={<TrashIcon size={20} className='cursor-pointer' />}
+             title="Do you want to delete this collection?"
+             onConfirm={() => console.log("Deleted")}
+             onCancel={() => console.log("Cancelled")}
+             ButtonStyle={'absolute right-0 bottom-0'}
+            />
+            {/* edit dialog */}
             <Dialog>
               <DialogTrigger asChild>
                 <EditIcon size={20} className='cursor-pointer' />

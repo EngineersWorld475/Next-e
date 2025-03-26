@@ -15,17 +15,19 @@ export default function Home() {
     <>
       <div className="relative">
         <Navbar />
+        {/* Feedback button */}
         <Button onClick={() => setOpenFeedbackDialogue(true)} className='fixed top-1/3 right-10 transform -translate-y-1/3 rotate-90 bg-[#ff6347] origin-bottom-right z-20 text-white hover:bg-gray-800'>🚀 Feedback</Button>
         {/* section 1 */}
-        <div className="flex flex-col justify-center bg-white items-center overflow-hidden h-72 gap-3 shadow-md">
+        <div className="flex flex-col justify-center bg-white items-center overflow-hidden h-96 md:h-72 lg:h-72 gap-3 shadow-md">
           <h1 className="text-4xl text-gray-700 font-semibold text-center mt-24 md:mt-10">
             <span className='block sm:inline'>Welcome to</span>
             <span className='block sm:inline'> Scholarly</span>
           </h1>
-          <p className="text-customGrayBlue px-4">
+          <p className="text-customGrayBlue flex flex-col md:flex-row lg:flex-row items-center ">
             <span className='block sm:inline'>"A good scientist (or student) knows the </span>
             <span className='block sm:inline'>right answers. A great scientist (or student)</span>
-            <span className='block sm:inline'> knows the right questions." - Claude Lévi-Strauss</span>
+            <span className='block sm:inline'> knows the right questions."</span>
+            <span className='block sm:inline'>- Claude Lévi-Strauss</span>
           </p>
         </div>
         {/* section 2 */}

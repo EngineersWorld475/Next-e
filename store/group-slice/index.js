@@ -7,7 +7,7 @@ const initialState = {
     error: null
 }
 
-export const addGroup = createAsyncThunk("pdf/addGroup", async (groupData, { rejectWithValue }) => {
+export const addGroup = createAsyncThunk("/pdf/addGroup", async (groupData, { rejectWithValue }) => {
     try {
         const response = await axios.post(`/api/PDF/addgroup?UserId=${groupData?.userid}&GroupName=${groupData?.groupName}&TagsText=${groupData?.tagsText}`, {}, {
             headers: { Authorization: `Bearer ${groupData?.authToken}` },
@@ -21,7 +21,7 @@ export const addGroup = createAsyncThunk("pdf/addGroup", async (groupData, { rej
 });
 
 
-export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async (userId, groupId, authToken, { }, { rejectWithValue }) => {
+export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async (userId, groupId, authToken, {}, { rejectWithValue }) => {
     try {
         const response = await axios.delete(`/api/PDF/deletegroup?UserId=${userId}&GroupId=${groupId}`, {
             headers: {
@@ -46,6 +46,19 @@ export const addNewEmail = createAsyncThunk('/pdf/addnewEmail', async (userId, e
         return response?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not add new Email')
+    }
+})
+
+export const deleteEmail = createAsyncThunk('/pdf/delete_email', async (userId, groupEmailId, authToken, {}, { rejectWithValue }) => {
+    try {
+        const response = await axios.delete(`/api/PDF/deleteemail?UserId=${userId}&GroupEmailId=${groupEmailId}`, {
+            headers: {
+                Authorization: `Bearer ${authToken}`
+            }
+        })
+        return response?.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || 'Can not delete Emalil')
     }
 })
 
@@ -82,6 +95,15 @@ const groupDataSlice = createSlice({
         }).addCase(addNewEmail.rejected, (state, action) => {
             state.isLoading = false;
             state.error = action?.payload;
+        }).addCase(deleteEmail.pending, (state) => {
+            state.isLoading = true;
+        }).addCase(deleteEmail.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.group = action.payload;
+            state.error = null;
+        }).addCase(deleteEmail.rejected, (action, payload) => {
+            state.isLoading = false;
+            state.error = action.payload;
         })
     }
 })

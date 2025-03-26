@@ -4,11 +4,11 @@ import { loginUser } from '@/store/auth-slice';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import CryptoJS from 'crypto-js';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useCustomToast } from '@/hooks/useCustomToast';
 
 const LoginPage = () => {
   const initialState = {
@@ -21,6 +21,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { showToast } = useCustomToast();
   const router = useRouter();
 
   const handleChange = async (e) => {
@@ -52,11 +53,10 @@ const LoginPage = () => {
         }
         router.push('/pdf/pdflist');
       } else {
-        toast.error(
-          <span className="text-red-500 font-semibold text-center">
-            {result?.Message}
-          </span>
-        )
+        showToast({
+          description: result?.Message,
+          variant: "warning"
+        })
         setSubmitting(false);
 
       }
@@ -105,7 +105,7 @@ const LoginPage = () => {
           <form className='flex flex-col space-y-4 text-black' onSubmit={handleLogin}>
             <div>
               <label htmlFor='email' className='block text-sm font-medium text-gray-700'>Email</label>
-              <input type='email' id='EmailID' placeholder='Enter Email Address...' name='EmailID' value={formData?.EmailID} className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' onChange={handleChange} required />
+              <input type='email' id='EmailID' placeholder='Enter Email Address...' name='EmailID' value={formData?.EmailID} className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none sm:text-sm p-2 bg-white' onChange={handleChange} required />
             </div>
             <div>
               <label htmlFor='password' className='block text-sm font-medium text-gray-700'>Password</label>
@@ -116,7 +116,7 @@ const LoginPage = () => {
                   placeholder='Enter Password'
                   name="Password"
                   value={formData?.Password}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 pr-10 bg-white"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none sm:text-sm p-2 pr-10 bg-white"
                   onChange={handleChange}
                   required
                 />

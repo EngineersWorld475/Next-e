@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useCustomToast } from '@/hooks/useCustomToast';
 
 
 const RegisterPage = () => {
@@ -27,7 +28,7 @@ const RegisterPage = () => {
 
   const [formData, setFormData] = useState(initialState);
   const [passwordError, setPasswordError] = useState('')
-  const { isLoading } = useSelector((state) => state.auth)
+   const { showToast } = useCustomToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -57,11 +58,10 @@ const RegisterPage = () => {
       const result = await dispatch(registerUser(formData)).unwrap();
       router.push('/auth/login')
     } catch (error) {
-      toast.error(
-        <span className="text-red-600 font-semibold text-center">
-          {error}
-        </span>
-      )
+      showToast({
+        description: error,
+        variant: "error"
+      })
       setIsSubmitting(false)
     }
   }

@@ -15,6 +15,7 @@ const AuthLayout = ({ children }) => {
         <div className="object-cover mb-3">
           <Image src="/images/scholarly-logo-auth.png" alt="scholarly-logo-auth" width={200} height={200} />
         </div>
+        <div className="w-1/3 bg-gray-300 py-[0.5px]"></div>
         {children}
       </div>
     </div>

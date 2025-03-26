@@ -7,13 +7,14 @@ import { Input } from '../ui/input'
 import { Loader2, Pencil } from 'lucide-react'
 import { useDispatch } from 'react-redux'
 import { getUserDetails, saveUserDetails } from '@/store/user-slice'
-import { toast } from 'sonner'
 import useUserId from '@/hooks/useUserId'
+import { useCustomToast } from '@/hooks/useCustomToast'
 
 const EditProfileModal = ({ editProfileData }) => {
 
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
+    const { showToast } = useCustomToast();
     const userId = useUserId();
 
     //  Memoize form data initialization
@@ -67,18 +68,16 @@ const EditProfileModal = ({ editProfileData }) => {
 
             dispatch(getUserDetails(userId));
             setIsOpen(false);
-            toast.success(
-                <span className="text-green-500 font-semibold text-center">
-                    User updated successfully
-                </span>
-            )
+            showToast({
+                description: 'User updated successfully',
+                variant: "success"
+              })
             setIsSubmitting(false);
         } catch (error) {
-            toast.error(
-                <span className="text-red-500 font-semibold text-center">
-                    {error}
-                </span>
-            )
+            showToast({
+                description: error,
+                variant: "error"
+              })
             setIsSubmitting(false)
         }
     }, [dispatch, formData])
