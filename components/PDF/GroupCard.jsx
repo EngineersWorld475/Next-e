@@ -5,11 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { FaUsers } from "react-icons/fa";
 import { Badge } from '../ui/badge';
 import { TrashIcon } from 'lucide-react';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
+
 import ConfirmDialog from '@/common/ConfirmDialog';
 
-const GroupCard = ({ groupName, count }) => {
+const GroupCard = ({ groupName, emails, count }) => {
     return (
         <div>
             <Accordion type="single" collapsible className="w-full">
@@ -28,18 +27,12 @@ const GroupCard = ({ groupName, count }) => {
                         </CardHeader>
                         <AccordionContent>
                             <CardContent className="relative p-4">
-                                <div className='flex flex-row gap-5 items-center mb-3'>
-                                    <p>sanjaygnair777@gmail.com</p>
-                                    <TrashIcon className='h-4 w-4 cursor-pointer' />
-                                </div>
-                                <div className='flex flex-row gap-5 items-center mb-3'>
-                                    <p>imedward@gmail.com</p>
-                                    <TrashIcon className='h-4 w-4 cursor-pointer' />
-                                </div>
-                                <div className='flex flex-col md:flex-row lg:flex-row gap-2 items-center w-full'>
-                                    <Input type="text" className="w-full md:w-1/3 lg:w-1/3" placeholder="Enter email" />
-                                    <Button>Add</Button>
-                                </div>
+                                {emails?.map((email, index) => (
+                                    <div key={email || `email-${index}`} className='flex flex-row gap-5 items-center mb-3'>
+                                        <p>{email}</p>
+                                        <TrashIcon className='h-4 w-4 cursor-pointer' />
+                                    </div>
+                                ))}
                                 {/* confirm dialog box */}
                                 <ConfirmDialog
                                     triggerText="Delete"

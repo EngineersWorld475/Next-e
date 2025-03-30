@@ -3,6 +3,7 @@ import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import storage from 'redux-persist/lib/storage';
 import authReducer from './auth-slice';
 import profileReducer from './user-slice';
+import groupReducer from './group-slice';
 import { thunk } from "redux-thunk";
 import { persistReducer, persistStore } from "redux-persist";
 import sessionStorage from "redux-persist/es/storage/session";
@@ -15,7 +16,8 @@ const authPersistConfig = {
 // combine all reducers 
 const rootReducer = combineReducers({
     auth: persistReducer(authPersistConfig, authReducer),
-    userprofile: profileReducer
+    userprofile: profileReducer,
+    group: groupReducer,
 })
 
 // configure store

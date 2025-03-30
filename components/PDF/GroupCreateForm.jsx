@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { useDispatch, useSelector } from "react-redux";
-import { addGroup } from "@/store/group-slice";
+import { addGroup, getGroupsByUserId } from "@/store/group-slice";
 import useUserId from "@/hooks/useUserId";
 import { toast } from "sonner";
 
@@ -67,12 +67,13 @@ const CreateGroup = () => {
     try {
       await dispatch(
         addGroup({
-          userid: userId,
+          userId: userId,
           groupName: formattedData?.name,
           tagsText: formattedData?.emails,
           authToken: user?.token,
         })
       ).unwrap();
+      dispatch(getGroupsByUserId({userId}))
       toast.success("Group created successfully!");
       form.reset();
     } catch (error) {

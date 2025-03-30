@@ -3,25 +3,34 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     isLoading: false,
-    group: null,
+    groupList: [],
     error: null
 }
 
-export const addGroup = createAsyncThunk("/pdf/addGroup", async (groupData, { rejectWithValue }) => {
+export const addGroup = createAsyncThunk("/pdf/addgroup", async ({userId, groupName, tagsText, authToken}, { rejectWithValue }) => {
     try {
-        const response = await axios.post(`/api/PDF/addgroup?UserId=${groupData?.userid}&GroupName=${groupData?.groupName}&TagsText=${groupData?.tagsText}`, {}, {
-            headers: { Authorization: `Bearer ${groupData?.authToken}` },
+        const response = await axios.post(`/api/mock/PDF/addgroup?UserId=${userId}&GroupName=${groupName}&TagsText=${tagsText}`, {}, {
+            headers: { Authorization: `Bearer ${authToken}` },
         });
 
         return response.data;
     } catch (error) {
-        console.error("API error:", error.response?.data || error.message);
         return rejectWithValue(error.response?.data || "An error occurred");
     }
-});
+}); 
+
+export const getGroupsByUserId = createAsyncThunk("/pdf/getgroups", async ({userId}, { rejectWithValue }) => {
+    try {
+        const response = await axios.get(`/api/mock/PDF/addgroup?UserId=${userId}`);
+        console.log('...response', response)
+        return response.data.data || [];
+    } catch (error) {
+        return rejectWithValue(error.response?.data || "Failed to fetch groups");
+    }
+});    
 
 
-export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async (userId, groupId, authToken, {}, { rejectWithValue }) => {
+export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async ({userId, groupId, authToken}, { rejectWithValue }) => {
     try {
         const response = await axios.delete(`/api/PDF/deletegroup?UserId=${userId}&GroupId=${groupId}`, {
             headers: {
@@ -34,11 +43,11 @@ export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async (userId, g
     }
 })
 
-export const addNewEmail = createAsyncThunk('/pdf/addnewEmail', async (userId, email, groupId, authToken, { }, {
+export const addNewEmail = createAsyncThunk('/pdf/addnewEmail', async ({userId, email, groupId, authToken}, {
     rejectWithValue
 }) => {
     try {
-        const response = await axios.post(`/api/PDF/addnewmail?UserId=${userId}&newEmail=${email}&GroupId=${groupId}`, {
+        const response = await axios.post(`/api/PDF/addnewmail?UserId=${userId}&newEmail=${email}&GroupId=${groupId}`, {}, {
             headers: {
                 Authorization: `Bearer ${authToken}`
             }
@@ -49,7 +58,7 @@ export const addNewEmail = createAsyncThunk('/pdf/addnewEmail', async (userId, e
     }
 })
 
-export const deleteEmail = createAsyncThunk('/pdf/delete_email', async (userId, groupEmailId, authToken, {}, { rejectWithValue }) => {
+export const deleteEmail = createAsyncThunk('/pdf/delete_email', async ({userId, groupEmailId, authToken}, {}, { rejectWithValue }) => {
     try {
         const response = await axios.delete(`/api/PDF/deleteemail?UserId=${userId}&GroupEmailId=${groupEmailId}`, {
             headers: {
@@ -71,26 +80,37 @@ const groupDataSlice = createSlice({
             state.isLoading = true;
         }).addCase(addGroup.fulfilled, (state, action) => {
             state.isLoading = false;
-            state.group = action?.payload;
+            state.groupList = [...state.groupList, action.payload];
             state.error = null;
         }).addCase(addGroup.rejected, (state, action) => {
             state.isLoading = false;
-            state.group = null;
             state.error = action?.payload;
+        }) .addCase(getGroupsByUserId.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(getGroupsByUserId.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.groupList = action.payload;
+            state.error = null;
+        })
+        .addCase(getGroupsByUserId.rejected, (state, action) => {
+            state.isLoading = false;
+            state.groupList = [];
+            state.error = action.payload;
         }).addCase(deleteGroup.pending, (state) => {
             state.isLoading = true
-        }).addCase(deleteGroup.fulfilled, (action, payload) => {
+        }).addCase(deleteGroup.fulfilled, (state, action) => {
             state.isLoading = false;
-            state.group = action?.payload;
+            state.groupList = action?.payload;
             state.error = null
         }).addCase(deleteGroup.rejected, (state, action) => {
             state.isLoading = false;
             state.error = action?.payload;
         }).addCase(addNewEmail.pending, (state) => {
             state.isLoading = true;
-        }).addCase(addGroup.fulfilled, (state, action) => {
+        }).addCase(addNewEmail.fulfilled, (state, action) => {
             state.isLoading = false;
-            state.group = action?.payload;
+            state.groupList = action?.payload;
             state.error = null
         }).addCase(addNewEmail.rejected, (state, action) => {
             state.isLoading = false;
@@ -99,9 +119,9 @@ const groupDataSlice = createSlice({
             state.isLoading = true;
         }).addCase(deleteEmail.fulfilled, (state, action) => {
             state.isLoading = false;
-            state.group = action.payload;
+            state.groupList = action.payload;
             state.error = null;
-        }).addCase(deleteEmail.rejected, (action, payload) => {
+        }).addCase(deleteEmail.rejected, (state, action) => {
             state.isLoading = false;
             state.error = action.payload;
         })

@@ -9,16 +9,16 @@ const initialState = {
 
 export const saveaFile = createAsyncThunk('/pdf/savefile', async ({ userId, article, url, pubmedid, author, doi, authToken }, { rejectWithValue }) => {
     try {
-       const response = await axios.post(
-         `/api/PDF/savefile?userId=${userId}`,
-         { article, url, pubmedid, author, doi },
-         { 
-           headers: { 
-             Authorization: `Bearer ${authToken}` 
-           } 
-         }
-       );
-       return response?.data;
+        const response = await axios.post(
+            `/api/PDF/savefile?userId=${userId}`,
+            { article, url, pubmedid, author, doi },
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`
+                }
+            }
+        );
+        return response?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not save File');
     }
