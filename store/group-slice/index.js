@@ -12,7 +12,7 @@ export const addGroup = createAsyncThunk("/pdf/addgroup", async ({userId, groupN
         const response = await axios.post(`/api/mock/PDF/addgroup?UserId=${userId}&GroupName=${groupName}&TagsText=${tagsText}`, {}, {
             headers: { Authorization: `Bearer ${authToken}` },
         });
-
+        console.log('...addGroupresponse', response)
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response?.data || "An error occurred");
@@ -22,8 +22,7 @@ export const addGroup = createAsyncThunk("/pdf/addgroup", async ({userId, groupN
 export const getGroupsByUserId = createAsyncThunk("/pdf/getgroups", async ({userId}, { rejectWithValue }) => {
     try {
         const response = await axios.get(`/api/mock/PDF/addgroup?UserId=${userId}`);
-        console.log('...response', response)
-        return response.data.data || [];
+        return response?.data?.data || [];
     } catch (error) {
         return rejectWithValue(error.response?.data || "Failed to fetch groups");
     }
@@ -32,12 +31,13 @@ export const getGroupsByUserId = createAsyncThunk("/pdf/getgroups", async ({user
 
 export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async ({userId, groupId, authToken}, { rejectWithValue }) => {
     try {
-        const response = await axios.delete(`/api/PDF/deletegroup?UserId=${userId}&GroupId=${groupId}`, {
+        const response = await axios.delete(`/api/mock/PDF/addgroup?UserId=${userId}&GroupId=${groupId}`, {
             headers: {
                 Authorization: `Bearer ${authToken}`
             }
         });
-        return response?.data;
+        console.log('...delete response', response);
+        return response?.data?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not delete group')
     }
@@ -47,12 +47,13 @@ export const addNewEmail = createAsyncThunk('/pdf/addnewEmail', async ({userId, 
     rejectWithValue
 }) => {
     try {
-        const response = await axios.post(`/api/PDF/addnewmail?UserId=${userId}&newEmail=${email}&GroupId=${groupId}`, {}, {
+        const response = await axios.put(`/api/mock/PDF/addnewmail?UserId=${userId}&newEmail=${email}&GroupId=${groupId}`, {}, {
             headers: {
                 Authorization: `Bearer ${authToken}`
             }
         })
-        return response?.data;
+        console.log('...response', response)
+        return response?.data?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not add new Email')
     }

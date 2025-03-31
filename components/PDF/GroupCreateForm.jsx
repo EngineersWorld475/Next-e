@@ -12,15 +12,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { addGroup, getGroupsByUserId } from "@/store/group-slice";
 import useUserId from "@/hooks/useUserId";
 import { toast } from "sonner";
+import { useCustomToast } from "@/hooks/useCustomToast";
 
 const groupSchema = z.object({
   name: z.string().min(3, "Group name must be at least 3 characters"),
   emails: z.array(z.string().email("Invalid email address")).min(1, "At least one email is required"),
 });
 
-const CreateGroup = () => {
+const CreateGroup = ({setIsMounting}) => {
   const [emailInput, setEmailInput] = useState("");
   const { user } = useSelector((state) => state.auth);
+  const { showToast } = useCustomToast();
   const dispatch = useDispatch();
   const userId = useUserId()
 
@@ -55,6 +57,7 @@ const CreateGroup = () => {
   };
 
   const onSubmit = async (data) => {
+    setIsMounting(false)
     if (!user?.token) {
       toast.error("Unauthorized! Please log in again.");
       return;
@@ -71,15 +74,23 @@ const CreateGroup = () => {
           groupName: formattedData?.name,
           tagsText: formattedData?.emails,
           authToken: user?.token,
-        })
+        }) 
       ).unwrap();
-      dispatch(getGroupsByUserId({userId}))
-      toast.success("Group created successfully!");
+      dispatch(getGroupsByUserId({userId})).then((result) => {
+        console.log('...result', result)
+        showToast({
+          title: "Group created successfully!",
+          variant: "success"
+        })
+      })
       form.reset();
     } catch (error) {
-      toast.error(error?.message || "Something went wrong. Please try again.");
+      showToast({
+        title: error?.message || "Something went wrong. Please try again.",
+        variant: "error"
+      })
     }
-  };
+  }; 
 
 
   return (

@@ -1,7 +1,7 @@
 'use client'
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import React from "react";
+import React, { useState } from "react";
 
 const ConfirmDialog = ({ 
   triggerText, 
@@ -13,8 +13,9 @@ const ConfirmDialog = ({
   cancelText = "Cancel", 
   ButtonStyle 
 }) => {
+  const [openModal, setOpenModal] = useState(false)
   return (
-    <Dialog>
+    <Dialog open={openModal} onOpenChange={setOpenModal}>
       <DialogTrigger asChild>
         {iconTrigger ? ( 
           <span className="cursor-pointer">{iconTrigger}</span>
@@ -28,14 +29,14 @@ const ConfirmDialog = ({
         </DialogHeader>
         <div className="flex flex-row gap-4 justify-center items-center mt-4">
           <Button 
-            onClick={onCancel} 
+            onClick={() => setOpenModal(false)} 
             variant="outline" 
             className="px-4 py-2 text-gray-600 border-gray-300 hover:bg-gray-100 transition-all rounded-lg dark:bg-gray-600 dark:text-white outline-none border-none"
           >
             {cancelText}
           </Button>
           <Button 
-            onClick={onConfirm} 
+            onClick={() => { setOpenModal(false); onConfirm && onConfirm(); }}  
             className="px-4 py-2 text-white bg-gray-700 border-gray-300 transition-all rounded-lg outline-none border-none hover:bg-gray-800"
           >
             {confirmText}
