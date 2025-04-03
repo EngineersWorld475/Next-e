@@ -6,10 +6,10 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { useDispatch, useSelector } from "react-redux";
-import { addGroup, getGroupsByUserId } from "@/store/group-slice";
+import { addGroup } from "@/store/group-slice";
 import useUserId from "@/hooks/useUserId";
 import { toast } from "sonner";
 import { useCustomToast } from "@/hooks/useCustomToast";
@@ -19,10 +19,11 @@ const groupSchema = z.object({
   emails: z.array(z.string().email("Invalid email address")).min(1, "At least one email is required"),
 });
 
-const CreateGroup = ({setIsMounting}) => {
+const CreateGroup = ({setIsMounting, listOfGroups, setListOfGroups}) => {
   const [emailInput, setEmailInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { user } = useSelector((state) => state.auth);
-  const { showToast } = useCustomToast();
+  const { showToast } = useCustomToast(); 
   const dispatch = useDispatch();
   const userId = useUserId()
 
@@ -58,6 +59,7 @@ const CreateGroup = ({setIsMounting}) => {
 
   const onSubmit = async (data) => {
     setIsMounting(false)
+    setIsSubmitting(true)
     if (!user?.token) {
       toast.error("Unauthorized! Please log in again.");
       return;
@@ -65,30 +67,46 @@ const CreateGroup = ({setIsMounting}) => {
 
     const formattedData = {
       name: data.name,
-      emails: emails.join(","),
-    };
+      emails: emails.map(email => ({
+          Email: email,
+          GroupEmailId: (listOfGroups.length > 0) ? listOfGroups[listOfGroups.length - 1].Groupmails[0].GroupEmailId + 1 : 1,
+          GroupId: null,
+      })),
+  };
     try {
-      await dispatch(
+      const response = await dispatch(
         addGroup({
           userId: userId,
           groupName: formattedData?.name,
-          tagsText: formattedData?.emails,
+          tagsText: emails.join(","),
           authToken: user?.token,
         }) 
       ).unwrap();
-      dispatch(getGroupsByUserId({userId})).then((result) => {
-        console.log('...result', result)
+      if (response === true) { 
+        const newGroup = {
+            GroupId:  (listOfGroups.length > 0) ? listOfGroups[listOfGroups.length - 1].GroupId + 1 : 1,
+            GroupName: formattedData.name,
+            Groupmails: formattedData.emails,
+            Members: emails.length,
+            CreatedDate: null,
+        };
+
+        setListOfGroups((prevGroups) => [...prevGroups, newGroup]);
+
         showToast({
-          title: "Group created successfully!",
-          variant: "success"
-        })
-      })
-      form.reset();
+            title: "Group created successfully!",
+            variant: "success"
+        });
+    }
+
+    setIsSubmitting(false);
+    form.reset();
     } catch (error) {
       showToast({
         title: error?.message || "Something went wrong. Please try again.",
         variant: "error"
       })
+      setIsSubmitting(false)
     }
   }; 
 
@@ -151,8 +169,17 @@ const CreateGroup = ({setIsMounting}) => {
               )}
             />
 
-            <Button type="submit" className="w-full">
-              Add Group
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+               {
+                isSubmitting ? (
+                  <>
+                   <Loader2 className="animate-spin h-5 w-5 text-center" />
+                   Loading...
+                   </>
+                ) : (
+                 'Add Group'
+                )
+               }
             </Button>
           </form>
         </Form>

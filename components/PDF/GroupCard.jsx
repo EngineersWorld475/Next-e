@@ -9,7 +9,7 @@ import { TrashIcon } from 'lucide-react';
 import ConfirmDialog from '@/common/ConfirmDialog';
 import { useDispatch, useSelector } from 'react-redux';
 import useUserId from '@/hooks/useUserId';
-import { addNewEmail, deleteGroup, getGroupsByUserId } from '@/store/group-slice';
+import { addNewEmail, deleteEmail, deleteGroup, getGroupsByUserId } from '@/store/group-slice';
 import { useCustomToast } from '@/hooks/useCustomToast';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -21,7 +21,7 @@ const GroupCard = ({ groupName, emails, count, groupId, setIsMounting }) => {
     const { showToast } = useCustomToast()
     const [email, setEmail] = useState('');
 
-    const handleChange = (e) => {
+    const handleChange = (e) => { 
         setEmail(e.target.value)
     }
     const handleSubmit = () => {
@@ -36,7 +36,6 @@ const GroupCard = ({ groupName, emails, count, groupId, setIsMounting }) => {
         }
         setIsMounting(false)
         dispatch(addNewEmail({ userId, email, groupId, authToken: user?.token })).then((result) => {
-            console.log('...result', result)
             if (result.success) {
                 showToast({
                     title: result.message,
@@ -50,25 +49,53 @@ const GroupCard = ({ groupName, emails, count, groupId, setIsMounting }) => {
             })
         })
         dispatch(getGroupsByUserId({ userId }))
-        setEmail('')
+        setEmail('') 
     }
 
-    const handleDelete = () => {
-        try {
-            setIsMounting(false)
-            dispatch(deleteGroup({ userId, groupId, authToken: user?.token }));
-            dispatch(getGroupsByUserId({ userId })).then(() => {
-                showToast({
-                    title: "Group deleted successfully",
-                    variant: "success"
-                })
-            })
-        } catch (error) {
-            showToast({
-                title: error || "Something went wrong. Please try again",
-                variant: "error"
-            })
-        }
+    const handleDeleteGroup = () => {
+        // try {       
+        //     setIsMounting(false);
+        //     dispatch(deleteGroup({ userId, groupId, authToken: user?.token }));
+        //     dispatch(getGroupsByUserId({ userId })).then(() => {
+        //         showToast({
+        //             title: "Group deleted successfully",
+        //             variant: "success"
+        //         })
+        //     })
+        // } catch (error) {
+        //     showToast({
+        //         title: error || "Something went wrong. Please try again",
+        //         variant: "error"
+        //     })
+        // }
+    }
+
+    const handleDeleteEmail = (email) => {
+        // try {
+        //     setIsMounting(false);
+        //     dispatch(deleteEmail({
+        //         userId: userId, 
+        //         groupId:groupId,
+        //         authToken: user?.token,
+        //         email: email
+        //     })).then((result) => {
+        //         dispatch(getGroupsByUserId({ userId }));
+        //         showToast({
+        //             title: "Email removed successfully",
+        //             variant: "success"
+        //         });
+        //     }).catch((error) => {
+        //         showToast({
+        //                 title: error || 'Failed to delete email',
+        //                 variant: "error"
+        //             });
+        //     })
+        // } catch (error) {
+        //     showToast({
+        //         title: error || "Something went wrong. Please try again",
+        //         variant: "error"
+        //     })
+        // }
     }
 
 
@@ -90,22 +117,22 @@ const GroupCard = ({ groupName, emails, count, groupId, setIsMounting }) => {
                         </CardHeader>
                         <AccordionContent>
                             <CardContent className="relative p-4">
-                                {emails?.map((email, index) => (
+                                {emails?.map((item, index) => (
                                     <div key={email || `email-${index}`} className='flex flex-row gap-5 items-center mb-3'>
-                                        <p>{email}</p>
-                                        <TrashIcon className='h-4 w-4 cursor-pointer' />
+                                        <p>{item?.Email}</p>
+                                        <TrashIcon className='h-4 w-4 cursor-pointer' onClick={() => handleDeleteEmail(email)} />
                                     </div>
                                 ))}
 
                                 <div className='flex flex-col md:flex-row lg:flex-row gap-3 w-full md:w-`/3 lg:w-1/3'>
                                     <Input type="text" placeholder="Enter E-mailId" value={email} onChange={handleChange} />
-                                    <Button className="w-1/3" onClick={handleSubmit} disabled={email === ''}>Add</Button>
+                                    <Button className="w-1/3" onClick={handleSubmit} disabled={email === ''}>Add</Button> 
                                 </div>
                                 {/* confirm dialog box */}
                                 <ConfirmDialog
                                     triggerText="Delete"
                                     title="Are you sure you want to delete this group?"
-                                    onConfirm={handleDelete}
+                                    onConfirm={handleDeleteGroup}
                                     onCancel={() => console.log("Cancelled")}
                                     ButtonStyle={'absolute right-0 bottom-0'}
                                 />

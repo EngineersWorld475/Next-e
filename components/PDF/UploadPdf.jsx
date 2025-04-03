@@ -18,6 +18,7 @@ const UploadPdf = () => {
         }
     }
 
+    console.log('.....file', fileUrl)
 
     return (
         <div className='flex flex-col gap-3 bg-white dark:bg-gray-900 dark:text-white'>
