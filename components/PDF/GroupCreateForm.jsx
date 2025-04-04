@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, X } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { useDispatch, useSelector } from "react-redux";
-import { addGroup } from "@/store/group-slice";
+import { addGroup, getGroupsByUserId } from "@/store/group-slice";
 import useUserId from "@/hooks/useUserId";
 import { toast } from "sonner";
 import { useCustomToast } from "@/hooks/useCustomToast";
@@ -19,11 +19,11 @@ const groupSchema = z.object({
   emails: z.array(z.string().email("Invalid email address")).min(1, "At least one email is required"),
 });
 
-const CreateGroup = ({setIsMounting, listOfGroups, setListOfGroups}) => {
+const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
   const [emailInput, setEmailInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { user } = useSelector((state) => state.auth);
-  const { showToast } = useCustomToast(); 
+  const { showToast } = useCustomToast();
   const dispatch = useDispatch();
   const userId = useUserId()
 
@@ -35,6 +35,7 @@ const CreateGroup = ({setIsMounting, listOfGroups, setListOfGroups}) => {
 
   const emails = form.watch("emails") || [];
 
+  // User Adding Email
   const addEmail = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -53,10 +54,12 @@ const CreateGroup = ({setIsMounting, listOfGroups, setListOfGroups}) => {
     }
   };
 
+  // User Removing Email from the textArea
   const removeEmail = (emailToRemove) => {
     form.setValue("emails", emails.filter((email) => email !== emailToRemove));
   };
 
+  // Adding a new Group Function
   const onSubmit = async (data) => {
     setIsMounting(false)
     setIsSubmitting(true)
@@ -68,11 +71,11 @@ const CreateGroup = ({setIsMounting, listOfGroups, setListOfGroups}) => {
     const formattedData = {
       name: data.name,
       emails: emails.map(email => ({
-          Email: email,
-          GroupEmailId: (listOfGroups.length > 0) ? listOfGroups[listOfGroups.length - 1].Groupmails[0].GroupEmailId + 1 : 1,
-          GroupId: null,
+        Email: email,
+        GroupEmailId: (listOfGroups.length > 0) ? listOfGroups[listOfGroups.length - 1].Groupmails[0].GroupEmailId + 1 : 1,
+        GroupId: null,
       })),
-  };
+    };
     try {
       const response = await dispatch(
         addGroup({
@@ -80,27 +83,33 @@ const CreateGroup = ({setIsMounting, listOfGroups, setListOfGroups}) => {
           groupName: formattedData?.name,
           tagsText: emails.join(","),
           authToken: user?.token,
-        }) 
+        })
       ).unwrap();
-      if (response === true) { 
+      if (response === true) {
         const newGroup = {
-            GroupId:  (listOfGroups.length > 0) ? listOfGroups[listOfGroups.length - 1].GroupId + 1 : 1,
-            GroupName: formattedData.name,
-            Groupmails: formattedData.emails,
-            Members: emails.length,
-            CreatedDate: null,
+          GroupId: (listOfGroups.length > 0) ? listOfGroups[listOfGroups.length - 1].GroupId + 1 : 1,
+          GroupName: formattedData.name,
+          Groupmails: formattedData.emails,
+          Members: emails.length,
+          CreatedDate: null,
         };
 
         setListOfGroups((prevGroups) => [...prevGroups, newGroup]);
+        dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
 
         showToast({
-            title: "Group created successfully!",
-            variant: "success"
+          title: "Group created successfully!",
+          variant: "success"
         });
-    }
+      } else {
+        showToast({
+          title: "You have already added this group. Please try a different group name",
+          variant: "info"
+        })
+      }
 
-    setIsSubmitting(false);
-    form.reset();
+      setIsSubmitting(false);
+      form.reset();
     } catch (error) {
       showToast({
         title: error?.message || "Something went wrong. Please try again.",
@@ -108,7 +117,7 @@ const CreateGroup = ({setIsMounting, listOfGroups, setListOfGroups}) => {
       })
       setIsSubmitting(false)
     }
-  }; 
+  };
 
 
   return (
@@ -170,16 +179,16 @@ const CreateGroup = ({setIsMounting, listOfGroups, setListOfGroups}) => {
             />
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-               {
+              {
                 isSubmitting ? (
                   <>
-                   <Loader2 className="animate-spin h-5 w-5 text-center" />
-                   Loading...
-                   </>
+                    <Loader2 className="animate-spin h-5 w-5 text-center" />
+                    Loading...
+                  </>
                 ) : (
-                 'Add Group'
+                  'Add Group'
                 )
-               }
+              }
             </Button>
           </form>
         </Form>

@@ -15,6 +15,7 @@ const GroupList = () => {
   const { user } = useSelector((state) => state.auth)
   const [listOfGroups, setListOfGroups] = useState([])
 
+
   useEffect(() => {
     dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
   }, [dispatch, userId])
@@ -35,26 +36,27 @@ const GroupList = () => {
           </div>
         ) : (
           <div className='w-full md:w-2/3 lg:w-2/3 bg-white dark:bg-black dark:text-white dark:rounded-lg px-3 py-2'>
-          <h1 className='font-semibold text-gray-500 mt-2'>Groups</h1>
-          <p className='text-sm text-gray-500 mb-3'>Total Groups: <span>{listOfGroups?.length}</span></p>
-          {listOfGroups?.length > 0 ? (
-            listOfGroups?.map((group, index) => (
-              <GroupCard
-                key={group?.GroupId || group.GroupName} 
-                groupName={group?.GroupName}
-                emails={group?.Groupmails}
-                count={group?.Members}
-                groupId={group?.GroupId}
-                setIsMounting={setIsMounting}
-              />
-            ))
-          ) : (
-            <p>No groups found</p>
-          )}
-        </div>
+            <h1 className='font-semibold text-gray-500 mt-2'>Groups</h1>
+            <p className='text-sm text-gray-500 mb-3'>Total Groups: <span>{listOfGroups?.length}</span></p>
+            {listOfGroups?.length > 0 ? (
+              listOfGroups?.map((group) => (
+                <GroupCard
+                  key={group?.GroupId || group.GroupName}
+                  groupName={group?.GroupName}
+                  emails={group?.Groupmails}
+                  count={group?.Members}
+                  groupId={group?.GroupId}
+                  setIsMounting={setIsMounting}
+                  setListOfGroups={setListOfGroups}
+                />
+              ))
+            ) : (
+              <p>No groups found</p>
+            )}
+          </div>
         )}
         <div className='w-full md:w-1/3 lg:w-1/3'>
-          <CreateGroup setIsMounting={setIsMounting} listOfGroups={listOfGroups} setListOfGroups={setListOfGroups}/>
+          <CreateGroup setIsMounting={setIsMounting} listOfGroups={listOfGroups} setListOfGroups={setListOfGroups} />
         </div>
       </div>
     </ div>

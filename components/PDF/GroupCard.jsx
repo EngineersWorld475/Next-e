@@ -14,20 +14,23 @@ import { useCustomToast } from '@/hooks/useCustomToast';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 
-const GroupCard = ({ groupName, emails, count, groupId, setIsMounting }) => {
+const GroupCard = ({ groupName, emails, count, groupId, setIsMounting, setListOfGroups }) => {
     const dispatch = useDispatch();
     const userId = useUserId();
     const { user } = useSelector((state) => state.auth)
+    const { error } = useSelector((state) => state.group)
     const { showToast } = useCustomToast()
-    const [email, setEmail] = useState('');
+    const [newEmail, setNewEmail] = useState('');
 
-    const handleChange = (e) => { 
-        setEmail(e.target.value)
+    const handleChange = (e) => {
+        setNewEmail(e.target.value)
     }
-    const handleSubmit = () => {
+
+    // Adding Email to the existing group
+    const handleAddEmail = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(newEmail)) {
             showToast({
                 title: "Invalid email format. Please enter a valid email address.",
                 variant: "warning",
@@ -35,68 +38,113 @@ const GroupCard = ({ groupName, emails, count, groupId, setIsMounting }) => {
             return;
         }
         setIsMounting(false)
-        dispatch(addNewEmail({ userId, email, groupId, authToken: user?.token })).then((result) => {
-            if (result.success) {
-                showToast({
-                    title: result.message,
-                    variant: "success"
-                })
+        dispatch(addNewEmail({ userId, email: newEmail, groupId, authToken: user?.token })).then((result) => {
+            if (result?.payload === true) {
+                setListOfGroups((prevGroups) =>
+                    prevGroups.map((group) => {
+                        if (group.GroupId === groupId) {
+                            const updatedEmails = Array.isArray(group.Groupmails)
+                                ? [...group.Groupmails, {
+                                    Email: newEmail,
+                                    GroupEmailId: group.Groupmails.length > 0 ? group.Groupmails[group.Groupmails.length - 1].GroupEmailId + 1 : 1,
+                                    GroupId: null
+                                }]
+                                : [{ Email: newEmail, GroupEmailId: 1, GroupId: null }];
+
+
+                            return {
+                                ...group,
+                                Groupmails: updatedEmails.length > 0 ? updatedEmails : []
+                            };
+                        }
+                        return group;
+                    })
+                );
             }
+            dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
+
         }).catch(() => {
             showToast({
                 title: error || "Something went wrong!!! please try again later",
                 variant: "error"
             })
         })
-        dispatch(getGroupsByUserId({ userId }))
-        setEmail('') 
+        setNewEmail('')
     }
 
+    // DELETE GROUP FUNCTION
     const handleDeleteGroup = () => {
-        // try {       
-        //     setIsMounting(false);
-        //     dispatch(deleteGroup({ userId, groupId, authToken: user?.token }));
-        //     dispatch(getGroupsByUserId({ userId })).then(() => {
-        //         showToast({
-        //             title: "Group deleted successfully",
-        //             variant: "success"
-        //         })
-        //     })
-        // } catch (error) {
-        //     showToast({
-        //         title: error || "Something went wrong. Please try again",
-        //         variant: "error"
-        //     })
-        // }
+        setIsMounting(false);
+        dispatch(deleteGroup({ userId, groupId, authToken: user?.token })).then((result) => {
+            if (result?.payload === true) {
+                setListOfGroups((prevGroups) => prevGroups.filter(group => group.GroupId !== groupId));
+                showToast({
+                    title: "Group deleted successfully",
+                    variant: "success"
+                })
+                dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
+                showToast({
+                    title: "Email added successfully",
+                    variant: "success"
+                })
+            } else {
+                showToast({
+                    title: error || 'Can not delete group',
+                    variant: "error"
+                });
+            }
+        }).catch((error) => {
+            showToast({
+                title: error?.message || "Something went wrong. Please try again",
+                variant: "error"
+            })
+        })
     }
 
+    // DELETE GROUP EMAIL FUNCTION
     const handleDeleteEmail = (email) => {
-        // try {
-        //     setIsMounting(false);
-        //     dispatch(deleteEmail({
-        //         userId: userId, 
-        //         groupId:groupId,
-        //         authToken: user?.token,
-        //         email: email
-        //     })).then((result) => {
-        //         dispatch(getGroupsByUserId({ userId }));
-        //         showToast({
-        //             title: "Email removed successfully",
-        //             variant: "success"
-        //         });
-        //     }).catch((error) => {
-        //         showToast({
-        //                 title: error || 'Failed to delete email',
-        //                 variant: "error"
-        //             });
-        //     })
-        // } catch (error) {
-        //     showToast({
-        //         title: error || "Something went wrong. Please try again",
-        //         variant: "error"
-        //     })
-        // }
-    }
+        setIsMounting(false);
+
+        dispatch(deleteEmail({
+            userId: userId,
+            groupEmailId: email?.GroupEmailId,
+            authToken: user?.token,
+        })).then((result) => {
+            if (result?.payload === false) { // here it is false beacouse the success response from backend is a false(boolean value)
+                setListOfGroups((prevGroups) =>
+                    prevGroups.map((group) => {
+                        if (group.GroupId === groupId) {
+                            const updatedEmails = Array.isArray(group.Groupmails)
+                                ? group.Groupmails.filter((item) => item.GroupEmailId !== email?.GroupEmailId)
+                                : [];
+
+                            return {
+                                ...group,
+                                Groupmails: updatedEmails.length > 0 ? updatedEmails : []
+                            };
+                        }
+                        return group;
+                    })
+                );
+                dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
+                showToast({
+                    title: "Email deleted successfully",
+                    variant: "success"
+                });
+            } else {
+                showToast({
+                    title: error || 'Failed to delete email',
+                    variant: "error"
+                });
+            }
+        }).catch((error) => {
+            showToast({
+                title: error?.message || "Something went wrong. Please try again",
+                variant: "error"
+            });
+        });
+    };
+
 
 
     return (
@@ -118,15 +166,20 @@ const GroupCard = ({ groupName, emails, count, groupId, setIsMounting }) => {
                         <AccordionContent>
                             <CardContent className="relative p-4">
                                 {emails?.map((item, index) => (
-                                    <div key={email || `email-${index}`} className='flex flex-row gap-5 items-center mb-3'>
+                                    <div key={item?.Email || `email-${index}`} className='flex flex-row gap-5 items-center mb-3'>
                                         <p>{item?.Email}</p>
-                                        <TrashIcon className='h-4 w-4 cursor-pointer' onClick={() => handleDeleteEmail(email)} />
+                                        <ConfirmDialog
+                                            iconTrigger={<TrashIcon className='h-4 w-4 cursor-pointer' />}
+                                            title="Are you sure you want to delete this email?"
+                                            onConfirm={() => handleDeleteEmail(item)}
+                                            onCancel={() => console.log("Cancelled")}
+                                        />
                                     </div>
                                 ))}
 
                                 <div className='flex flex-col md:flex-row lg:flex-row gap-3 w-full md:w-`/3 lg:w-1/3'>
-                                    <Input type="text" placeholder="Enter E-mailId" value={email} onChange={handleChange} />
-                                    <Button className="w-1/3" onClick={handleSubmit} disabled={email === ''}>Add</Button> 
+                                    <Input type="text" placeholder="Enter E-mailId" value={newEmail} onChange={handleChange} />
+                                    <Button className="w-1/3" onClick={handleAddEmail} disabled={newEmail === ''}>Add</Button>
                                 </div>
                                 {/* confirm dialog box */}
                                 <ConfirmDialog

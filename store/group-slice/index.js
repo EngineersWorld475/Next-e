@@ -32,14 +32,14 @@ export const getGroupsByUserId = createAsyncThunk("/pdf/getgroups", async ({ use
 });
 
 
-export const deleteGroup = createAsyncThunk('/pdf/deleteGroup', async ({ userId, groupId, authToken }, { rejectWithValue }) => {
+export const deleteGroup = createAsyncThunk('/pdf/deletegroup', async ({ userId, groupId, authToken }, { rejectWithValue }) => {
     try {
-        const response = await axios.delete(`/api/mock/PDF/addgroup?UserId=${userId}&GroupId=${groupId}`, {
+        const response = await axios.post(`/api/PDF/deletegroup?UserId=${userId}&GroupId=${groupId}`, {}, {
             headers: {
                 Authorization: `Bearer ${authToken}`
             }
         });
-        return response?.data?.data;
+        return response?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not delete group')
     }
@@ -49,25 +49,25 @@ export const addNewEmail = createAsyncThunk('/pdf/addnewEmail', async ({ userId,
     rejectWithValue
 }) => {
     try {
-        const response = await axios.put(`/api/mock/PDF/addnewmail?UserId=${userId}&newEmail=${email}&GroupId=${groupId}`, {}, {
+        const response = await axios.post(`/api/PDF/addnewmail?UserId=${userId}&newEmail=${email}&GroupId=${groupId}`, {}, {
             headers: {
                 Authorization: `Bearer ${authToken}`
             }
         })
-        return response?.data?.data;
+        return response?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not add new Email')
     }
 })
 
-export const deleteEmail = createAsyncThunk('/pdf/deleteemail', async ({ userId, groupId, authToken, email }, { rejectWithValue }) => {
+export const deleteEmail = createAsyncThunk('/pdf/deleteemail', async ({ userId, groupEmailId, authToken }, { rejectWithValue }) => {
     try {
-        const response = await axios.delete(`/api/mock/PDF/deleteemail?UserId=${userId}&GroupId=${groupId}&Email=${email}`, {
+        const response = await axios.post(`/api/PDF/deleteemail?UserId=${userId}&GroupEmailId=${groupEmailId}`, {}, {
             headers: {
                 Authorization: `Bearer ${authToken}`
             }
         })
-        return response?.data?.data;
+        return response?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not delete Emalil')
     }
@@ -102,7 +102,6 @@ const groupDataSlice = createSlice({
                 state.isLoading = true
             }).addCase(deleteGroup.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.groupList = action?.payload;
                 state.error = null
             }).addCase(deleteGroup.rejected, (state, action) => {
                 state.isLoading = false;
@@ -111,7 +110,6 @@ const groupDataSlice = createSlice({
                 state.isLoading = true;
             }).addCase(addNewEmail.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.groupList = action?.payload;
                 state.error = null
             }).addCase(addNewEmail.rejected, (state, action) => {
                 state.isLoading = false;
@@ -120,7 +118,6 @@ const groupDataSlice = createSlice({
                 state.isLoading = true;
             }).addCase(deleteEmail.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.groupList = action.payload;
                 state.error = null;
             }).addCase(deleteEmail.rejected, (state, action) => {
                 state.isLoading = false;
