@@ -12,8 +12,8 @@ const GroupList = () => {
   const userId = useUserId();
   const [isMounting, setIsMounting] = useState(false);
   const { groupList, isLoading } = useSelector((state) => state.group);
-  const { user } = useSelector((state) => state.auth)
-  const [listOfGroups, setListOfGroups] = useState([])
+  const { user } = useSelector((state) => state.auth);
+  const [listOfGroups, setListOfGroups] = useState([]);
 
 
   useEffect(() => {
@@ -48,6 +48,7 @@ const GroupList = () => {
                   groupId={group?.GroupId}
                   setIsMounting={setIsMounting}
                   setListOfGroups={setListOfGroups}
+                  listOfGroups={listOfGroups}
                 />
               ))
             ) : (

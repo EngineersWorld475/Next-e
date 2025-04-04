@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,36 +33,43 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
     mode: "onChange"
   });
 
-  const emails = form.watch("emails") || [];
+  const emails = form.watch("emails");
 
-  // User Adding Email
+  // Add Email
   const addEmail = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (emailInput.trim() === "") return;
-
       const email = emailInput.trim();
-      if (!/\S+@\S+\.\S+/.test(email)) {
-        return alert("Invalid email format");
+
+      if (!email) return;
+
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        showToast({
+          title: "Invalid email format",
+          variant: "warning",
+        });
+        return; 
       }
 
       if (!emails.includes(email)) {
         form.setValue("emails", [...emails, email]);
       }
 
-      setEmailInput("");
+      setEmailInput(""); 
     }
-  };
+  }
 
   // User Removing Email from the textArea
-  const removeEmail = (emailToRemove) => {
+  const removeEmail = useCallback((emailToRemove) => {
     form.setValue("emails", emails.filter((email) => email !== emailToRemove));
-  };
+  }, [emails, form])
 
-  // Adding a new Group Function
-  const onSubmit = async (data) => {
+  // Create Group
+  const onSubmit = useCallback( async (data) => {
     setIsMounting(false)
     setIsSubmitting(true)
+
     if (!user?.token) {
       toast.error("Unauthorized! Please log in again.");
       return;
@@ -101,23 +108,22 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
           title: "Group created successfully!",
           variant: "success"
         });
+      form.reset();
       } else {
         showToast({
           title: "You have already added this group. Please try a different group name",
-          variant: "info"
+          variant: "warning"
         })
       }
-
-      setIsSubmitting(false);
-      form.reset();
     } catch (error) {
       showToast({
         title: error?.message || "Something went wrong. Please try again.",
         variant: "error"
       })
-      setIsSubmitting(false)
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }, [user, userId, emails, listOfGroups, dispatch, showToast, setListOfGroups, setIsMounting, form])
 
 
   return (
@@ -169,7 +175,7 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
                       onChange={(e) => setEmailInput(e.target.value)}
                       onKeyDown={addEmail}
                       rows={1}
-                      className="border-none outline-none w-full bg-transparent resize-none"
+                      className="border-none outline-none w-full bg-transparent resize-none focus:outline-none focus:border-none"
                       placeholder="Type email and press Enter"
                     />
                   </div>

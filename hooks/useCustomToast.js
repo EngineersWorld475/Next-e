@@ -10,10 +10,10 @@ export function useCustomToast() {
         toast.error(title, { description, style: { backgroundColor: "#D22B2B", color: "white", border: "none" } });
         break;
       case "warning":
-        toast.warning(title, { description, style: { backgroundColor: "#D22B2B", color: "white", border: "none" } });
+        toast.warning(title, { description, style: { backgroundColor: "#CC5500", color: "white", border: "none" } });
         break;
       case "info":
-        toast.info(title, { description, style: { backgroundColor: "#DAA520", color: "white", border: "none" } });
+        toast.info(title, { description, style: { backgroundColor: "#088F8F", color: "white", border: "none" } });
         break;
       default:
         toast(title, { description });
