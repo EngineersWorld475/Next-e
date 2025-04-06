@@ -1,9 +1,10 @@
 "use client"
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import storage from 'redux-persist/lib/storage';
-import authReducer from './auth-slice';
+import authReducer from './auth-slice'; 
 import profileReducer from './user-slice';
 import groupReducer from './group-slice';
+import collectionReducer from './pdf-slice';
 import { thunk } from "redux-thunk";
 import { persistReducer, persistStore } from "redux-persist";
 import sessionStorage from "redux-persist/es/storage/session";
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
     auth: persistReducer(authPersistConfig, authReducer),
     userprofile: profileReducer,
     group: groupReducer,
+    collection: collectionReducer,
 })
 
 // configure store

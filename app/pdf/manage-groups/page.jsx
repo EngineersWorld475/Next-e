@@ -15,10 +15,11 @@ const GroupList = () => {
   const { user } = useSelector((state) => state.auth);
   const [listOfGroups, setListOfGroups] = useState([]);
 
-
   useEffect(() => {
-    dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
-  }, [dispatch, userId])
+    if(user?.token) {
+      dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
+    }
+  }, [dispatch, userId, user?.token])
 
   useEffect(() => {
     setIsMounting(true)

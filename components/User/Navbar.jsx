@@ -14,10 +14,10 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const router =  useRouter()
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     dispatch(logout()); 
-    persistor.purge()
-    router.push('/auth/login'); 
+    await persistor.purge()
+    router.replace('/auth/login'); 
   };
 
   return (

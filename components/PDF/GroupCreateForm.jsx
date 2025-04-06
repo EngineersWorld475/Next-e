@@ -66,7 +66,7 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
   }, [emails, form])
 
   // Create Group
-  const onSubmit = useCallback( async (data) => {
+  const createGroup = useCallback( async (data) => {
     setIsMounting(false)
     setIsSubmitting(true)
 
@@ -133,7 +133,7 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(createGroup)} className="space-y-4">
             {/* Group name */}
             <FormField
               control={form.control}

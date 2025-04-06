@@ -61,8 +61,19 @@ const LoginPage = () => {
 
       }
     } catch (error) {
-      console.error('Login error:', error);
-      setSubmitting(false);
+    if (error.response?.status === 500) {
+      showToast({
+        description: "Internal Server Error. Please try again later.",
+        variant: "destructive",
+      });
+    } else {
+      showToast({
+        description: error?.response?.data?.message || "An error occurred. Please try again.",
+        variant: "warning",
+      });
+    }
+
+    setSubmitting(false);
     }
   }
 
