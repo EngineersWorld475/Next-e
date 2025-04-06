@@ -8,13 +8,13 @@ import { Label } from '../ui/label'
 import { Button } from '../ui/button'
 import ConfirmDialog from '@/common/ConfirmDialog'
 
-const Pdfcard = () => {
+const Pdfcard = ({article, author, doi, id, pdf, pubmedId, handleDeleteCollection}) => {
   return (
     <div className='flex flex-col md:flex-row lg:flex-row w-full shadow-md mb-4 text-gray-600'>
       <div className='flex-1'>
         <div className='flex flex-col gap-2 px-4 py-4'>
-          <h1>mammogram</h1>
-          <h1>Author:</h1>
+          <h1>{article}</h1>
+          <h1>Author: <span>{author}</span></h1>
           <h1>Number Of Annotations:</h1>
         </div>
       </div>
@@ -25,7 +25,7 @@ const Pdfcard = () => {
             <ConfirmDialog 
              iconTrigger={<TrashIcon size={20} className='cursor-pointer' />}
              title="Do you want to delete this collection?"
-             onConfirm={() => console.log("Deleted")}
+             onConfirm={() => handleDeleteCollection(id)}
              onCancel={() => console.log("Cancelled")}
              ButtonStyle={'absolute right-0 bottom-0'}
             />
@@ -66,13 +66,13 @@ const Pdfcard = () => {
             <GlobeIcon size={20} className='cursor-pointer' />
             <DownloadIcon size={20} className='cursor-pointer' />
           </div>
-          <h1>Pub Med ID:</h1>
+          <h1>Pub Med ID:  <span>{pubmedId}</span></h1>
           <h1>Comments:</h1>
         </div>
       </div>
       <div className='flex-1'>
         <div className='flex flex-col gap-2 px-4 py-4'>
-          <h1>DOI Number:</h1>
+          <h1>DOI Number: <span>{doi}</span></h1>
           <h1>Closed Access</h1>
         </div>
       </div>
