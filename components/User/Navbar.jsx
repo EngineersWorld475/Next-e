@@ -28,7 +28,7 @@ const Navbar = () => {
           width={120}
           height={40}
           alt="Scholarly Logo"
-          className="object-contain"
+          className="w-24 h-10 md:w-36 md:h-14"
         />
       </Link>
 

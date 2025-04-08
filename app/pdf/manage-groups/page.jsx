@@ -1,9 +1,11 @@
 'use client'
 import GroupCard from '@/components/PDF/GroupCard'
 import CreateGroup from '@/components/PDF/GroupCreateForm'
+import { Button } from '@/components/ui/button'
 import useUserId from '@/hooks/useUserId'
 import { getGroupsByUserId } from '@/store/group-slice'
 import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -15,6 +17,7 @@ const GroupList = () => {
   const { groupList, isLoading } = useSelector((state) => state.group);
   const { user } = useSelector((state) => state.auth);
   const [listOfGroups, setListOfGroups] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     if(user?.token) {
@@ -29,7 +32,10 @@ const GroupList = () => {
     setListOfGroups(groupList);
   }, [groupList]);
   return (
-    <div className={`border-l-4 ${onManageGroupsMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white text-black dark:bg-black dark:text-white rounded-lg`} onMouseEnter={() => SetOnManageGroupsMousHover(true)} onMouseLeave={() => SetOnManageGroupsMousHover(false)}>
+    <div className={`border-l-4 ${onManageGroupsMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white text-black dark:bg-black dark:text-white rounded-lg relative`} onMouseEnter={() => SetOnManageGroupsMousHover(true)} onMouseLeave={() => SetOnManageGroupsMousHover(false)}>
+      <Button className="absolute top-0 right-7 bg-red-500 hover:bg-red-600 dark:bg-gray-300 dark:text-black shadow-lg hidden md:block" onClick={() => {
+        router.push('/pdf/pdflist')
+      }}>Go To Dashboard</Button>
       <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue mb-4 px-5'>Manage Groups</h1>
       <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-white p-4 shadow-lg rounded-xl dark:bg-gray-900 dark:text-white'>
         {isLoading && isMounting ? (

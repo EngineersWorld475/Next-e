@@ -16,7 +16,7 @@ const PdfList = () => {
   const [onListPdfMouseHover, setOnListPdfMouseHover] = useState(false);
   const [listOfCollections, setListOfCollections] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ article: '', url: '', pubmedid: '', author: '', doi: '' });
+  const [formData, setFormData] = useState({ article: '', url: '', pubmedid: '', author: '', doi: '',file: '' });
   const { showToast } = useCustomToast();
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(null);
@@ -40,23 +40,30 @@ const PdfList = () => {
       form.append('pubmedid', formData.pubmedid);
       form.append('author', formData.author);
       form.append('doi', formData.doi);
-      form.append('userId', userId);
+      form.append('file', formData.file);
 
-      const result = await dispatch(saveFile({ formData: form, authToken: user?.token }))
-      if (result?.payload?.success) {
-        const newCollection = {
-          id: Date.now().toString(),
-          article: formData?.article,
-          pubmedid: formData?.pubmedid,
-          author: formData?.author,
-          doi: formData?.doi,
-          userId: userId,
-          pdfFile: formData?.url, 
-          createdAt: new Date().toISOString(),
-        };
-        setListOfCollections((prevCollections) => Array.isArray(prevCollections) ? [...prevCollections, newCollection] : [newCollection])
-        dispatch(getCollections({ userId, authToken: user?.token }))
-        showToast({ title: "Upload successful!", variant: "success" });
+      const result = await dispatch(saveFile({ formData: form, authToken: user?.token }));
+
+      if (result?.payload) {
+        showToast({
+          title: result?.payload,
+          variant: "success"
+        })
+      }
+      // if (result?.payload?.success) {
+      //   const newCollection = {
+      //     id: Date.now().toString(),
+      //     article: formData?.article,
+      //     pubmedid: formData?.pubmedid,
+      //     author: formData?.author,
+      //     doi: formData?.doi,
+      //     userId: userId,
+      //     pdfFile: formData?.url, 
+      //     createdAt: new Date().toISOString(),
+      //   };
+      //   setListOfCollections((prevCollections) => Array.isArray(prevCollections) ? [...prevCollections, newCollection] : [newCollection])
+      //   dispatch(getCollections({ userId, authToken: user?.token }))
+      //   showToast({ title: "Upload successful!", variant: "success" });
         if (fileInputRef.current) {
           fileInputRef.current.value = ''; // resets the file input
         }
@@ -65,14 +72,15 @@ const PdfList = () => {
         setFormData({
           article: '',
           url: '',
+          file: '',
           pubmedid: '',
           author: '',
           doi: '',
           userId: ''
         })
-      } else {
-        showToast({ title: result?.payload?.message || "Upload failed", variant: "error" });
-      }
+      // } else {
+      //   showToast({ title: result?.payload?.message || "Upload failed", variant: "error" });
+      // }
     } catch (err) {
       showToast({
         title: err || "Something went wrong. Please try again ",

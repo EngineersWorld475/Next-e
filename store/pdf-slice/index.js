@@ -10,7 +10,7 @@ const initialState = {
 export const saveFile = createAsyncThunk('/pdf/savefile', async ({ formData, authToken }, { rejectWithValue }) => {
     try {
         const response = await axios.post(
-            `/api/mock/PDF/savefile`,
+            `/api/PDF/savefile`,
             formData,
             {
                 headers: {
@@ -88,7 +88,6 @@ const collectionSlice = createSlice({
             state.isLoading = true
         }).addCase(saveFile.fulfilled, (state, action) => {
             state.isLoading = false;
-            state.collectionList = action.payload;
             state.error = null;
         }).addCase(saveFile.rejected, (state, action) => {
             state.isLoading = false;

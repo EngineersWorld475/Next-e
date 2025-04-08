@@ -16,7 +16,7 @@ const UploadPdf = ({ setFile, fileUrl, setFileUrl, formData, setFormData, isSubm
 
             setFormData(prev => ({
                 ...prev,
-                url: selectedFile
+                file: selectedFile
             }));
         }
     };
@@ -55,7 +55,7 @@ const UploadPdf = ({ setFile, fileUrl, setFileUrl, formData, setFormData, isSubm
                 {uploadType === "file" ? (
                     <>
                         <div className="flex items-center gap-3">
-                            <Input id="fileUpload" type="file" accept="application/pdf" className="cursor-pointer" onChange={handleFileChange} ref={fileInputRef} />
+                            <Input id="fileUpload" type="file" accept="application/pdf" name="file" className="cursor-pointer" onChange={handleFileChange} ref={fileInputRef} />
                             {fileUrl && (
                                 <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-sm">
                                     Open PDF
@@ -78,7 +78,7 @@ const UploadPdf = ({ setFile, fileUrl, setFileUrl, formData, setFormData, isSubm
                     <Input type="text" placeholder="Pub Med Id" name="pubmedid" value={formData?.pubmedid} onChange={handleChange} />
                     <Input type="text" placeholder="Author" name="author" value={formData?.author} onChange={handleChange} />
                 </div>
-                <Button className="text-xs px-2 md:text-base md:px-4 md:py-2 w-full md:w-1/12 lg:w-1/12" onClick={handleUploadCollection} disabled={isSubmitting || formData?.article === '' || formData?.author === '' || formData?.doi === '' || formData?.url === '' || formData?.pubmedid === ''}>
+                <Button className="text-xs px-2 md:text-base md:px-4 md:py-2 w-full md:w-1/12 lg:w-1/12" onClick={handleUploadCollection} disabled={isSubmitting || formData?.article === '' || formData?.author === '' || formData?.doi === '' || (formData?.url === '' && formData.file === '') || formData?.pubmedid === ''}>
                     {
                         isSubmitting ? (
                             <>
