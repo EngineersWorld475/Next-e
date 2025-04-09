@@ -10,7 +10,7 @@ const initialState = {
 export const saveFile = createAsyncThunk('/pdf/savefile', async ({ formData, authToken }, { rejectWithValue }) => {
     try {
         const response = await axios.post(
-            `/api/PDF/savefile`,
+            `/api/mock/PDF/savefile`,
             formData,
             {
                 headers: {
@@ -19,7 +19,7 @@ export const saveFile = createAsyncThunk('/pdf/savefile', async ({ formData, aut
                 }
             }
         );
-        return response?.data;
+        return response?.data?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not save File');
     }
@@ -32,17 +32,19 @@ export const getCollections = createAsyncThunk('/pdf/getcollections', async ({us
                 Authorization: `Bearer ${authToken}`
             }
         })
+        console.log('...response', response)
         return response?.data?.data;
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Can not fetch files');
     }
 })
 
-export const editPdf = createAsyncThunk('/pdf/editpdf', async ({ article, pubmedid, author, doi, userId, authToken }, { rejectWithValue }) => {
+export const editPdf = createAsyncThunk('/pdf/editpdf', async ({ id, article, pubmedid, author, doi, userId, authToken }, { rejectWithValue }) => {
     try {
-        const response = await axios.post(`/api/PDF/editpdf?UId=${userId}`, { article, pubmedid, author, doi }, {
+        const response = await axios.put(`/api/mock/PDF/editCollection?userId=${userId}`, { id, article, pubmedid, author, doi }, {
             headers: {
-                Authorization: `Bearer ${authToken}`
+                Authorization: `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
             }
         })
         return response?.data;
@@ -64,9 +66,9 @@ export const deletePdf = createAsyncThunk('/pdf/deletepdf', async ({ userId, id,
     }
 })
 
-export const searchPdf = createAsyncThunk('/pdf/searchPdf', async ({ keyword, authToken }, { rejectWithValue }) => {
+export const searchPdf = createAsyncThunk('/pdf/searchPdf', async ({ keyword, userId, authToken }, { rejectWithValue }) => {
     try {
-        const response = await axios.get(`/api/mock/PDF/searchCollection?keyword=${keyword}`, {
+        const response = await axios.get(`/api/mock/PDF/searchCollection?userId=${userId}&keyword=${keyword}`, {
             headers: {
                 Authorization: `Bearer ${authToken}`
             }
@@ -88,6 +90,7 @@ const collectionSlice = createSlice({
             state.isLoading = true
         }).addCase(saveFile.fulfilled, (state, action) => {
             state.isLoading = false;
+            state.collectionList = action.payload; // setting only for mock api
             state.error = null;
         }).addCase(saveFile.rejected, (state, action) => {
             state.isLoading = false;

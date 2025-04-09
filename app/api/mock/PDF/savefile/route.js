@@ -9,7 +9,8 @@ export async function POST(req) {
     const author = formData.get('author');
     const doi = formData.get('doi');
     const userId = formData.get('userId');
-    const pdfFile = formData.get('url');
+    const url = formData.get('url');
+    const pdfFile = formData.get('file');
 
     if (!pdfFile || pdfFile.type !== 'application/pdf') {
       return Response.json({ success: false, message: 'Invalid PDF file' }, { status: 400 });
@@ -33,6 +34,7 @@ export async function POST(req) {
 
     const currentPdfs = getMockPdfs();
     setMockPdfs([...currentPdfs, newPdf]);
+  console.log('....mockpdfs after get', getMockPdfs())
 
     return Response.json({ success: true, fileUpload: true, data: newPdf });
   } catch (error) {

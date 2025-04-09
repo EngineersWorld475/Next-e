@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1744262859549",
+    "article": "Computer Science",
+    "pubmedid": "30",
+    "author": "sanjay",
+    "doi": "20",
+    "userId": "23",
+    "pdfFile": "http://localhost:3000/mock-pdfs/1744262859549-MI-AKS-IPC-10 ABS (1).pdf",
+    "createdAt": "2025-04-10T05:27:39.550Z"
+  },
+  {
+    "id": "1744200725170",
+    "article": "quantum physics",
+    "pubmedid": "50",
+    "author": "sanjay",
+    "doi": "20",
+    "userId": "23",
+    "pdfFile": "http://localhost:3000/mock-pdfs/1744200725170-MI-AKS-IPC-10 ABS.pdf",
+    "createdAt": "2025-04-09T12:12:05.170Z"
+  },
+  {
+    "id": "1744204469634",
+    "article": "Astronomy",
+    "pubmedid": "12",
+    "author": "sanjay",
+    "doi": "32",
+    "userId": "23",
+    "pdfFile": "http://localhost:3000/mock-pdfs/1744204469632-MI-AKS-IPC-10 ABS (2).pdf",
+    "createdAt": "2025-04-09T13:14:29.634Z"
+  }
+]

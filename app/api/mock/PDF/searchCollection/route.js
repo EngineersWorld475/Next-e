@@ -2,6 +2,7 @@ import { getMockPdfs } from "../../mockPdfs";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("userId")
   const keyword = searchParams.get("keyword");
   const authToken = req.headers.get("Authorization");
 
@@ -12,14 +13,19 @@ export async function GET(req) {
     });
   }
 
+  if (!userId) {
+    return Response.json({ success: false, message: 'Missing userId' }, { status: 400 });
+  }
+
   if (!keyword) {
     return Response.json({ success: false, message: 'Missing keyword' }, { status: 400 });
   }
 
   const allPdfs = getMockPdfs();
+  const usersPdf = allPdfs.filter((pdf) => pdf.userId === userId)
 
-  const filteredPdfs = allPdfs.filter((pdf) => {
-    const lowerKeyword = keyword.toLowerCase();
+  const filteredPdfs = usersPdf.filter((pdf) => {
+    const lowerKeyword = keyword.toLowerCase(); 
     return (
       pdf.article?.toLowerCase().includes(lowerKeyword) ||
       pdf.pubmedid?.toLowerCase().includes(lowerKeyword) ||
