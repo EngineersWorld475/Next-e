@@ -11,6 +11,7 @@ const GroupList = () => {
   const dispatch = useDispatch();
   const userId = useUserId();
   const [isMounting, setIsMounting] = useState(false);
+  const [onManageGroupsMouseHover, SetOnManageGroupsMousHover] = useState(false)
   const { groupList, isLoading } = useSelector((state) => state.group);
   const { user } = useSelector((state) => state.auth);
   const [listOfGroups, setListOfGroups] = useState([]);
@@ -28,8 +29,8 @@ const GroupList = () => {
     setListOfGroups(groupList);
   }, [groupList]);
   return (
-    <div className='bg-white text-black dark:bg-black dark:text-white'>
-      <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue mb-4'>Manage Groups</h1>
+    <div className={`border-l-4 ${onManageGroupsMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white text-black dark:bg-black dark:text-white rounded-lg`} onMouseEnter={() => SetOnManageGroupsMousHover(true)} onMouseLeave={() => SetOnManageGroupsMousHover(false)}>
+      <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue mb-4 px-5'>Manage Groups</h1>
       <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-white p-4 shadow-lg rounded-xl dark:bg-gray-900 dark:text-white'>
         {isLoading && isMounting ? (
           <div className='w-full md:w-2/3 lg:w-2/3 bg-white flex justify-center items-center gap-1 dark:bg-black dark:text-white dark:rounded-lg px-3 py-2'>

@@ -5,20 +5,23 @@ import UploadPdf from '@/components/PDF/UploadPdf'
 import useUserId from '@/hooks/useUserId'
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { deletePdf, getCollections, saveFile } from '@/store/pdf-slice';
+import { deletePdf, getCollections, saveFile, searchPdf } from '@/store/pdf-slice';
 import { useCustomToast } from '@/hooks/useCustomToast';
 
 const PdfList = () => {
   const { collectionList } = useSelector((state) => state.collection);
   const { user } = useSelector((state) => state.auth);
-  const [listOfCollections, setListOfCollections] = useState([])
+  const [onUploadPdfMouseHover, setOnUploadPdfMouseHover] = useState(false);
+  const [onSearchPdfMouseHover, setOnSearchPdfMouseHover] = useState(false);
+  const [onListPdfMouseHover, setOnListPdfMouseHover] = useState(false);
+  const [listOfCollections, setListOfCollections] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({ article: '', url: '', pubmedid: '', author: '', doi: '' });
-  const { showToast } = useCustomToast()
-  const [file, setFile] = useState(null)
-  const [fileUrl, setFileUrl] = useState(null)
-  const dispatch = useDispatch()
-  const fileInputRef = useRef(null)
+  const { showToast } = useCustomToast();
+  const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState(null);
+  const dispatch = useDispatch();
+  const fileInputRef = useRef(null);
   const userId = useUserId();
 
   const handleUploadCollection = async () => {
@@ -109,24 +112,38 @@ const PdfList = () => {
     }
   }, [collectionList]);
   
-
+  const handleSearchCollection = (keyword) => {
+    try {
+      dispatch(searchPdf({keyword, authToken: user?.token})).then((result) => {
+        if(result?.payload?.success) {
+          setListOfCollections(result?.payload?.data)
+        }
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-5 h-screen bg-white dark:bg-black dark:text-white">
       <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue'>Dashboard</h1>
-      <div className="bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 dark:text-white dark:rounded-lg">
+      <div className={`border-l-4 ${onUploadPdfMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 dark:text-white dark:rounded-lg rounded-lg md:min-h-[150px] lg:min-h-[150px]`} onMouseEnter={() => setOnUploadPdfMouseHover(true)} onMouseLeave={() => setOnUploadPdfMouseHover(false)}>
         <UploadPdf setFile={setFile} fileUrl={fileUrl} setFileUrl={setFileUrl} formData={formData} setFormData={setFormData} isSubmitting={isSubmitting} fileInputRef={fileInputRef} handleUploadCollection={handleUploadCollection} />
       </div>
-      <div className="bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 dark:text-white dark:rounded-lg">
-        <SearchPdf />
+      <div className={`border-l-4 ${onSearchPdfMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 dark:text-white dark:rounded-lg rounded-lg md:min-h-[130px] lg:min-h-[130px]`} onMouseEnter={() => setOnSearchPdfMouseHover(true)} onMouseLeave={() => setOnSearchPdfMouseHover(false)}>
+        <SearchPdf handleSearchCollection={handleSearchCollection}/>
       </div>
-      <div className=" bg-white shadow-lg flex flex-col px-7  dark:bg-gray-900 dark:text-white dark:rounded-lg flex-1">
+      <div className={`border-l-4 ${onListPdfMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white shadow-lg flex flex-col px-7  dark:bg-gray-900 dark:text-white dark:rounded-lg flex-1 rounded-lg`} onMouseEnter={() => setOnListPdfMouseHover(true)} onMouseLeave={() => setOnListPdfMouseHover(false)}>
         <h1 className='font-semibold text-blue-600 my-3'>My collections</h1>
         {
-          listOfCollections && listOfCollections.length > 0 && (
+          listOfCollections && listOfCollections.length > 0 ? (
             listOfCollections.map((collection, index) => (
               <Pdfcard key={collection.id || index} article={collection.article} author={collection.author} doi={collection.doi} id={collection.id} pdf={collection.pdfFile} pubmedId={collection.pubmedid} handleDeleteCollection={handleDeleteCollection} />
             ))
+          ) : (
+            <div>
+              <h3 className='text-gray-500'>No Collections Found</h3>
+            </div>
           )
         }
       </div>
