@@ -136,4 +136,4 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
   )
 }
 
-export default Pdfcard
+export default  React.memo(Pdfcard);

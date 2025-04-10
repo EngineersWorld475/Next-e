@@ -3,7 +3,7 @@ import Pdfcard from '@/components/PDF/Pdfcard'
 import SearchPdf from '@/components/PDF/SearchPdf'
 import UploadPdf from '@/components/PDF/UploadPdf'
 import useUserId from '@/hooks/useUserId'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { deletePdf, getCollections, saveFile, searchPdf } from '@/store/pdf-slice';
 import { useCustomToast } from '@/hooks/useCustomToast';
@@ -11,21 +11,30 @@ import { useCustomToast } from '@/hooks/useCustomToast';
 const PdfList = () => {
   const { collectionList } = useSelector((state) => state.collection);
   const { user } = useSelector((state) => state.auth);
-  const [onUploadPdfMouseHover, setOnUploadPdfMouseHover] = useState(false);
-  const [onSearchPdfMouseHover, setOnSearchPdfMouseHover] = useState(false);
-  const [onListPdfMouseHover, setOnListPdfMouseHover] = useState(false);
-  const [listOfCollections, setListOfCollections] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const dispatch = useDispatch();
   const userId = useUserId();
-  const [formData, setFormData] = useState({ article: '', url: '', pubmedid: '', author: '', doi: '',file: '' });
   const { showToast } = useCustomToast();
+
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(null);
-  const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingCollections, setLoadingCollections] = useState(false);
+  const [searchingCollections, setSearchingCollections] = useState(false);
+  const [listOfCollections, setListOfCollections] = useState([]);
+
+  const [formData, setFormData] = useState({
+    article: '',
+    url: '',
+    pubmedid: '',
+    author: '',
+    doi: '',
+    file: ''
+  });
+
   // Upload collection
-  const handleUploadCollection = async () => {
+  const handleUploadCollection = useCallback(async () => {
     try {
       setIsSubmitting(true)
       if (!user?.token) {
@@ -41,11 +50,10 @@ const PdfList = () => {
       form.append('pubmedid', formData.pubmedid);
       form.append('author', formData.author);
       form.append('doi', formData.doi);
-      form.append('userId', userId )
+      form.append('userId', userId)
       form.append('file', formData.file);
 
       const result = await dispatch(saveFile({ formData: form, authToken: user?.token }));
-      console.log('....result', result);
       // if (result?.payload) {
       //   showToast({
       //     title: result?.payload,
@@ -60,7 +68,7 @@ const PdfList = () => {
           author: formData?.author,
           doi: formData?.doi,
           userId: userId,
-          pdfFile: formData?.file, 
+          pdfFile: formData?.file,
           createdAt: new Date().toISOString(),
         };
         setListOfCollections((prevCollections) => Array.isArray(prevCollections) ? [...prevCollections, newCollection] : [newCollection])
@@ -92,72 +100,95 @@ const PdfList = () => {
       setIsSubmitting(false)
     }
 
-  }
-  
+  }, [dispatch, formData, user?.token, userId, showToast])
+
   // Delete collection
-  const handleDeleteCollection = (id) => {
-    try {
-      dispatch(deletePdf({userId, id, authToken: user?.token})).then((result) => {
-        if(result?.payload?.success) {
-          setListOfCollections((prevCollections) => prevCollections.filter((collection) => collection.id !== id));
+  const handleDeleteCollection = useCallback(
+    async (id) => {
+      try {
+        const result = await dispatch(deletePdf({ userId, id, authToken: user?.token }))
+        if (result?.payload?.success) {
+          setListOfCollections((prev) => prev.filter((c) => c.id !== id))
           dispatch(getCollections({ userId, authToken: user?.token }))
-          showToast({ title: result?.payload?.message || "Collection deleted successfully", variant: "success" });
+          showToast({ title: result?.payload?.message || 'Collection deleted', variant: 'success' })
         } else {
-          showToast({ title: "Can not delete collection", variant: "error" });
+          showToast({ title: 'Failed to delete collection', variant: 'error' })
+        }
+      } catch (error) {
+        showToast({ title: 'Error deleting collection', variant: 'error' })
+      }
+    }, [dispatch, userId, user?.token, showToast])
+
+  // Search collection
+  const handleSearchCollection = useCallback((keyword) => {
+    try {
+      setLoadingCollections(true)
+      dispatch(searchPdf({ keyword, userId, authToken: user?.token })).then((result) => {
+        if (result?.payload?.success) {
+          setListOfCollections(result?.payload?.data)
+          setLoadingCollections(false)
         }
       })
     } catch (error) {
-      console.log(error || "Something went wrong. Please try again later")
+      console.log(error)
     }
-  }
+  }, [dispatch, userId, user?.token])
 
+  // Fetch collections on mount
   useEffect(() => {
-    if (user?.token) {
-      dispatch(getCollections({ userId, authToken: user?.token }))
+    if (user?.token && userId) {
+      dispatch(getCollections({ userId, authToken: user?.token })).then((result) => {
+        setLoadingCollections(false)
+      })
     }
-  }, [dispatch, userId])
+  }, [dispatch, userId, user?.token])
 
   useEffect(() => {
     if (Array.isArray(collectionList)) {
       setListOfCollections(collectionList);
     }
   }, [collectionList]);
-  
 
-  // Search collection
-  const handleSearchCollection = (keyword) => {
-    try {
-      dispatch(searchPdf({keyword, userId, authToken: user?.token})).then((result) => {
-        if(result?.payload?.success) {
-          setListOfCollections(result?.payload?.data)
-        }
-      })
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  useEffect(() => {
+    setLoadingCollections(true)
+  }, [])
+
 
   return (
     <div className="flex flex-col gap-5 h-screen bg-white dark:bg-black dark:text-white">
       <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue'>Dashboard</h1>
-      <div className={`border-l-4 ${onUploadPdfMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 dark:text-white dark:rounded-lg rounded-lg md:min-h-[150px] lg:min-h-[150px]`} onMouseEnter={() => setOnUploadPdfMouseHover(true)} onMouseLeave={() => setOnUploadPdfMouseHover(false)}>
+      {/* Upload PDF */}
+      <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 rounded-lg">
         <UploadPdf setFile={setFile} fileUrl={fileUrl} setFileUrl={setFileUrl} formData={formData} setFormData={setFormData} isSubmitting={isSubmitting} fileInputRef={fileInputRef} handleUploadCollection={handleUploadCollection} />
       </div>
-      <div className={`border-l-4 ${onSearchPdfMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 dark:text-white dark:rounded-lg rounded-lg md:min-h-[130px] lg:min-h-[130px]`} onMouseEnter={() => setOnSearchPdfMouseHover(true)} onMouseLeave={() => setOnSearchPdfMouseHover(false)}>
-        <SearchPdf handleSearchCollection={handleSearchCollection} setListOfCollections={setListOfCollections}/>
+      {/* Search PDF */}
+      <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 rounded-lg">
+        <SearchPdf handleSearchCollection={handleSearchCollection} setListOfCollections={setListOfCollections} setSearchingCollections={setSearchingCollections} setLoadingCollections={setLoadingCollections} />
       </div>
-      <div className={`border-l-4 ${onListPdfMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white shadow-lg flex flex-col px-7  dark:bg-gray-900 dark:text-white dark:rounded-lg flex-1 rounded-lg`} onMouseEnter={() => setOnListPdfMouseHover(true)} onMouseLeave={() => setOnListPdfMouseHover(false)}>
+      {/* List PDFs */}
+      <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex flex-col px-7 flex-1 dark:bg-gray-900 rounded-lg">
         <h1 className='font-semibold text-blue-600 my-3'>My collections</h1>
-        {
+        {loadingCollections ? (
+          <div className='w-full'>
+            <h2 className='text-gray-500'>{
+              searchingCollections ? 'Searching for collections...' : 'Loading collections...'
+            }</h2>
+          </div>
+        ) : (
+
           listOfCollections && listOfCollections.length > 0 ? (
             listOfCollections.map((collection, index) => (
               <Pdfcard key={collection.id || index} article={collection.article} author={collection.author} doi={collection.doi} id={collection.id} pdf={collection.pdfFile} pubmedId={collection.pubmedid} handleDeleteCollection={handleDeleteCollection} />
             ))
           ) : (
             <div>
-              <h3 className='text-gray-500'>No Collections Found</h3>
+              <>
+                <h3 className='text-gray-500'>No Collections Found</h3>
+              </>
             </div>
           )
+
+        )
         }
       </div>
     </div>

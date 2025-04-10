@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -8,7 +8,8 @@ import { Loader2 } from 'lucide-react';
 
 const UploadPdf = ({ setFile, fileUrl, setFileUrl, formData, setFormData, isSubmitting, fileInputRef, handleUploadCollection }) => {
     const [uploadType, setUploadType] = useState("file");
-    const handleFileChange = (e) => {
+    const isButtonDisabled = isSubmitting || formData?.article === '' || formData?.author === '' || formData?.doi === '' || (formData?.url === '' && formData.file === '') || formData?.pubmedid === '';
+    const handleFileChange = useCallback((e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile && selectedFile.type === "application/pdf") {
             setFile(selectedFile);
@@ -19,14 +20,14 @@ const UploadPdf = ({ setFile, fileUrl, setFileUrl, formData, setFormData, isSubm
                 file: selectedFile
             }));
         }
-    };
+    }, [])
 
-    const handleChange = (e) => {
+    const handleChange = useCallback( (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
         });
-    };
+    }, [formData])
 
     return (
         <div className='flex flex-col gap-3 bg-white dark:bg-gray-900 dark:text-white'>
@@ -78,7 +79,7 @@ const UploadPdf = ({ setFile, fileUrl, setFileUrl, formData, setFormData, isSubm
                     <Input type="text" placeholder="Pub Med Id" name="pubmedid" value={formData?.pubmedid} onChange={handleChange} />
                     <Input type="text" placeholder="Author" name="author" value={formData?.author} onChange={handleChange} />
                 </div>
-                <Button className="text-xs px-2 md:text-base md:px-4 md:py-2 w-full md:w-1/12 lg:w-1/12" onClick={handleUploadCollection} disabled={isSubmitting || formData?.article === '' || formData?.author === '' || formData?.doi === '' || (formData?.url === '' && formData.file === '') || formData?.pubmedid === ''}>
+                <Button className="text-xs px-2 md:text-base md:px-4 md:py-2 w-full md:w-1/12 lg:w-1/12" onClick={handleUploadCollection} disabled={isButtonDisabled}>
                     {
                         isSubmitting ? (
                             <>

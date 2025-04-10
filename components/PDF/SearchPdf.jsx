@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getCollections } from '@/store/pdf-slice'
 import useUserId from '@/hooks/useUserId'
 
-const SearchPdf = ({handleSearchCollection, setListOfCollections}) => {
+const SearchPdf = ({handleSearchCollection, setListOfCollections, setSearchingCollections, setLoadingCollections}) => {
   const [keyword, setKeyword] = useState('');
   const dispatch = useDispatch() 
   const { user } = useSelector((state) => state.auth)
@@ -20,10 +20,17 @@ const SearchPdf = ({handleSearchCollection, setListOfCollections}) => {
       <div className='flex flex-col md:flex-row lg:flex-row gap-3 md:gap-2 lg:gap-2'>
         <Input type="text" placeholder="Search your collections" className="w-56 md:w-96 lg:w-96" name="keyword" value={keyword} onChange={handleChange}/>
         <div className='flex flex-row gap-1'>
-          <Button className="text-xs px-2 md:text-base md:px-4 md:py-2" onClick={() => handleSearchCollection(keyword)}>Search</Button>
           <Button className="text-xs px-2 md:text-base md:px-4 md:py-2" onClick={() => {
+            handleSearchCollection(keyword)
+            setSearchingCollections(true)
+          }}>Search</Button>
+          <Button className="text-xs px-2 md:text-base md:px-4 md:py-2" onClick={() => {
+            setLoadingCollections(true)
+            setSearchingCollections(false)
             setKeyword('')
-            const collectionList = dispatch(getCollections({userId, authToken: user?.token}))
+            const collectionList = dispatch(getCollections({userId, authToken: user?.token})).then((result) => {
+              setLoadingCollections(false)
+            })
             setListOfCollections(collectionList)
           }}>Clear</Button>
         </div>
