@@ -22,9 +22,9 @@ export async function GET(req) {
   }
 
   const allPdfs = getMockPdfs();
-  const usersPdf = allPdfs.filter((pdf) => pdf.userId === userId)
+  const pdfList = allPdfs.filter((pdf) => pdf.userId !== userId)
 
-  const filteredPdfs = usersPdf.filter((pdf) => {
+  const filteredPdfs = pdfList.filter((pdf) => {
     const lowerKeyword = keyword.toLowerCase(); 
     return (
       pdf.article?.toLowerCase().includes(lowerKeyword) ||

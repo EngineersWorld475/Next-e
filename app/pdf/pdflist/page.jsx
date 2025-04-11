@@ -22,7 +22,9 @@ const PdfList = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingCollections, setLoadingCollections] = useState(false);
   const [searchingCollections, setSearchingCollections] = useState(false);
+  const [searchedCollectionList, setSearchedCollectionList] = useState([]);
   const [listOfCollections, setListOfCollections] = useState([]);
+  const [showActions, setShowActions] = useState(false)
 
   const [formData, setFormData] = useState({
     article: '',
@@ -36,6 +38,7 @@ const PdfList = () => {
   // Upload collection
   const handleUploadCollection = useCallback(async () => {
     try {
+      setLoadingCollections(false)
       setIsSubmitting(true)
       if (!user?.token) {
         showToast({
@@ -106,6 +109,7 @@ const PdfList = () => {
   const handleDeleteCollection = useCallback(
     async (id) => {
       try {
+        setLoadingCollections(false)
         const result = await dispatch(deletePdf({ userId, id, authToken: user?.token }))
         if (result?.payload?.success) {
           setListOfCollections((prev) => prev.filter((c) => c.id !== id))
@@ -121,27 +125,30 @@ const PdfList = () => {
 
   // Search collection
   const handleSearchCollection = useCallback((keyword) => {
+    setSearchingCollections(true)
     try {
-      setLoadingCollections(true)
       dispatch(searchPdf({ keyword, userId, authToken: user?.token })).then((result) => {
+        setSearchingCollections(false)
         if (result?.payload?.success) {
-          setListOfCollections(result?.payload?.data)
-          setLoadingCollections(false)
+          setSearchedCollectionList(result?.payload?.data);
         }
       })
     } catch (error) {
+      setSearchingCollections(false)
       console.log(error)
     }
   }, [dispatch, userId, user?.token])
 
   // Fetch collections on mount
   useEffect(() => {
+    setShowActions(true)
+    setLoadingCollections(true)
     if (user?.token && userId) {
       dispatch(getCollections({ userId, authToken: user?.token })).then((result) => {
         setLoadingCollections(false)
       })
     }
-  }, [dispatch, userId, user?.token])
+  }, [dispatch, userId, user?.token, showActions])
 
   useEffect(() => {
     if (Array.isArray(collectionList)) {
@@ -163,22 +170,19 @@ const PdfList = () => {
       </div>
       {/* Search PDF */}
       <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 rounded-lg">
-        <SearchPdf handleSearchCollection={handleSearchCollection} setListOfCollections={setListOfCollections} setSearchingCollections={setSearchingCollections} setLoadingCollections={setLoadingCollections} />
+        <SearchPdf handleSearchCollection={handleSearchCollection} setSearchingCollections={setSearchingCollections} searchedCollectionList={searchedCollectionList} setSearchedCollectionList={setSearchedCollectionList} searchingCollections={searchingCollections} />
       </div>
       {/* List PDFs */}
       <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex flex-col px-7 flex-1 dark:bg-gray-900 rounded-lg">
         <h1 className='font-semibold text-blue-600 my-3'>My collections</h1>
-        {loadingCollections ? (
-          <div className='w-full'>
-            <h2 className='text-gray-500'>{
-              searchingCollections ? 'Searching for collections...' : 'Loading collections...'
-            }</h2>
-          </div>
-        ) : (
-
+       { loadingCollections ? (
+        <div>
+          <h3 className='text-gray-500 text-sm'>Loading collections...</h3>
+        </div>
+       ) : (
           listOfCollections && listOfCollections.length > 0 ? (
             listOfCollections.map((collection, index) => (
-              <Pdfcard key={collection.id || index} article={collection.article} author={collection.author} doi={collection.doi} id={collection.id} pdf={collection.pdfFile} pubmedId={collection.pubmedid} handleDeleteCollection={handleDeleteCollection} />
+              <Pdfcard key={collection.id || index} article={collection.article} author={collection.author} doi={collection.doi} id={collection.id} pdf={collection.pdfFile} pubmedId={collection.pubmedid} handleDeleteCollection={handleDeleteCollection} showActions={showActions} />
             ))
           ) : (
             <div>
@@ -187,9 +191,7 @@ const PdfList = () => {
               </>
             </div>
           )
-
-        )
-        }
+       )}
       </div>
     </div>
   )

@@ -12,7 +12,7 @@ import { editPdf, getCollections } from '@/store/pdf-slice'
 import useUserId from '@/hooks/useUserId'
 import { useCustomToast } from '@/hooks/useCustomToast'
 
-const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollection }) => {
+const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollection, showActions }) => {
   const [editFormData, setEditFormData] = useState({
     article: article || '',
     author: author || '',
@@ -20,7 +20,8 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
     pubmedId: pubmedId || ''
   })
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openAccess, setOpenAccess] = useState(false)
   const dispatch = useDispatch();
   const userId = useUserId();
   const { user } = useSelector((state) => state.auth);
@@ -70,7 +71,8 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
       </div>
       <div className='flex-1'>
         <div className='flex flex-col gap-2 px-4 py-4'>
-          <div className='flex flex-row gap-7 items-center'>
+          {showActions && (
+            <div className='flex flex-row gap-7 items-center'>
             {/* confirm delete dialog */}
             <ConfirmDialog
               iconTrigger={<TrashIcon size={20} className='cursor-pointer' />}
@@ -119,9 +121,16 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
                 </form>
               </DialogContent>
             </Dialog>
-            <GlobeIcon size={20} className='cursor-pointer' />
+            <GlobeIcon size={20} className={`cursor-pointer ${openAccess ? 'text-green-500' : 'text-red-500'}`} onClick={() => { 
+              setOpenAccess(!openAccess)
+              showToast({
+                title: "Saved successfully",
+                variant: "success"
+              })
+              }}/>
             <DownloadIcon size={20} className='cursor-pointer' />
           </div>
+          )}
           <h1>Pub Med ID:  <span>{pubmedId}</span></h1>
           <h1>Comments:</h1>
         </div>
@@ -129,7 +138,7 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
       <div className='flex-1'>
         <div className='flex flex-col gap-2 px-4 py-4'>
           <h1>DOI Number: <span>{doi}</span></h1>
-          <h1>Closed Access</h1>
+          <h1>{openAccess ? 'Open Access' : 'Closed Access'}</h1>
         </div>
       </div>
     </div>

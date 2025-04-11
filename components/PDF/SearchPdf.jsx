@@ -2,39 +2,61 @@
 import React, { useState } from 'react'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { useDispatch, useSelector } from 'react-redux'
-import { getCollections } from '@/store/pdf-slice'
-import useUserId from '@/hooks/useUserId'
+import Pdfcard from './Pdfcard'
+import { useCustomToast } from '@/hooks/useCustomToast'
 
-const SearchPdf = ({handleSearchCollection, setListOfCollections, setSearchingCollections, setLoadingCollections}) => {
+const SearchPdf = ({ handleSearchCollection, setSearchingCollections, searchedCollectionList, setSearchedCollectionList, searchingCollections }) => {
   const [keyword, setKeyword] = useState('');
-  const dispatch = useDispatch() 
-  const { user } = useSelector((state) => state.auth)
-  const userId = useUserId();
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showActions, setShowActions] = useState(true);
+  const { showToast } = useCustomToast();
   const handleChange = (e) => {
     setKeyword(e.target.value)
   }
   return (
-    <div className='flex flex-col gap-2'>
+    <div className='flex flex-col gap-2 w-full'>
       <p className='font-semibold text-blue-600'>Search your collections</p>
       <div className='flex flex-col md:flex-row lg:flex-row gap-3 md:gap-2 lg:gap-2'>
-        <Input type="text" placeholder="Search your collections" className="w-56 md:w-96 lg:w-96" name="keyword" value={keyword} onChange={handleChange}/>
+        <Input type="text" placeholder="Search your collections" className="w-56 md:w-96 lg:w-96" name="keyword" value={keyword} onChange={handleChange} />
         <div className='flex flex-row gap-1'>
           <Button className="text-xs px-2 md:text-base md:px-4 md:py-2" onClick={() => {
-            handleSearchCollection(keyword)
-            setSearchingCollections(true)
+            if (keyword === '') {
+              showToast({
+                title: 'Search input required',
+                description: 'Please enter a keyword to search your collections.',
+                variant: 'warning',
+              });
+            } else {
+              handleSearchCollection(keyword)
+              setSearchingCollections(true)
+              setShowSearchResults(true)
+              setShowActions(false)
+            }
           }}>Search</Button>
           <Button className="text-xs px-2 md:text-base md:px-4 md:py-2" onClick={() => {
-            setLoadingCollections(true)
-            setSearchingCollections(false)
             setKeyword('')
-            const collectionList = dispatch(getCollections({userId, authToken: user?.token})).then((result) => {
-              setLoadingCollections(false)
-            })
-            setListOfCollections(collectionList)
-          }}>Clear</Button>
+            setSearchedCollectionList([])
+            setShowSearchResults(false)
+          }
+          }>Clear</Button>
         </div>
       </div>
+      {/* Search results */}
+      {showSearchResults && (
+        searchingCollections ? (
+          <h3 className='text-gray-500 text-sm px-3 py-3'>Searching for collections...</h3>
+        ) : (
+          searchedCollectionList && searchedCollectionList.length > 0 ? (
+            searchedCollectionList.map((c, index) => (
+              <div key={c.id || index} className='mt-3'>
+                <Pdfcard article={c.article} author={c.author} doi={c.doi} id={c.id} pdf={c.pdfFile} pubmedId={c.pubmedid} showActions={showActions} />
+              </div>
+            ))
+          ) : (
+            <h3 className='text-gray-500 text-sm px-3 py-3'>No Collections Found</h3>
+          )
+        )
+      )}
     </div>
   )
 }

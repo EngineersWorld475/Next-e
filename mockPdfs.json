@@ -28,5 +28,45 @@
     "userId": "23",
     "pdfFile": "http://localhost:3000/mock-pdfs/1744407156363-MI-AKS-IPC-10 ABS (1).pdf",
     "createdAt": "2025-04-11T21:32:36.364Z"
+  },
+  {
+    "id": "1744497120745",
+    "article": "Astronomy",
+    "pubmedid": "33",
+    "author": "antony deol",
+    "doi": "32",
+    "userId": "26",
+    "pdfFile": "http://localhost:3000/mock-pdfs/1744497120745-MI-AKS-IPC-10 ABS (2).pdf",
+    "createdAt": "2025-04-12T22:32:00.745Z"
+  },
+  {
+    "id": "1744497150577",
+    "article": "Corona virus prevention",
+    "pubmedid": "33",
+    "author": "antony deol",
+    "doi": "32",
+    "userId": "26",
+    "pdfFile": "http://localhost:3000/mock-pdfs/1744497150577-MI-AKS-IPC-10 ABS (1).pdf",
+    "createdAt": "2025-04-12T22:32:30.577Z"
+  },
+  {
+    "id": "1744497193659",
+    "article": "Quantum phsics defaule forum",
+    "pubmedid": "44",
+    "author": "antony deol",
+    "doi": "67",
+    "userId": "26",
+    "pdfFile": "http://localhost:3000/mock-pdfs/1744497193659-MI-AKS-IPC-10 ABS (1).pdf",
+    "createdAt": "2025-04-12T22:33:13.659Z"
+  },
+  {
+    "id": "1744525262333",
+    "article": "Computer graphics",
+    "pubmedid": "45",
+    "author": "antony deol",
+    "doi": "43",
+    "userId": "26",
+    "pdfFile": "http://localhost:3000/mock-pdfs/1744525262333-MI-AKS-IPC-10 ABS.pdf",
+    "createdAt": "2025-04-13T06:21:02.333Z"
   }
 ]

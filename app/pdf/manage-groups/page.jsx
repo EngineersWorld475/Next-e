@@ -13,7 +13,6 @@ const GroupList = () => {
   const dispatch = useDispatch();
   const userId = useUserId();
   const [isMounting, setIsMounting] = useState(false);
-  const [onManageGroupsMouseHover, SetOnManageGroupsMousHover] = useState(false)
   const { groupList, isLoading } = useSelector((state) => state.group);
   const { user } = useSelector((state) => state.auth);
   const [listOfGroups, setListOfGroups] = useState([]);
@@ -32,7 +31,7 @@ const GroupList = () => {
     setListOfGroups(groupList);
   }, [groupList]);
   return (
-    <div className={`border-l-4 ${onManageGroupsMouseHover ? 'border-blue-600 dark:border-gray-300' : 'border-transparent'} bg-white text-black dark:bg-black dark:text-white rounded-lg relative`} onMouseEnter={() => SetOnManageGroupsMousHover(true)} onMouseLeave={() => SetOnManageGroupsMousHover(false)}>
+    <div className='group border-l-4 border-l-transparent hover:border-blue-600 hover:dark:border-gray-300 bg-white text-black dark:bg-black dark:text-white rounded-lg relative'>
       <Button className="absolute top-0 right-7 bg-red-500 hover:bg-red-600 dark:bg-gray-300 dark:text-black shadow-lg hidden md:block" onClick={() => {
         router.push('/pdf/pdflist')
       }}>Go To Dashboard</Button>
