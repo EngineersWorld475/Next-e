@@ -9,7 +9,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "next-themes";
 import AuthGuard from "@/components/Auth/AuthGuard";
 
-const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"] });
+const inter = Inter({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-inter", });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,9 +25,9 @@ export default function RootLayout({
   children,
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${geistSans.variable} ${geistMono.variable}`}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.className} antialiased`}
+        className="antialiased"
       >
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>

@@ -1,7 +1,7 @@
 [
   {
     "id": "1744262859549",
-    "article": "Computer graphics",
+    "article": "Computer science",
     "pubmedid": "60",
     "author": "sanjay",
     "doi": "20",
@@ -18,16 +18,6 @@
     "userId": "23",
     "pdfFile": "http://localhost:3000/mock-pdfs/1744200725170-MI-AKS-IPC-10 ABS.pdf",
     "createdAt": "2025-04-09T12:12:05.170Z"
-  },
-  {
-    "id": "1744407156364",
-    "article": "Organic principles",
-    "pubmedid": "50",
-    "author": "sanjay",
-    "doi": "100",
-    "userId": "23",
-    "pdfFile": "http://localhost:3000/mock-pdfs/1744407156363-MI-AKS-IPC-10 ABS (1).pdf",
-    "createdAt": "2025-04-11T21:32:36.364Z"
   },
   {
     "id": "1744497120745",

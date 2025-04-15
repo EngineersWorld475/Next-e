@@ -16,13 +16,13 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     dispatch(logout()); 
-    await persistor.purge()
+    await persistor.purge();
     router.replace('/auth/login'); 
   };
 
   return (
     <nav className="flex justify-between items-center px-3 md:px-10 lg:px-10 py-3 shadow-md bg-white dark:bg-gray-900 dark:text-white">
-      <Link href={'/pdf/pdflist'}>
+      <Link href={'/pdf/pdflist'} prefetch={true}>
         <Image
           src="/images/scholarly-logo-auth.png"
           width={120}
@@ -33,7 +33,9 @@ const Navbar = () => {
       </Link>
 
       <div className="flex gap-3 md:gap-6 lg:gap-6 text-gray-600 font-medium items-center justify-center">
-        <Link href={'/pdf/manage-groups'} className='cursor-pointer hover:text-gray-500 transition text-sm md:text-base lg:text-base'>Manage Groups</Link>
+        <Link href={'/pdf/manage-groups'} prefetch={true}>
+          <span className='cursor-pointer hover:text-gray-500 transition text-sm md:text-base lg:text-base'>Manage Groups</span>
+        </Link>
         <div className='flex flex-row gap-3 md:gap-6 lg:gap-6 justify-center items-center'>
           <ThemeToggle />
           <DropdownMenu>
@@ -42,24 +44,24 @@ const Navbar = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
-                <Link href={'/user/add-profile'}>
+                <Link href={'/user/add-profile'} prefetch={true}>
                   <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
                     <UserIcon className='text-gray-400' />
-                    Profile
+                    <span>Profile</span>
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
-                <Link href={'/user/feedback'}>
+                <Link href={'/user/feedback'} prefetch={true}>
                   <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
                     <UserIcon className='text-gray-400' />
-                    Feedback
+                    <span>Feedback</span>
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
-                <Link href={'/auth/reset-password'}>
+                <Link href={'/auth/reset-password'} prefetch={true}>
                   <DropdownMenuItem className='flex flex-row gap-4 items-center text-gray-600 cursor-pointer text-xs'>
                     <UserIcon className='text-gray-400' />
-                    Change Password 
+                    <span>Change Password</span> 
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />

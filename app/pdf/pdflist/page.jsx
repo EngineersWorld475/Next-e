@@ -24,8 +24,7 @@ const PdfList = () => {
   const [searchingCollections, setSearchingCollections] = useState(false);
   const [searchedCollectionList, setSearchedCollectionList] = useState([]);
   const [listOfCollections, setListOfCollections] = useState([]);
-  const [showActions, setShowActions] = useState(false)
-
+  const [showActions, setShowActions] = useState(false);
   const [formData, setFormData] = useState({
     article: '',
     url: '',
@@ -42,9 +41,10 @@ const PdfList = () => {
       setIsSubmitting(true)
       if (!user?.token) {
         showToast({
-          title: "unauthorized",
-          variant: "warning"
-        })
+          title: "Unauthorized",
+          description: "Please log in to continue.",
+          variant: "warning",
+        });
       }
 
       const form = new FormData();
@@ -76,7 +76,10 @@ const PdfList = () => {
         };
         setListOfCollections((prevCollections) => Array.isArray(prevCollections) ? [...prevCollections, newCollection] : [newCollection])
         dispatch(getCollections({ userId, authToken: user?.token }))
-        showToast({ title: "Upload successful!", variant: "success" });
+        showToast({
+          title: "Collection uploaded successfully!",
+          variant: "success",
+        });
         if (fileInputRef.current) {
           fileInputRef.current.value = ''; // resets the file input
         }
@@ -92,13 +95,18 @@ const PdfList = () => {
           userId: ''
         })
       } else {
-        showToast({ title: result?.payload?.message || "Upload failed", variant: "error" });
+        showToast({
+          title: "Upload failed",
+          description: result?.payload?.message || "Failed to upload the collection.",
+          variant: "destructive",
+        });
       }
     } catch (err) {
       showToast({
-        title: err || "Something went wrong. Please try again ",
-        variant: "error"
-      })
+        title: "Something went wrong",
+        description: err?.message || "Unable to upload the collection. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false)
     }
@@ -114,12 +122,23 @@ const PdfList = () => {
         if (result?.payload?.success) {
           setListOfCollections((prev) => prev.filter((c) => c.id !== id))
           dispatch(getCollections({ userId, authToken: user?.token }))
-          showToast({ title: result?.payload?.message || 'Collection deleted', variant: 'success' })
+          showToast({
+            title: "Collection deleted successfully!",
+            variant: "success",
+          });
         } else {
-          showToast({ title: 'Failed to delete collection', variant: 'error' })
+          showToast({
+            title: "Failed to delete collection",
+            description: result?.payload?.message || "Something went wrong while deleting.",
+            variant: "destructive",
+          });
         }
       } catch (error) {
-        showToast({ title: 'Error deleting collection', variant: 'error' })
+        showToast({
+          title: "Error deleting collection",
+          description: error?.message || "Please try again later.",
+          variant: "destructive",
+        });
       }
     }, [dispatch, userId, user?.token, showToast])
 
@@ -175,11 +194,11 @@ const PdfList = () => {
       {/* List PDFs */}
       <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex flex-col px-7 flex-1 dark:bg-gray-900 rounded-lg">
         <h1 className='font-semibold text-blue-600 my-3'>My collections</h1>
-       { loadingCollections ? (
-        <div>
-          <h3 className='text-gray-500 text-sm'>Loading collections...</h3>
-        </div>
-       ) : (
+        {loadingCollections ? (
+          <div>
+            <h3 className='text-gray-500 text-sm'>Loading collections...</h3>
+          </div>
+        ) : (
           listOfCollections && listOfCollections.length > 0 ? (
             listOfCollections.map((collection, index) => (
               <Pdfcard key={collection.id || index} article={collection.article} author={collection.author} doi={collection.doi} id={collection.id} pdf={collection.pdfFile} pubmedId={collection.pubmedid} handleDeleteCollection={handleDeleteCollection} showActions={showActions} />
@@ -191,7 +210,7 @@ const PdfList = () => {
               </>
             </div>
           )
-       )}
+        )}
       </div>
     </div>
   )

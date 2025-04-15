@@ -23,7 +23,10 @@ export default {
   				'Segoe UI Emoji"',
   				'Segoe UI Symbol"',
   				'Noto Color Emoji"'
-  			]
+  			],
+			  inter: ['var(--font-inter)', 'sans-serif'],
+			  geist: ['var(--font-geist-sans)', 'sans-serif'],
+			  mono: ['var(--font-geist-mono)', 'monospace'],
   		},
   		colors: {
   			customGrayBlue: '#858796',

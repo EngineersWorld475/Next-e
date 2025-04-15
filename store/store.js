@@ -1,6 +1,5 @@
 "use client"
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import storage from 'redux-persist/lib/storage';
 import authReducer from './auth-slice'; 
 import profileReducer from './user-slice';
 import groupReducer from './group-slice';

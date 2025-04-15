@@ -47,7 +47,8 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
       if (!emailRegex.test(email)) {
         showToast({
           title: "Invalid email format",
-          variant: "warning",
+          description: "Please enter a valid email address (e.g., john@example.com).",
+          variant: "warning"
         });
         return; 
       }
@@ -106,20 +107,23 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
 
         showToast({
           title: "Group created successfully!",
+          description: "Your new group has been added to the list.",
           variant: "success"
         });
       form.reset();
       } else {
         showToast({
-          title: "You have already added this group. Please try a different group name",
+          title: "Group already exists",
+          description: "Try using a different name. This group is already added.",
           variant: "warning"
-        })
+        });
       }
     } catch (error) {
       showToast({
-        title: error?.message || "Something went wrong. Please try again.",
+        title: "Something went wrong",
+        description: error?.message || "We couldn't create the group. Please try again.",
         variant: "error"
-      })
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -21,35 +21,44 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
     const { error } = useSelector((state) => state.group)
     const { showToast } = useCustomToast()
     const [newEmail, setNewEmail] = useState('');
-    const [addEmail, setAddEmail] = useState(false)
+    const [isAddingEmail, setIsAddingEmail] = useState(false)
 
 
     const handleChange = useCallback((e) => {
         setNewEmail(e.target.value)
     }, [])
 
-    const existingEmails = useMemo(() => {
-        return listOfGroups.find((item) => item.GroupId === groupId)?.Groupmails?.map((item) => item.Email) || [];
+    const groupData = useMemo(() => {
+        return listOfGroups.find(item => item.GroupId === groupId);
     }, [listOfGroups, groupId]);
+
+    const existingEmails = useMemo(() => {
+        return groupData?.Groupmails?.map(item => item.Email) || [];
+    }, [groupData]);
 
     // Adding Email to the existing group
     const handleAddEmail = useCallback(async () => {
-        setAddEmail(true)
+        setIsAddingEmail(true)
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
         if (!emailRegex.test(newEmail)) {
             showToast({
-                title: "Invalid email format. Please enter a valid email address.",
+                title: "Invalid Email",
+                description: "Please enter a valid email address.",
                 variant: "warning",
             });
-            setAddEmail(false)
+            setIsAddingEmail(false)
             return;
         }
 
         // checking if the currently adding email is already in the group
         if (existingEmails.includes(newEmail)) {
-            showToast({ title: "Email already exists", variant: "warning" });
-            setAddEmail(false);
+            showToast({
+                title: "Duplicate Email",
+                description: "This email is already in the group.",
+                variant: "warning",
+            });
+            setIsAddingEmail(false);
             return;
         }
 
@@ -62,48 +71,47 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
             if (result === true) {
                 await dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
                 showToast({
-                    title: "Email added to Group",
-                    variant: "success"
+                    title: "Email Added",
+                    description: "The email was successfully added to the group.",
+                    variant: "success",
                 });
             } else {
                 throw new Error(error || "Failed to add email.");
             }
-            setAddEmail(false)
+            setIsAddingEmail(false)
         } catch (err) {
             showToast({
-                title: err.message || "Something went wrong! Please try again later.",
-                variant: "error"
+                title: "Failed to Add Email",
+                description: err.message || "Something went wrong while adding the email.",
+                variant: "error",
             });
         }
 
         setNewEmail('');
-        setAddEmail(false)
+        setIsAddingEmail(false)
     }, [dispatch, userId, newEmail, groupId, user?.token, showToast, setIsMounting, existingEmails])
 
     // DELETE GROUP FUNCTION
-    const handleDeleteGroup = useCallback(() => {
-        setIsMounting(false);
-        dispatch(deleteGroup({ userId, groupId, authToken: user?.token })).then((result) => {
-            if (result?.payload === true) {
-                setListOfGroups((prevGroups) => prevGroups.filter(group => group.GroupId !== groupId));
-                dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
-                showToast({
-                    title: "Group deleted successfully",
-                    variant: "success"
-                })
+    const handleDeleteGroup = useCallback(async () => {
+        try {
+            setIsMounting(false);
+            const result = await dispatch(deleteGroup({ userId, groupId, authToken: user?.token })).unwrap();
+            if (result === true) {
+                setListOfGroups((prev) => prev.filter(group => group.GroupId !== groupId));
+                await dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
+                showToast({ title: "Group Deleted", description: "Successfully deleted.", variant: "success" });
             } else {
-                showToast({
-                    title: error || 'Can not delete group',
-                    variant: "error"
-                });
+                throw new Error("Could not delete group.");
             }
-        }).catch((error) => {
+        } catch (error) {
             showToast({
-                title: error?.message || "Something went wrong. Please try again",
-                variant: "error"
-            })
-        })
-    }, [dispatch, userId, groupId, user?.token, showToast, setIsMounting, setListOfGroups, error])
+                title: "Error",
+                description: error?.message || "Something went wrong",
+                variant: "error",
+            });
+        }
+    }, [dispatch, userId, groupId, user?.token, showToast, setIsMounting, setListOfGroups]);
+    
 
     // DELETE GROUP EMAIL FUNCTION
     const handleDeleteEmail = useCallback((email) => {
@@ -132,13 +140,15 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
                 );
                 dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
                 showToast({
-                    title: "Email deleted successfully",
-                    variant: "success"
+                    title: "Email Deleted",
+                    description: "The email was removed from the group.",
+                    variant: "success",
                 });
             } else {
                 showToast({
-                    title: error || 'Failed to delete email',
-                    variant: "error"
+                    title: "Delete Failed",
+                    description: "Could not delete the email. Please try again.",
+                    variant: "error",
                 });
             }
         }).catch((error) => {
@@ -182,9 +192,20 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
                                 ))}
 
                                 <div className='flex flex-col md:flex-row lg:flex-row gap-3 w-full md:w-`/3 lg:w-1/3'>
-                                    <Input type="text" placeholder="Enter E-mailId" value={newEmail} onChange={handleChange} />
-                                    <Button className="w-1/3" onClick={handleAddEmail} disabled={newEmail === '' || addEmail}>
-                                        {addEmail ? (
+                                    <Input
+                                        disabled={isAddingEmail}
+                                        type="text"
+                                        placeholder="Enter E-mailId"
+                                        value={newEmail}
+                                        onChange={handleChange}
+                                    />
+                                    <Button
+                                        className="w-1/3"
+                                        onClick={handleAddEmail}
+                                        disabled={newEmail === '' || isAddingEmail}
+                                        aria-busy={isAddingEmail}
+                                    >
+                                        {isAddingEmail ? (
                                             <>
                                                 <Loader2 className="animate-spin h-5 w-5 text-center" />
                                             </>

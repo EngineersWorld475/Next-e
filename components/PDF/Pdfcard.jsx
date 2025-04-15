@@ -2,7 +2,6 @@
 import { DownloadIcon, EditIcon, GlobeIcon, Loader2, TrashIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
-import { Form } from '../ui/form'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Button } from '../ui/button'
@@ -47,15 +46,19 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
         dispatch(getCollections({ userId, authToken: user?.token }))
         setIsDialogOpen(false)
         showToast({
-          title: "Collection updated successfully",
-          variant: "success"
-        })
+          title: "Collection updated",
+          description: "Your PDF collection details were successfully saved.",
+          variant: "success",
+        });
+        
       }
     } catch (error) {
       showToast({
-        title: error,
-        variant: "error"
-      })
+        title: "Update failed",
+        description:  error?.message || "Something went wrong while updating the collection. Please try again.",
+        variant: "destructive",
+      });
+      
     } finally {
       setIsSubmitting(false)
     }
@@ -124,9 +127,13 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
             <GlobeIcon size={20} className={`cursor-pointer ${openAccess ? 'text-green-500' : 'text-red-500'}`} onClick={() => { 
               setOpenAccess(!openAccess)
               showToast({
-                title: "Saved successfully",
-                variant: "success"
-              })
+                title: openAccess ? "Access set to closed" : "Access set to open",
+                description: openAccess
+                  ? "This collection is now marked as Closed Access."
+                  : "This collection is now marked as Open Access.",
+                variant: "success",
+              });
+              
               }}/>
             <DownloadIcon size={20} className='cursor-pointer' />
           </div>

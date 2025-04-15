@@ -18,11 +18,17 @@ const Navbar = () => {
         className="w-24 h-10 md:w-36 md:h-14"
       />
       {user ? (
-        <Link href={'/pdf/pdflist'} className='text-white hover:text-black text-xs md:text-base lg:text-base  border border-white py-1 px-2 md:py-2 md:px-3 rounded-lg'>Go To Dashboard</Link>
+        <Link href={'/pdf/pdflist'} prefetch={true} >
+          <span className='text-white hover:text-black text-xs md:text-base lg:text-base  border border-white py-1 px-2 md:py-2 md:px-3 rounded-lg'>Go To Dashboard</span>
+        </Link>
       ) : (
         <div className='flex space-x-5 text-white'>
-          <Link href={'/auth/login'} className='hover:text-black text-sm md:text-base lg:text-base'>Log In</Link>
-          <Link href={'/auth/register'} className='hover:text-black text-sm md:text-base lg:text-base'>Sign Up</Link>
+          <Link href={'/auth/login'} prefetch={true}>
+            <span className='hover:text-black text-sm md:text-base lg:text-base'>Log In</span>
+          </Link>
+          <Link href={'/auth/register'} prefetch={true}>
+            <span className='hover:text-black text-sm md:text-base lg:text-base'>Sign Up</span>
+          </Link>
         </div>
       )
       }
