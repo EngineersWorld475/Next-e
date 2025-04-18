@@ -179,7 +179,7 @@ const PdfList = () => {
     setLoadingCollections(true)
   }, [])
 
-
+  console.log('...listofcollections', listOfCollections)
   return (
     <div className="flex flex-col gap-5 h-screen bg-white dark:bg-black dark:text-white">
       <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue'>Dashboard</h1>

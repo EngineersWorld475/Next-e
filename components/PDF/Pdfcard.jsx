@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { editPdf, getCollections } from '@/store/pdf-slice'
 import useUserId from '@/hooks/useUserId'
 import { useCustomToast } from '@/hooks/useCustomToast'
+import { useRouter } from 'next/navigation'
 
 const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollection, showActions }) => {
   const [editFormData, setEditFormData] = useState({
@@ -25,6 +26,7 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
   const userId = useUserId();
   const { user } = useSelector((state) => state.auth);
   const { showToast } = useCustomToast();
+  const router = useRouter();
 
   const handleChage = (e) => {
     setEditFormData(
@@ -63,13 +65,21 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
       setIsSubmitting(false)
     }
   }
+
+  // Function to navigate to the PDF viewer
+  const handlePdfClick = () => {
+    // Redirect to the PDF viewer page
+    router.push(`/pdf-viewer/${id}`);
+  }
   return (
     <div className='flex flex-col md:flex-row lg:flex-row w-full shadow-md mb-4 text-gray-600'>
       <div className='flex-1'>
         <div className='flex flex-col gap-2 px-4 py-4'>
-          <h1>{article}</h1>
-          <h1>Author: <span>{author}</span></h1>
-          <h1>Number Of Annotations:</h1>
+        {/* use this for displaying pdf in pdf viewer(not working now) */}
+        {/* <h3 href="#" onClick={handlePdfClick} target="_blank" rel="noopener noreferrer" className='text-blue-600 hover:underline hover:text-blue-700 cursor-pointer'>{article}</h3> */}
+        <a href={pdf} target="_blank" rel="noopener noreferrer" className='text-blue-600 hover:underline hover:text-blue-700 cursor-pointer'>{article}</a>
+        <h1>Author: <span>{author}</span></h1>
+        <h1>Number Of Annotations:</h1>
         </div>
       </div>
       <div className='flex-1'>

@@ -1,9 +1,10 @@
 import { getMockPdfs, setMockPdfs } from "../../mockPdfs";
+import fs from 'fs';
+import path from 'path';
 
 export async function POST(req) {
   try {
     const formData = await req.formData();
-
     const article = formData.get('article');
     const pubmedid = formData.get('pubmedid');
     const author = formData.get('author');
@@ -18,8 +19,18 @@ export async function POST(req) {
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Simulate file URL
-    const fakeUrl = `http://localhost:3000/mock-pdfs/${Date.now()}-${pdfFile.name}`;
+    // Convert the uploaded file to a buffer
+    const buffer = Buffer.from(await pdfFile.arrayBuffer());
+    const filename = `${Date.now()}-${pdfFile.name}`;
+
+    // Define where to save the file (public/uploads)
+    const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+
+    // Save the file to your local disk
+    fs.writeFileSync(filePath, buffer);
+
+    // Real URL to access the uploaded PDF
+    const realUrl = `/uploads/${filename}`;
 
     const newPdf = {
       id: Date.now().toString(),
@@ -28,16 +39,16 @@ export async function POST(req) {
       author,
       doi,
       userId,
-      pdfFile: fakeUrl,
+      pdfFile: realUrl,
       createdAt: new Date().toISOString(),
     };
 
     const currentPdfs = getMockPdfs();
     setMockPdfs([...currentPdfs, newPdf]);
-  console.log('....mockpdfs after get', getMockPdfs())
 
     return Response.json({ success: true, fileUpload: true, data: newPdf });
   } catch (error) {
+    console.log('...savefile error',error)
     return Response.json({ success: false, message: 'Something went wrong' }, { status: 500 });
   }
 }
