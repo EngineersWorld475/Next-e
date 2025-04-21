@@ -38,25 +38,5 @@
     "userId": "26",
     "pdfFile": "/uploads/1744906681168-MI-AKS-IPC-10 ABS.pdf",
     "createdAt": "2025-04-17T16:18:01.171Z"
-  },
-  {
-    "id": "1745305459152",
-    "article": "Astronomy",
-    "pubmedid": "11",
-    "author": "sanjay",
-    "doi": "32",
-    "userId": "23",
-    "pdfFile": "/uploads/1745305459142-6666_merged.pdf",
-    "createdAt": "2025-04-22T07:04:19.152Z"
-  },
-  {
-    "id": "1745419129272",
-    "article": "Organic principles",
-    "pubmedid": "33",
-    "author": "sanjay",
-    "doi": "22",
-    "userId": "23",
-    "pdfFile": "/uploads/1745419129266-dummy-pdf_2.pdf",
-    "createdAt": "2025-04-23T14:38:49.272Z"
   }
 ]

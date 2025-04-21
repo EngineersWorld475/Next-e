@@ -30,6 +30,7 @@ export default {
   		},
   		colors: {
   			customGrayBlue: '#858796',
+			'gray-dark': '#212529',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

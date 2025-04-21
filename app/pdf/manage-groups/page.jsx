@@ -4,7 +4,7 @@ import CreateGroup from '@/components/PDF/GroupCreateForm'
 import { Button } from '@/components/ui/button'
 import useUserId from '@/hooks/useUserId'
 import { getGroupsByUserId } from '@/store/group-slice'
-import { Loader2 } from 'lucide-react'
+import { Loader } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -39,7 +39,7 @@ const GroupList = () => {
       <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-white p-4 shadow-lg rounded-xl dark:bg-gray-900 dark:text-white'>
         {isLoading && isMounting ? (
           <div className='w-full md:w-2/3 lg:w-2/3 bg-white flex justify-center items-center gap-1 dark:bg-black dark:text-white dark:rounded-lg px-3 py-2'>
-            <Loader2 className="animate-spin h-5 w-5 text-center" />
+            <Loader className="animate-spin text-black w-7 h-7 text-center" />
           </div>
         ) : (
           <div className='w-full md:w-2/3 lg:w-2/3 bg-white dark:bg-black dark:text-white dark:rounded-lg px-3 py-2'>

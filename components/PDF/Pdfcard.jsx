@@ -1,5 +1,5 @@
 'use client'
-import { DownloadIcon, EditIcon, GlobeIcon, Loader2, TrashIcon } from 'lucide-react'
+import { DownloadIcon, EditIcon, GlobeIcon, Loader, Loader2, TrashIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Input } from '../ui/input'
@@ -65,15 +65,22 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
       setIsSubmitting(false)
     }
   }
+
+  const handlePdfClick = () => {
+    const pdfUrlEncoded = encodeURIComponent(pdf);
+    window.open(`/pdf-viewer/${id}?url=${pdfUrlEncoded}`, '_blank');
+  };
+  
+  
+
   return (
     <div className='flex flex-col md:flex-row lg:flex-row w-full shadow-md mb-4 text-gray-600'>
       <div className='flex-1'>
         <div className='flex flex-col gap-2 px-4 py-4'>
-          {/* use this for displaying pdf in pdf viewer(not working now) */}
-          <a onClick={() => router.push(`/pdf-viewer/${id}`)} target="_blank" className="cursor-pointer text-blue-600 hover:underline">
+          {/* rendering to custom pdfviewer */}
+          <a onClick={handlePdfClick} className="cursor-pointer text-blue-600 hover:underline">
             {article}
           </a>
-          {/* <a href={pdf} target="_blank" rel="noopener noreferrer" className='text-blue-600 hover:underline hover:text-blue-700 cursor-pointer'>{article}</a> */}
           <h1>Author: <span>{author}</span></h1>
           <h1>Number Of Annotations:</h1>
         </div>

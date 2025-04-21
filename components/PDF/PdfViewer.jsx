@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '../ui/button';
-import { DownloadIcon, Maximize2, Minimize2 } from 'lucide-react';
+import { Bookmark, ChevronFirst, ChevronLast, ChevronsRight, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, ZoomIn, ZoomOut } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
@@ -90,54 +90,101 @@ export default function PDFViewer({ pdfUrl }) {
   };
 
 
+  // silencing TextLayer task cancelled warning
+  useEffect(() => {
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      if (
+        typeof args[0] === 'string' &&
+        args[0].includes('AbortException: TextLayer task cancelled')
+      ) {
+        return;
+      }
+      originalWarn(...args);
+    };
+  
+    return () => {
+      console.warn = originalWarn;
+    };
+  }, []);
+  
   if (!isClient || !pdfUrl) {
     return <p className="text-center mt-10">Loading pdf...</p>;
   }
 
   return (
     <div className="relative w-full h-screen overflow-auto">
-      <div className="sticky top-0 bg-gray-100 px-4 py-6 flex justify-between items-center gap-4 z-10">
-        <div className='flex flex-row gap-2 items-center'>
-          <Button
-            onClick={goToPreviousPage}
-            disabled={pageNumber <= 1}
-            variant="outline"
-          >
-            Previous
-          </Button>
-          <span>
-            Page {pageNumber} of {numPages || '?'}
-          </span>
-          <Button
-            onClick={goToNextPage}
-            disabled={pageNumber >= numPages}
-            variant="outline"
-          >
-            Next
-          </Button>
+      <div className="sticky top-0 bg-gray-dark text-white px-4 py-3 flex justify-between items-center gap-4 z-10 relative">
+
+        {/* Left: Navigation */}
+        <div className='flex flex-row gap-5 items-center'>
+          <button title='Find in Document'>
+            <Search size={16} className='cursor-pointer' />
+          </button>
+          <div className='flex flex-row gap-3 items-center'>
+            <button
+              title='Previous Page'
+              onClick={goToPreviousPage}
+              disabled={pageNumber <= 1}
+              className=''
+            >
+              <ChevronFirst size={18} className='cursor-pointer' />
+            </button>
+            <span className='text-xs'>
+              {pageNumber} / {numPages || '?'}
+            </span>
+            <button
+              title='Next Page'
+              onClick={goToNextPage}
+              disabled={pageNumber >= numPages}
+
+            >
+              <ChevronLast size={18} className='cursor-pointer' />
+            </button>
+          </div>
         </div>
-        <div className='flex flex-row gap-2 items-center'>
-          <Button onClick={zoomIn} variant="outline">
-            Zoom In
-          </Button>
-          <Button onClick={zoomOut} variant="outline">
-            Zoom Out
-          </Button>
-          <span>Zoom: {(scale * 100).toFixed(0)}%</span>
+
+        {/* Center: Zoom Controls */}
+        <div className='md:absolute md:left-1/2 md:-translate-x-1/2 flex flex-row gap-5 items-center'>
+          <button title='Zoom In' onClick={zoomIn}>
+            <ZoomIn size={18} className='cursor-pointer' />
+          </button>
+          <button title='Zoom Out' onClick={zoomOut} className='Zoom Out'>
+            <ZoomOut size={18} className='cursor-pointer' />
+          </button>
+          <span className='text-xs'>Zoom: {(scale * 100).toFixed(0)}%</span>
         </div>
-        <div className='flex flex-row gap-2 items-center'>
-          <Button onClick={handleDownload} variant="outline">
-            <DownloadIcon size={16} className="mr-2" />
-            Download
-          </Button>
-          <Button onClick={toggleFullScreen} variant="outline">
+
+        {/* Right section */}
+        <div className='flex flex-row gap-5 md:gap-7 lg:gap-7 items-center'>
+          <button title='My Annotations'>
+            <Eye size={18} className='cursor-pointer text-[#ff6347]' />
+          </button>
+          <button title='Open File'>
+            <FileUp size={18} className='cursor-pointer' />
+          </button>
+          <button title='Print'>
+            <Printer size={18} className='cursor-pointer' />
+          </button>
+          <button title='Download' onClick={handleDownload}>
+            <DownloadIcon size={18} className='cursor-pointer' />
+          </button>
+          <button title='Current view(copy or open in new window)'>
+            <Bookmark size={18} className='cursor-pointer' />
+          </button>
+          <button title='Share'>
+            <Share size={18} className='cursor-pointer text-[#ff6347]' />
+          </button>
+          <button title='Switch to Presentation Mode' onClick={toggleFullScreen}>
             {isFullScreen ? (
-              <Minimize2 size={16} className="mr-2" />
+              <Minimize2 size={18} className='cursor-pointer' />
             ) : (
-              <Maximize2 size={16} className="mr-2" />
+              <Expand size={18} className='cursor-pointer' />
             )}
-            {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
-          </Button>
+          </button>
+          <button title='Tools'>
+            <ChevronsRight size={22} className='cursor-pointer' />
+          </button>
         </div>
       </div>
       <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess} className="flex justify-center items-center py-3">
