@@ -132,3 +132,8 @@
     @apply bg-background text-foreground font-geist;
   }
 }
+
+/* .highlight {
+  background-color: yellow;
+  color: black;
+} */

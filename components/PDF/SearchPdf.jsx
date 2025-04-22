@@ -4,6 +4,7 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import Pdfcard from './Pdfcard'
 import { useCustomToast } from '@/hooks/useCustomToast'
+import { Loader } from 'lucide-react'
 
 const SearchPdf = ({ handleSearchCollection, setSearchingCollections, searchedCollectionList, setSearchedCollectionList, searchingCollections }) => {
   const [keyword, setKeyword] = useState('');
@@ -44,12 +45,16 @@ const SearchPdf = ({ handleSearchCollection, setSearchingCollections, searchedCo
       {/* Search results */}
       {showSearchResults && (
         searchingCollections ? (
-          <h3 className='text-gray-500 text-sm px-3 py-3'>Searching for collections...</h3>
+          <div className="flex items-center gap-2 text-sm text-gray-500 py-2 px-3">
+            <Loader className="w-4 h-4 animate-spin text-black" />
+            <span>Searching for collections...</span>
+          </div>
+
         ) : (
           searchedCollectionList && searchedCollectionList.length > 0 ? (
             searchedCollectionList.map((c, index) => (
               <div key={c.id || index} className='mt-3'>
-                <Pdfcard article={c.article} author={c.author} doi={c.doi} id={c.id} pdf={c.pdfFile} pubmedId={c.pubmedid} showActions={showActions} />
+                <Pdfcard id={c.id} article={c.article} author={c.author} doi={c.doi} pdf={c.pdfFile} pubmedId={c.pubmedid} showActions={showActions} />
               </div>
             ))
           ) : (
