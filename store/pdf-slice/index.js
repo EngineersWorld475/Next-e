@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     isLoading: false,
-    collectionList: null,
+    collectionList: [],
     error: null
 }
 

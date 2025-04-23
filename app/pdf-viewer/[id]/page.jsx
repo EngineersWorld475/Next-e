@@ -1,21 +1,17 @@
-'use client';
-import { getMockPdfs } from '@/app/api/mock/mockPdfs';
-import { Document, Page, pdfjs } from 'react-pdf';
+'use client'
+import { useSelector } from 'react-redux'
+import { useParams } from 'next/navigation'
+import PDFViewer from '@/components/PDF/PdfViewer'
 
+export default function PdfViewerPage() {
+  const { id } = useParams()
+  const { collectionList } = useSelector((state) => state.collection)
+  console.log('...collectionList', collectionList);
+  const collection = Array.isArray(collectionList)
+    ? collectionList.find(item => item.id === id)
+    : null
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
+  if (!collection) return <div>PDF not found</div>
 
-export default function PDFViewer({ params }) {
-  const { id } = params;
-  const pdf = getMockPdfs().find((item) => item.id === id); // this wont work in client component.
-
-  if (!pdf) return <p>PDF not found</p>;
-
-  return (
-    <div className="h-screen p-4">
-      <Document file={pdf.pdfFile}>
-        <Page pageNumber={1} />
-      </Document>
-    </div>
-  );
+  return <PDFViewer pdfUrl={collection?.pdfFile} />
 }

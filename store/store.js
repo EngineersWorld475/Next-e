@@ -24,7 +24,7 @@ const rootReducer = combineReducers({
 // configure store
 const store = configureStore({
     reducer: rootReducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }).concat(thunk),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
 
 }) 
 
