@@ -2,12 +2,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '../ui/button';
-import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, X, ZoomIn, ZoomOut, Loader2 } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
-import 'pdfjs-dist/web/pdf_viewer.css';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
@@ -15,10 +14,27 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getGroupsByUserId } from '@/store/group-slice';
 import useUserId from '@/hooks/useUserId';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Card, CardContent } from '../ui/card';
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
-export default function PDFViewer({ pdfUrl }) {
+// Reusable LoadingSpinner Component
+function LoadingSpinner({ message = 'Loading...', size = 'md' }) {
+  const sizeClasses = {
+    sm: 'w-6 h-6',
+    md: 'w-8 h-8',
+    lg: 'w-12 h-12',
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
+      <Loader2 className={`animate-spin text-gray-500 ${sizeClasses[size]}`} />
+      <p className="text-sm text-gray-600 font-medium">{message}</p>
+    </div>
+  );
+}
+
+export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
   const [selectedText, setSelectedText] = useState('');
   const [question, setQuestion] = useState('');
   const [showBox, setShowBox] = useState(false);
@@ -32,20 +48,21 @@ export default function PDFViewer({ pdfUrl }) {
   const [searchResults, setSearchResults] = useState([]);
   const [currentMatch, setCurrentMatch] = useState(0);
   const [hasTextLayer, setHasTextLayer] = useState(true);
-  const [radioItem, setRadioItem] = useState('group')
-  const [copied, setCopied] = useState(false)
+  const [radioItem, setRadioItem] = useState('group');
+  const [copied, setCopied] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(initialPdfUrl); // Manage local pdfUrl state
+  const [renderedPages, setRenderedPages] = useState({}); // Track rendered pages
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
   const pageRefs = useRef([]);
+  const fileInputRef = useRef(null); // Ref for file input
   const dispatch = useDispatch();
   const { groupList } = useSelector((state) => state.group);
   const userId = useUserId();
   const { user } = useSelector((state) => state.auth);
 
-
-  // Annotation Link(dummy)
-  const link = "https://ui.shadcn.com/docs/installation"
-
+  // Annotation Link (dummy)
+  const link = "https://ui.shadcn.com/docs/installation";
 
   useEffect(() => {
     setIsClient(true);
@@ -54,6 +71,21 @@ export default function PDFViewer({ pdfUrl }) {
   useEffect(() => {
     if (!pdfUrl) setShowBox(false);
   }, [pdfUrl]);
+
+  // Handle file selection
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      const fileUrl = URL.createObjectURL(file);
+      setPdfUrl(fileUrl);
+      // Clean up previous URL if it exists
+      if (pdfUrl && pdfUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    } else {
+      console.warn('Please select a valid PDF file');
+    }
+  };
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -119,6 +151,7 @@ export default function PDFViewer({ pdfUrl }) {
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
     pageRefs.current = Array(numPages).fill().map((_, i) => pageRefs.current[i] || null);
+    setRenderedPages({}); // Reset rendered pages on new document load
   };
 
   const goToPreviousPage = () => {
@@ -196,8 +229,8 @@ export default function PDFViewer({ pdfUrl }) {
 
   // Rendering groups when page loads
   useEffect(() => {
-    dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
-  }, [dispatch])
+    dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
+  }, [dispatch]);
 
   const onPageRenderSuccess = async (pageNumber) => {
     try {
@@ -212,6 +245,8 @@ export default function PDFViewer({ pdfUrl }) {
       } else {
         setHasTextLayer(true);
       }
+      // Mark page as rendered
+      setRenderedPages((prev) => ({ ...prev, [pageNumber]: true }));
     } catch (error) {
       console.error('Error extracting text:', error);
       setHasTextLayer(false);
@@ -273,7 +308,7 @@ export default function PDFViewer({ pdfUrl }) {
     setCurrentMatch(prevMatch);
     const matchPage = pageRefs.current[searchResults[prevMatch].page - 1];
     if (matchPage) {
-      matchPage.scrollIntoView({ behavior: 'smooth' });
+      pageRefs.current[prevMatch].scrollIntoView({ behavior: 'smooth' });
     }
     scrollToMatch(searchResults[prevMatch]);
   };
@@ -337,19 +372,20 @@ export default function PDFViewer({ pdfUrl }) {
     });
   };
 
-  // copy annotation link
+  // Copy annotation link
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(link)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }
+    await navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
 
   if (!isClient || !pdfUrl) {
-    return <p className="text-center mt-10">Loading pdf...</p>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <LoadingSpinner message="Loading PDF viewer..." size="lg" />
+      </div>
+    );
   }
-
-  console.log('.....radioItem', radioItem)
-
 
   return (
     <div className="relative w-full h-screen overflow-auto">
@@ -429,9 +465,22 @@ export default function PDFViewer({ pdfUrl }) {
           <button title="My Annotations" className="p-1 hover:bg-gray-700 rounded">
             <Eye size={18} className="cursor-pointer text-[#ff6347]" />
           </button>
-          <button title="Open File" className="p-1 hover:bg-gray-700 rounded">
-            <FileUp size={18} className="cursor-pointer" />
-          </button>
+          <div>
+            <button
+              title="Open File"
+              className="p-1 hover:bg-gray-700 rounded"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <FileUp size={18} className="cursor-pointer" />
+            </button>
+            <input
+              type="file"
+              accept="application/pdf"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </div>
           <button title="Print" className="p-1 hover:bg-gray-700 rounded">
             <Printer size={18} className="cursor-pointer" />
           </button>
@@ -441,48 +490,37 @@ export default function PDFViewer({ pdfUrl }) {
           <button title="Current view(copy or open in new window)" className="p-1 hover:bg-gray-700 rounded">
             <Bookmark size={18} className="cursor-pointer" />
           </button>
-          {/* share annotation */}
           <Dialog>
             <DialogTrigger>
               <Share size={24} className="cursor-pointer text-[#ff6347] p-1 hover:bg-gray-700 rounded" />
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => {
-              e.preventDefault(); // Prevent default autofocus
-            }}>
+            <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
               <DialogHeader>
                 <DialogTitle>Share Annotation</DialogTitle>
-                <DialogDescription>
-                  Share your annotation to group or individual.
-                </DialogDescription>
+                <DialogDescription>Share your annotation to group or individual.</DialogDescription>
               </DialogHeader>
               <div className="flex items-center space-x-2">
                 <div className="grid flex-1 gap-2">
-                  <Label htmlFor="link" className="sr-only">
-                    Link
-                  </Label>
-                  <Input
-                    id="link"
-                    value={link}
-                    readOnly
-                  />
+                  <Label htmlFor="link" className="sr-only">Link</Label>
+                  <Input id="link" value={link} readOnly />
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="px-3"
-                  onClick={handleCopy}
-                >
+                <Button type="button" size="sm" className="px-3" onClick={handleCopy}>
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </Button>
               </div>
-              <RadioGroup defaultValue="group" value={radioItem} className="flex gap-3 mx-2" onValueChange={(value) => setRadioItem(value)}>
+              <RadioGroup
+                defaultValue="group"
+                value={radioItem}
+                className="flex gap-3 mx-2"
+                onValueChange={(value) => setRadioItem(value)}
+              >
                 <div className="flex items-center space-x-1">
                   <RadioGroupItem value="group" id="r1" />
                   <Label htmlFor="r1">Group</Label>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="individual" id="r1" />
-                  <Label htmlFor="r1">Individual</Label>
+                  <RadioGroupItem value="individual" id="r2" />
+                  <Label htmlFor="r2">Individual</Label>
                 </div>
               </RadioGroup>
               {radioItem === 'group' ? (
@@ -494,11 +532,13 @@ export default function PDFViewer({ pdfUrl }) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {groupList && groupList.length > 0 && groupList.map((group) => {
-                          return (
-                            <SelectItem key={group.GroupId} value={group.GroupName} className='cursor-pointer'>{group.GroupName}</SelectItem>
-                          )
-                        })}
+                        {groupList &&
+                          groupList.length > 0 &&
+                          groupList.map((group) => (
+                            <SelectItem key={group.GroupId} value={group.GroupName} className="cursor-pointer">
+                              {group.GroupName}
+                            </SelectItem>
+                          ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -510,19 +550,12 @@ export default function PDFViewer({ pdfUrl }) {
                 </div>
               )}
               <DialogFooter className="sm:justify-start">
-                <Button type="button">
-                  Send
-                </Button>
+                <Button type="button">Send</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-
           <button title="Switch to Presentation Mode" onClick={toggleFullScreen} className="p-1 hover:bg-gray-700 rounded">
-            {isFullScreen ? (
-              <Minimize2 size={18} className="cursor-pointer" />
-            ) : (
-              <Expand size={18} className="cursor-pointer" />
-            )}
+            {isFullScreen ? <Minimize2 size={18} className="cursor-pointer" /> : <Expand size={18} className="cursor-pointer" />}
           </button>
           <button title="Tools" className="p-1 hover:bg-gray-700 rounded">
             <ChevronsRight size={22} className="cursor-pointer" />
@@ -534,27 +567,59 @@ export default function PDFViewer({ pdfUrl }) {
           file={decodeURIComponent(pdfUrl)}
           onLoadSuccess={onDocumentLoadSuccess}
           className="flex flex-col items-center"
-          loading={<p>Loading PDF...</p>}
-        >
-          {Array.from({ length: numPages || 0 }, (_, index) => (
-            <div
-              key={index + 1}
-              ref={(el) => (pageRefs.current[index] = el)}
-              data-page-number={index + 1}
-              className="mb-4"
-            >
-              <Page
-                pageNumber={index + 1}
-                renderTextLayer={true}
-                renderAnnotationLayer={true}
-                scale={scale}
-                onRenderSuccess={() => {
-                  onPageRenderSuccess(index + 1);
-                  highlightMatches(index + 1);
-                }}
-              />
+          loading={
+            <div className="flex items-center justify-center h-screen">
+              <LoadingSpinner message="Loading PDF document..." size="lg" />
             </div>
-          ))}
+          }
+        >
+          {Array.from({ length: numPages || 0 }, (_, index) => {
+            const pageNum = index + 1;
+            const isRendered = renderedPages[pageNum];
+            return (
+              <div
+                key={pageNum}
+                ref={(el) => (pageRefs.current[index] = el)}
+                data-page-number={pageNum}
+                className="mb-6 relative"
+              >
+                {/* Loading UI */}
+                <Card
+                  className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-md flex flex-col items-center p-6 mx-auto animate-fadeIn absolute inset-0 z-10 mb-3 ${
+                    isRendered ? 'hidden' : 'block'
+                  }`}
+                  style={{ animationDelay: `${index * 0.3}s` }}
+                >
+                  <CardContent className="w-full relative z-10">
+                    {/* Skeleton Bars */}
+                    <div className="space-y-4 mt-4">
+                      <div className="h-5 bg-gray-200 rounded w-3/4 mx-auto animate-pulse" />
+                      <div className="h-5 bg-gray-200 rounded w-5/6 mx-auto animate-pulse" />
+                      <div className="h-5 bg-gray-200 rounded w-2/3 mx-auto animate-pulse" />
+                      <div className="h-5 bg-gray-200 rounded w-4/5 mx-auto animate-pulse" />
+                    </div>
+                    {/* LoadingSpinner */}
+                    <div className="mt-6 flex justify-center">
+                      <LoadingSpinner message={`Loading page ${pageNum}...`} size="md" />
+                    </div>
+                  </CardContent>
+                </Card>
+                {/* Page Component */}
+                <div className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'}`}>
+                  <Page
+                    pageNumber={pageNum}
+                    renderTextLayer={true}
+                    renderAnnotationLayer={true}
+                    scale={scale}
+                    onRenderSuccess={() => {
+                      onPageRenderSuccess(pageNum);
+                      highlightMatches(pageNum);
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </Document>
       </div>
       {showBox && (
@@ -579,6 +644,19 @@ export default function PDFViewer({ pdfUrl }) {
         .highlight {
           background-color: green !important;
           color: black !important;
+        }
+        @keyframes fadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out forwards;
         }
       `}</style>
     </div>
