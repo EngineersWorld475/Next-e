@@ -38,5 +38,25 @@
     "userId": "26",
     "pdfFile": "/uploads/1744906681168-MI-AKS-IPC-10 ABS.pdf",
     "createdAt": "2025-04-17T16:18:01.171Z"
+  },
+  {
+    "id": "1745672704620",
+    "article": "Super computers",
+    "pubmedid": "33",
+    "author": "sanjay",
+    "doi": "22",
+    "userId": "23",
+    "pdfFile": "/uploads/1745672704616-MI-AKS-IPC-10ABS.pdf",
+    "createdAt": "2025-04-26T13:05:04.620Z"
+  },
+  {
+    "id": "1745673058747",
+    "article": "Organic principles",
+    "pubmedid": "33",
+    "author": "sanjay",
+    "doi": "32",
+    "userId": "23",
+    "pdfFile": "/uploads/1745673058742-MI-AKS-IPC-10 A.pdf",
+    "createdAt": "2025-04-26T13:10:58.747Z"
   }
 ]

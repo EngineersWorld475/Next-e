@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '../ui/button';
-import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, X, ZoomIn, ZoomOut, Loader2 } from 'lucide-react';
+import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, X, ZoomIn, ZoomOut, Loader2, SquareArrowUp, SquareArrowDown, RotateCw, RotateCcw, MousePointer, Hand } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
@@ -15,6 +15,7 @@ import { getGroupsByUserId } from '@/store/group-slice';
 import useUserId from '@/hooks/useUserId';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Card, CardContent } from '../ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
@@ -42,6 +43,7 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
+  const [rotation, setRotation] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -50,16 +52,23 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
   const [hasTextLayer, setHasTextLayer] = useState(true);
   const [radioItem, setRadioItem] = useState('group');
   const [copied, setCopied] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState(initialPdfUrl); // Manage local pdfUrl state
-  const [renderedPages, setRenderedPages] = useState({}); // Track rendered pages
+  const [pdfUrl, setPdfUrl] = useState(initialPdfUrl);
+  const [renderedPages, setRenderedPages] = useState({});
+  const [tool, setTool] = useState('text');
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
   const pageRefs = useRef([]);
-  const fileInputRef = useRef(null); // Ref for file input
+  const fileInputRef = useRef(null);
   const dispatch = useDispatch();
   const { groupList } = useSelector((state) => state.group);
   const userId = useUserId();
   const { user } = useSelector((state) => state.auth);
+  const visibleRange = 2;
+
+  // Panning state for hand tool
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const containerRef = useRef(null);
 
   // Annotation Link (dummy)
   const link = "https://ui.shadcn.com/docs/installation";
@@ -78,7 +87,6 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
     if (file && file.type === 'application/pdf') {
       const fileUrl = URL.createObjectURL(file);
       setPdfUrl(fileUrl);
-      // Clean up previous URL if it exists
       if (pdfUrl && pdfUrl.startsWith('blob:')) {
         URL.revokeObjectURL(pdfUrl);
       }
@@ -89,15 +97,17 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
 
   useEffect(() => {
     const handleMouseUp = () => {
-      const selection = window.getSelection().toString();
-      if (selection.length > 0) {
-        setSelectedText(selection);
-        setShowBox(true);
+      if (tool === 'text') {
+        const selection = window.getSelection().toString();
+        if (selection.length > 0) {
+          setSelectedText(selection);
+          setShowBox(true);
+        }
       }
     };
     document.addEventListener('mouseup', handleMouseUp);
     return () => document.removeEventListener('mouseup', handleMouseUp);
-  }, []);
+  }, [tool]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -148,10 +158,53 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
     };
   }, [numPages]);
 
+  // Handle panning for hand tool
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || tool !== 'hand') return;
+
+    const handleMouseDown = (e) => {
+      e.preventDefault(); // Prevent text selection or other default behaviors
+      setIsPanning(true);
+      setPanStart({ x: e.clientX, y: e.clientY });
+      container.style.cursor = 'grabbing';
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isPanning) return;
+      const dx = panStart.x - e.clientX; // Reverse direction for natural scrolling
+      const dy = panStart.y - e.clientY;
+      container.scrollLeft += dx;
+      container.scrollTop += dy;
+      setPanStart({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleMouseUp = () => {
+      setIsPanning(false);
+      container.style.cursor = 'grab';
+    };
+
+    container.style.cursor = 'grab';
+    container.style.userSelect = 'none'; // Prevent text selection during panning
+    container.addEventListener('mousedown', handleMouseDown);
+    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('mouseup', handleMouseUp);
+    container.addEventListener('mouseleave', handleMouseUp);
+
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown);
+      container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('mouseup', handleMouseUp);
+      container.removeEventListener('mouseleave', handleMouseUp);
+      container.style.cursor = 'default';
+      container.style.userSelect = 'auto';
+    };
+  }, [tool, isPanning]);
+
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
     pageRefs.current = Array(numPages).fill().map((_, i) => pageRefs.current[i] || null);
-    setRenderedPages({}); // Reset rendered pages on new document load
+    setRenderedPages({});
   };
 
   const goToPreviousPage = () => {
@@ -170,6 +223,38 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
         nextPage.scrollIntoView({ behavior: 'smooth' });
       }
     }
+  };
+
+  const goToFirstPage = () => {
+    const firstPage = pageRefs.current[0];
+    if (firstPage) {
+      firstPage.scrollIntoView({ behavior: 'smooth' });
+      setPageNumber(1);
+    }
+  };
+
+  const goToLastPage = () => {
+    const lastPage = pageRefs.current[numPages - 1];
+    if (lastPage) {
+      lastPage.scrollIntoView({ behavior: 'smooth' });
+      setPageNumber(numPages);
+    }
+  };
+
+  const rotateClockwise = () => {
+    setRotation((prev) => (prev + 90) % 360);
+  };
+
+  const rotateCounterclockwise = () => {
+    setRotation((prev) => (prev - 90 + 360) % 360);
+  };
+
+  const selectTextTool = () => {
+    setTool('text');
+  };
+
+  const selectHandTool = () => {
+    setTool('hand');
   };
 
   const zoomIn = () => {
@@ -227,7 +312,6 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
     };
   }, []);
 
-  // Rendering groups when page loads
   useEffect(() => {
     dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
   }, [dispatch]);
@@ -245,7 +329,6 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
       } else {
         setHasTextLayer(true);
       }
-      // Mark page as rendered
       setRenderedPages((prev) => ({ ...prev, [pageNumber]: true }));
     } catch (error) {
       console.error('Error extracting text:', error);
@@ -372,7 +455,6 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
     });
   };
 
-  // Copy annotation link
   const handleCopy = async () => {
     await navigator.clipboard.writeText(link);
     setCopied(true);
@@ -388,7 +470,7 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-auto">
+    <div className="relative w-full h-screen overflow-auto" ref={containerRef}>
       {hasTextLayer === false && (
         <div className="fixed top-4 left-4 bg-yellow-200 text-black p-2 rounded shadow z-50">
           Warning: This PDF may lack a text layer. Search and highlighting may not work. Use a text-based PDF.
@@ -557,9 +639,39 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
           <button title="Switch to Presentation Mode" onClick={toggleFullScreen} className="p-1 hover:bg-gray-700 rounded">
             {isFullScreen ? <Minimize2 size={18} className="cursor-pointer" /> : <Expand size={18} className="cursor-pointer" />}
           </button>
-          <button title="Tools" className="p-1 hover:bg-gray-700 rounded">
-            <ChevronsRight size={22} className="cursor-pointer" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <ChevronsRight size={22} className="cursor-pointer" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuGroup>
+                <DropdownMenuItem className="cursor-pointer" onClick={goToFirstPage}>
+                  <SquareArrowUp size={22} className="text-gray-500" />
+                  <span className="text-gray-600 text-sm">Go to First Page</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={goToLastPage}>
+                  <SquareArrowDown size={22} className="text-gray-500" />
+                  <span className="text-gray-600 text-sm">Go to Last Page</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={rotateClockwise}>
+                  <RotateCw size={22} className="text-gray-500" />
+                  <span className="text-gray-600 text-sm">Rotate Clockwise</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={rotateCounterclockwise}>
+                  <RotateCcw size={22} className="text-gray-500" />
+                  <span className="text-gray-600 text-sm">Rotate Counterclockwise</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={selectTextTool}>
+                  <MousePointer size={22} className="text-gray-500" />
+                  <span className="text-gray-600 text-sm">Text Selection Tool</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={selectHandTool}>
+                  <Hand size={22} className="text-gray-500" />
+                  <span className="text-gray-600 text-sm">Hand Tool</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <div className="flex flex-col items-center py-3 overflow-auto" style={{ maxHeight: 'calc(100vh - 60px)' }}>
@@ -576,6 +688,8 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
           {Array.from({ length: numPages || 0 }, (_, index) => {
             const pageNum = index + 1;
             const isRendered = renderedPages[pageNum];
+            const isInView = Math.abs(pageNumber - pageNum) <= visibleRange;
+
             return (
               <div
                 key={pageNum}
@@ -583,40 +697,41 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
                 data-page-number={pageNum}
                 className="mb-6 relative"
               >
-                {/* Loading UI */}
-                <Card
-                  className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-md flex flex-col items-center p-6 mx-auto animate-fadeIn absolute inset-0 z-10 mb-3 ${
-                    isRendered ? 'hidden' : 'block'
-                  }`}
-                  style={{ animationDelay: `${index * 0.3}s` }}
-                >
-                  <CardContent className="w-full relative z-10">
-                    {/* Skeleton Bars */}
-                    <div className="space-y-4 mt-4">
-                      <div className="h-5 bg-gray-200 rounded w-3/4 mx-auto animate-pulse" />
-                      <div className="h-5 bg-gray-200 rounded w-5/6 mx-auto animate-pulse" />
-                      <div className="h-5 bg-gray-200 rounded w-2/3 mx-auto animate-pulse" />
-                      <div className="h-5 bg-gray-200 rounded w-4/5 mx-auto animate-pulse" />
+                {isInView ? (
+                  <>
+                    <Card
+                      className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-md flex flex-col justify-center items-center p-6 mx-auto ${isRendered ? 'hidden' : 'block'}`}
+                      style={{ transition: 'opacity 0.3s ease' }}
+                    >
+                      <CardContent className="w-full relative z-10">
+                        <div className="space-y-4 mt-4">
+                          <div className="h-5 bg-gray-200 rounded w-3/4 mx-auto animate-pulse" />
+                          <div className="h-5 bg-gray-200 rounded w-5/6 mx-auto animate-pulse" />
+                          <div className="h-5 bg-gray-200 rounded w-2/3 mx-auto animate-pulse" />
+                          <div className="h-5 bg-gray-200 rounded w-4/5 mx-auto animate-pulse" />
+                        </div>
+                        <div className="mt-6 flex justify-center">
+                          <LoadingSpinner message={`Loading page ${pageNum}...`} size="md" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <div className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'}`}>
+                      <Page
+                        pageNumber={pageNum}
+                        renderTextLayer={true}
+                        renderAnnotationLayer={true}
+                        scale={scale}
+                        rotate={rotation}
+                        onRenderSuccess={() => {
+                          onPageRenderSuccess(pageNum);
+                          highlightMatches(pageNum);
+                        }}
+                      />
                     </div>
-                    {/* LoadingSpinner */}
-                    <div className="mt-6 flex justify-center">
-                      <LoadingSpinner message={`Loading page ${pageNum}...`} size="md" />
-                    </div>
-                  </CardContent>
-                </Card>
-                {/* Page Component */}
-                <div className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'}`}>
-                  <Page
-                    pageNumber={pageNum}
-                    renderTextLayer={true}
-                    renderAnnotationLayer={true}
-                    scale={scale}
-                    onRenderSuccess={() => {
-                      onPageRenderSuccess(pageNum);
-                      highlightMatches(pageNum);
-                    }}
-                  />
-                </div>
+                  </>
+                ) : (
+                  <div style={{ height: '297mm' }} />
+                )}
               </div>
             );
           })}
@@ -648,11 +763,9 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
         @keyframes fadeIn {
           0% {
             opacity: 0;
-            transform: translateY(10px);
           }
           100% {
             opacity: 1;
-            transform: translateY(0);
           }
         }
         .animate-fadeIn {
