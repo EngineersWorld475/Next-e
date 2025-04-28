@@ -16,6 +16,7 @@ import useUserId from '@/hooks/useUserId';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Card, CardContent } from '../ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { useCustomToast } from '@/hooks/useCustomToast';
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
@@ -55,15 +56,18 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
   const [pdfUrl, setPdfUrl] = useState(initialPdfUrl);
   const [renderedPages, setRenderedPages] = useState({});
   const [tool, setTool] = useState('text');
+  const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
   const pageRefs = useRef([]);
   const fileInputRef = useRef(null);
+  const pdfContainerRef = useRef(null);
   const dispatch = useDispatch();
   const { groupList } = useSelector((state) => state.group);
   const userId = useUserId();
   const { user } = useSelector((state) => state.auth);
   const visibleRange = 2;
+  const scrollSpeedFactor = 0.3; // handle the scrolling speed
 
   // Panning state for hand tool
   const [isPanning, setIsPanning] = useState(false);
@@ -81,6 +85,66 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
     if (!pdfUrl) setShowBox(false);
   }, [pdfUrl]);
 
+  // Restore view from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pdfParam = params.get('pdf');
+    const pageParam = params.get('page');
+    const scrollParam = params.get('scroll');
+    const scaleParam = params.get('scale');
+    const rotationParam = params.get('rotation');
+
+    if (pdfParam) {
+      // Sanitize and validate URL
+      try {
+        const decodedUrl = decodeURIComponent(pdfParam);
+        new URL(decodedUrl); // Throws if invalid
+        setPdfUrl(decodedUrl);
+      } catch (error) {
+        console.error('Invalid PDF URL:', error);
+        showToast({
+          title: 'Error',
+          description: 'Invalid PDF URL in query parameters',
+          variant: 'error',
+        });
+      }
+    }
+
+    // Wait for pages to render before restoring page and scroll
+    if (numPages && pageRefs.current.length === numPages) {
+      if (pageParam) {
+        const pageNum = parseInt(pageParam, 10);
+        if (!isNaN(pageNum) && pageNum > 0 && pageNum <= numPages) {
+          setPageNumber(pageNum);
+          const pageEl = pageRefs.current[pageNum - 1];
+          if (pageEl) {
+            pageEl.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      }
+      if (scrollParam) {
+        const scrollY = parseFloat(scrollParam);
+        if (!isNaN(scrollY) && containerRef.current) {
+          containerRef.current.scrollTop = scrollY;
+        }
+      }
+    }
+
+    if (scaleParam) {
+      const newScale = parseFloat(scaleParam);
+      if (!isNaN(newScale) && newScale >= 0.5 && newScale <= 3.0) {
+        setScale(newScale);
+      }
+    }
+
+    if (rotationParam) {
+      const newRotation = parseInt(rotationParam, 10);
+      if (!isNaN(newRotation) && [0, 90, 180, 270].includes(newRotation)) {
+        setRotation(newRotation);
+      }
+    }
+  }, [numPages]);
+
   // Handle file selection
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
@@ -91,7 +155,11 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
         URL.revokeObjectURL(pdfUrl);
       }
     } else {
-      console.warn('Please select a valid PDF file');
+      showToast({
+        title: 'Invalid File',
+        description: 'Please select a valid PDF file',
+        variant: 'error',
+      });
     }
   };
 
@@ -160,46 +228,77 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
 
   // Handle panning for hand tool
   useEffect(() => {
-    const container = containerRef.current;
+    const container = pdfContainerRef.current;
     if (!container || tool !== 'hand') return;
 
+    let animationFrameId = null;
+
     const handleMouseDown = (e) => {
-      e.preventDefault(); // Prevent text selection or other default behaviors
+      e.preventDefault();
+      e.stopPropagation();
       setIsPanning(true);
       setPanStart({ x: e.clientX, y: e.clientY });
-      container.style.cursor = 'grabbing';
     };
 
     const handleMouseMove = (e) => {
       if (!isPanning) return;
-      const dx = panStart.x - e.clientX; // Reverse direction for natural scrolling
-      const dy = panStart.y - e.clientY;
-      container.scrollLeft += dx;
-      container.scrollTop += dy;
-      setPanStart({ x: e.clientX, y: e.clientY });
+
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+
+      animationFrameId = requestAnimationFrame(() => {
+        const dx = (panStart.x - e.clientX) * scrollSpeedFactor;
+        const dy = (panStart.y - e.clientY) * scrollSpeedFactor;
+        container.scrollLeft += dx;
+        container.scrollTop += dy;
+        setPanStart({ x: e.clientX, y: e.clientY });
+      });
     };
 
     const handleMouseUp = () => {
       setIsPanning(false);
-      container.style.cursor = 'grab';
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
 
-    container.style.cursor = 'grab';
-    container.style.userSelect = 'none'; // Prevent text selection during panning
-    container.addEventListener('mousedown', handleMouseDown);
-    container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('mouseup', handleMouseUp);
-    container.addEventListener('mouseleave', handleMouseUp);
+    const disablePointerEvents = () => {
+      const canvases = container.querySelectorAll('.react-pdf__Page__canvas');
+      const textLayers = container.querySelectorAll('.react-pdf__Page__textLayer');
+      canvases.forEach((canvas) => (canvas.style.pointerEvents = 'none'));
+      textLayers.forEach((textLayer) => (textLayer.style.pointerEvents = 'none'));
+    };
+
+    const restorePointerEvents = () => {
+      const canvases = container.querySelectorAll('.react-pdf__Page__canvas');
+      const textLayers = container.querySelectorAll('.react-pdf__Page__textLayer');
+      canvases.forEach((canvas) => (canvas.style.pointerEvents = 'auto'));
+      textLayers.forEach((textLayer) => (textLayer.style.pointerEvents = 'auto'));
+    };
+
+    if (tool === 'hand') {
+      container.style.userSelect = 'none';
+      disablePointerEvents();
+      container.addEventListener('mousedown', handleMouseDown, { capture: true });
+      container.addEventListener('mousemove', handleMouseMove, { capture: true });
+      container.addEventListener('mouseup', handleMouseUp, { capture: true });
+      container.addEventListener('mouseleave', handleMouseUp, { capture: true });
+    }
 
     return () => {
-      container.removeEventListener('mousedown', handleMouseDown);
-      container.removeEventListener('mousemove', handleMouseMove);
-      container.removeEventListener('mouseup', handleMouseUp);
-      container.removeEventListener('mouseleave', handleMouseUp);
-      container.style.cursor = 'default';
       container.style.userSelect = 'auto';
+      restorePointerEvents();
+      container.removeEventListener('mousedown', handleMouseDown, { capture: true });
+      container.removeEventListener('mousemove', handleMouseMove, { capture: true });
+      container.removeEventListener('mouseup', handleMouseUp, { capture: true });
+      container.removeEventListener('mouseleave', handleMouseUp, { capture: true });
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
   }, [tool, isPanning]);
+
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -259,8 +358,7 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
 
   const zoomIn = () => {
     setScale((prev) => Math.min(prev + 0.25, 3.0));
-  };
-
+  }
   const zoomOut = () => {
     setScale((prev) => Math.max(prev - 0.25, 0.5));
   };
@@ -301,6 +399,45 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
     setSelectedText('');
   };
 
+  // Handle current view
+  const handleCurrentView = () => {
+    if (!pdfUrl) {
+      showToast({
+        title: 'No PDF Loaded',
+        description: 'Please load a PDF to share the current view',
+        variant: 'error',
+      });
+      return;
+    }
+
+    const scrollY = containerRef.current?.scrollTop || 0;
+    const params = new URLSearchParams({
+      pdf: encodeURIComponent(pdfUrl),
+      page: pageNumber.toString(),
+      scroll: scrollY.toFixed(2),
+      scale: scale.toFixed(2),
+      rotation: rotation.toString(),
+    });
+
+    const currentViewUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+    navigator.clipboard.writeText(currentViewUrl).then(() => {
+      console.log('Current view URL copied to clipboard:', currentViewUrl);
+      showToast({
+        title: 'Copied',
+        description: 'Current view URL copied to clipboard',
+        variant: 'success',
+      });
+    }).catch((err) => {
+      console.error('Failed to copy URL:', err);
+      showToast({
+        title: 'Copy Failed',
+        description: 'Failed to copy current view URL',
+        variant: 'error',
+      });
+    });
+  };
+
   useEffect(() => {
     const originalWarn = console.warn;
     console.warn = (...args) => {
@@ -314,7 +451,7 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
 
   useEffect(() => {
     dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
-  }, [dispatch]);
+  }, [dispatch, userId, user?.token]);
 
   const onPageRenderSuccess = async (pageNumber) => {
     try {
@@ -459,6 +596,11 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
     await navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+    showToast({
+      title: 'Copied',
+      description: 'Annotation link copied to clipboard',
+      variant: 'success',
+    });
   };
 
   if (!isClient || !pdfUrl) {
@@ -472,7 +614,7 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
   return (
     <div className="relative w-full h-screen overflow-auto" ref={containerRef}>
       {hasTextLayer === false && (
-        <div className="fixed top-4 left-4 bg-yellow-200 text-black p-2 rounded shadow z-50">
+        <div className="fixed top-10 left-4 bg-yellow-200 text-black p-2 rounded shadow z-50">
           Warning: This PDF may lack a text layer. Search and highlighting may not work. Use a text-based PDF.
         </div>
       )}
@@ -563,13 +705,18 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
               className="hidden"
             />
           </div>
-          <button title="Print" className="p-1 hover:bg-gray-700 rounded">
+          <button title="Print" className="p-1 hover:bg-gray-700 rounded" onClick={() => window.print()}>
             <Printer size={18} className="cursor-pointer" />
           </button>
           <button title="Download" onClick={handleDownload} className="p-1 hover:bg-gray-700 rounded">
             <DownloadIcon size={18} className="cursor-pointer" />
           </button>
-          <button title="Current view(copy or open in new window)" className="p-1 hover:bg-gray-700 rounded">
+          <button
+            title="Copy current view"
+            onClick={handleCurrentView}
+            className="p-1 hover:bg-gray-700 rounded"
+            disabled={!pdfUrl}
+          >
             <Bookmark size={18} className="cursor-pointer" />
           </button>
           <Dialog>
@@ -674,7 +821,12 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex flex-col items-center py-3 overflow-auto" style={{ maxHeight: 'calc(100vh - 60px)' }}>
+      <div
+        ref={pdfContainerRef}
+        className={`flex flex-col items-center py-3 overflow-auto ${tool === 'hand' ? (isPanning ? 'cursor-grabbing hand-tool-active' : 'cursor-grab hand-tool-active') : 'cursor-default'
+          }`}
+        style={{ maxHeight: 'calc(100vh - 60px)' }}
+      >
         <Document
           file={decodeURIComponent(pdfUrl)}
           onLoadSuccess={onDocumentLoadSuccess}
@@ -684,6 +836,14 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
               <LoadingSpinner message="Loading PDF document..." size="lg" />
             </div>
           }
+          onLoadError={(error) => {
+            console.error('PDF load error:', error);
+            showToast({
+              title: 'Error',
+              description: 'Failed to load PDF',
+              variant: 'error',
+            });
+          }}
         >
           {Array.from({ length: numPages || 0 }, (_, index) => {
             const pageNum = index + 1;
@@ -753,25 +913,30 @@ export default function PDFViewer({ pdfUrl: initialPdfUrl }) {
         </div>
       )}
       <style jsx>{`
-        .react-pdf__Page__textLayer {
-          border: 2px solid red !important;
-        }
-        .highlight {
-          background-color: green !important;
-          color: black !important;
-        }
-        @keyframes fadeIn {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-      `}</style>
+  .react-pdf__Page__textLayer {
+    border: 2px solid red !important;
+  }
+  .highlight {
+    background-color: green !important;
+    color: black !important;
+  }
+  .hand-tool-active .react-pdf__Page__canvas,
+  .hand-tool-active .react-pdf__Page__textLayer {
+    cursor: inherit !important;
+    user-select: none !important;
+  }
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+`}</style>
     </div>
   );
 }
