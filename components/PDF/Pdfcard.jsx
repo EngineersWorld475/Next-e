@@ -70,9 +70,6 @@ const Pdfcard = ({ article, author, pdf, doi, id, pubmedId, handleDeleteCollecti
     const pdfUrlEncoded = encodeURIComponent(pdf);
     window.open(`/pdf-viewer/${id}?url=${pdfUrlEncoded}`, '_blank');
   };
-  
-  console.log('...pdf', pdf);
-  console.log('...id', id)
 
   return (
     <div className='flex flex-col md:flex-row lg:flex-row w-full shadow-md mb-4 text-gray-600'>

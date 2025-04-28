@@ -2,11 +2,19 @@
 import { useEffect, useState, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '../ui/button';
-import { Bookmark, ChevronFirst, ChevronLast, ChevronsRight, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'pdfjs-dist/web/pdf_viewer.css';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { useDispatch, useSelector } from 'react-redux';
+import { getGroupsByUserId } from '@/store/group-slice';
+import useUserId from '@/hooks/useUserId';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
@@ -24,9 +32,20 @@ export default function PDFViewer({ pdfUrl }) {
   const [searchResults, setSearchResults] = useState([]);
   const [currentMatch, setCurrentMatch] = useState(0);
   const [hasTextLayer, setHasTextLayer] = useState(true);
+  const [radioItem, setRadioItem] = useState('group')
+  const [copied, setCopied] = useState(false)
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
   const pageRefs = useRef([]);
+  const dispatch = useDispatch();
+  const { groupList } = useSelector((state) => state.group);
+  const userId = useUserId();
+  const { user } = useSelector((state) => state.auth);
+
+
+  // Annotation Link(dummy)
+  const link = "https://ui.shadcn.com/docs/installation"
+
 
   useEffect(() => {
     setIsClient(true);
@@ -175,6 +194,11 @@ export default function PDFViewer({ pdfUrl }) {
     };
   }, []);
 
+  // Rendering groups when page loads
+  useEffect(() => {
+    dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
+  }, [dispatch])
+
   const onPageRenderSuccess = async (pageNumber) => {
     try {
       const page = await pdfjs.getDocument(decodeURIComponent(pdfUrl)).promise.then((pdf) => pdf.getPage(pageNumber));
@@ -313,9 +337,19 @@ export default function PDFViewer({ pdfUrl }) {
     });
   };
 
+  // copy annotation link
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(link)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
   if (!isClient || !pdfUrl) {
     return <p className="text-center mt-10">Loading pdf...</p>;
   }
+
+  console.log('.....radioItem', radioItem)
+
 
   return (
     <div className="relative w-full h-screen overflow-auto">
@@ -407,9 +441,82 @@ export default function PDFViewer({ pdfUrl }) {
           <button title="Current view(copy or open in new window)" className="p-1 hover:bg-gray-700 rounded">
             <Bookmark size={18} className="cursor-pointer" />
           </button>
-          <button title="Share" className="p-1 hover:bg-gray-700 rounded">
-            <Share size={18} className="cursor-pointer text-[#ff6347]" />
-          </button>
+          {/* share annotation */}
+          <Dialog>
+            <DialogTrigger>
+              <Share size={24} className="cursor-pointer text-[#ff6347] p-1 hover:bg-gray-700 rounded" />
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => {
+              e.preventDefault(); // Prevent default autofocus
+            }}>
+              <DialogHeader>
+                <DialogTitle>Share Annotation</DialogTitle>
+                <DialogDescription>
+                  Share your annotation to group or individual.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex items-center space-x-2">
+                <div className="grid flex-1 gap-2">
+                  <Label htmlFor="link" className="sr-only">
+                    Link
+                  </Label>
+                  <Input
+                    id="link"
+                    value={link}
+                    readOnly
+                  />
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="px-3"
+                  onClick={handleCopy}
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+              <RadioGroup defaultValue="group" value={radioItem} className="flex gap-3 mx-2" onValueChange={(value) => setRadioItem(value)}>
+                <div className="flex items-center space-x-1">
+                  <RadioGroupItem value="group" id="r1" />
+                  <Label htmlFor="r1">Group</Label>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <RadioGroupItem value="individual" id="r1" />
+                  <Label htmlFor="r1">Individual</Label>
+                </div>
+              </RadioGroup>
+              {radioItem === 'group' ? (
+                <div>
+                  <Label>Group</Label>
+                  <Select>
+                    <SelectTrigger className="w-[220px]">
+                      <SelectValue placeholder="Select Group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {groupList && groupList.length > 0 && groupList.map((group) => {
+                          return (
+                            <SelectItem key={group.GroupId} value={group.GroupName} className='cursor-pointer'>{group.GroupName}</SelectItem>
+                          )
+                        })}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div>
+                  <Label>Email</Label>
+                  <Input placeholder="Enter E-mail address" />
+                </div>
+              )}
+              <DialogFooter className="sm:justify-start">
+                <Button type="button">
+                  Send
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <button title="Switch to Presentation Mode" onClick={toggleFullScreen} className="p-1 hover:bg-gray-700 rounded">
             {isFullScreen ? (
               <Minimize2 size={18} className="cursor-pointer" />
@@ -427,7 +534,7 @@ export default function PDFViewer({ pdfUrl }) {
           file={decodeURIComponent(pdfUrl)}
           onLoadSuccess={onDocumentLoadSuccess}
           className="flex flex-col items-center"
-          // loading={<p>Loading PDF...</p>}
+          loading={<p>Loading PDF...</p>}
         >
           {Array.from({ length: numPages || 0 }, (_, index) => (
             <div

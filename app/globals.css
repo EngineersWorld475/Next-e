@@ -133,7 +133,7 @@
   }
 }
 
-/* .highlight {
-  background-color: yellow;
-  color: black;
-} */
+.highlight {
+  background-color: yellow !important;
+  color: black !important;
+}
