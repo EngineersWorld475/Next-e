@@ -1,7 +1,8 @@
 'use client';
+import React from 'react';
 import { Document, Page } from 'react-pdf';
 
-export default function PdfSidebar({
+const PdfSidebar = ({
   showThumbnails,
   pdfUrl,
   numPages,
@@ -10,7 +11,7 @@ export default function PdfSidebar({
   setThumbnailRendered,
   goToPage,
   searchText,
-}) {
+}) => {
   const thumbnailScale = 0.2;
 
   const onThumbnailRenderSuccess = (pageNumber) => {
@@ -32,7 +33,7 @@ export default function PdfSidebar({
       }}
     >
       {showThumbnails && (
-        <div className="p-2">
+        <div className="flex justify-center items-center">
           <Document
             file={decodeURIComponent(pdfUrl)}
             onLoadSuccess={() => {}}
@@ -49,7 +50,7 @@ export default function PdfSidebar({
               return (
                 <div
                   key={`thumbnail-${pageNum}`}
-                  className={`mb-2 cursor-pointer rounded border-2 ${pageNumber === pageNum ? 'border-[#ff6347]' : 'border-transparent'} hover:border-red-300 transition-colors`}
+                  className={`mb-2 cursor-pointer rounded border-2 ${pageNumber === pageNum ? 'border-[#ff6347]' : 'border-transparent'} transition-colors`}
                   onClick={() => goToPage(pageNum)}
                 >
                   <div className="relative">
@@ -117,3 +118,5 @@ export default function PdfSidebar({
     </div>
   );
 }
+
+export default React.memo(PdfSidebar);

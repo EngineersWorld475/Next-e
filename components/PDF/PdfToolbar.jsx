@@ -8,9 +8,12 @@ import { Input } from '../ui/input';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getGroupsByUserId } from '@/store/group-slice';
+import useUserId from '@/hooks/useUserId';
 
-export default function PdfToolbar({
+const PdfToolbar = ({
   pageNumber,
   numPages,
   scale,
@@ -40,10 +43,14 @@ export default function PdfToolbar({
   user,
   containerRef,
   showToast
-}) {
+}) => {
   const [copied, setCopied] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [radioItem, setRadioItem] = useState('group');
+  const [dialogOpen, setDialogOpen] = useState(false);
   const link = "https://ui.shadcn.com/docs/installation";
+  const dispatch = useDispatch();
+  const userId = useUserId();
 
   const goToPreviousPage = () => {
     if (pageNumber > 1) {
@@ -121,6 +128,32 @@ export default function PdfToolbar({
     link.click();
   };
 
+  const handlePrintPDF = () => {
+    if (!pdfUrl) {
+      showToast({
+        title: 'No PDF Loaded',
+        description: 'Please load a PDF to print',
+        variant: 'error',
+      });
+      return;
+    }
+
+    const printWindow = window.open(pdfUrl, '_blank');
+    if (!printWindow) {
+      showToast({
+        title: 'Popup Blocked',
+        description: 'Please allow popups to print the PDF',
+        variant: 'error',
+      });
+      return;
+    }
+
+    printWindow.addEventListener('load', () => {
+      printWindow.focus();
+      printWindow.print();
+    });
+  };
+
   const handleCurrentView = () => {
     if (!pdfUrl) {
       showToast({
@@ -168,6 +201,25 @@ export default function PdfToolbar({
       description: 'Annotation link copied to clipboard',
       variant: 'success',
     });
+  };
+
+  const handleDialogOpen = () => {
+    setDialogOpen(true);
+    if (user?.token && userId) {
+      dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
+        .catch((err) => {
+          console.error('Failed to fetch groups:', err);
+          showToast({
+            title: 'Error',
+            description: 'Failed to fetch groups',
+            variant: 'error',
+          });
+        });
+    }
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
   };
 
   return (
@@ -265,7 +317,17 @@ export default function PdfToolbar({
             className="hidden"
           />
         </div>
-        <button title="Print" className="p-1 hover:bg-gray-700 rounded" onClick={() => window.print()}>
+        <button
+          title="Print PDF"
+          className="p-1 hover:bg-gray-700 rounded"
+          onClick={() => {
+            setIsPrinting(true);
+            setTimeout(() => {
+              window.print();
+              setIsPrinting(false);
+            }, 100);
+          }}
+        >
           <Printer size={18} className="cursor-pointer" />
         </button>
         <button title="Download" onClick={handleDownload} className="p-1 hover:bg-gray-700 rounded">
@@ -279,7 +341,10 @@ export default function PdfToolbar({
         >
           <Bookmark size={18} className="cursor-pointer" />
         </button>
-        <Dialog>
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
+          if (open) handleDialogOpen();
+          else handleDialogClose();
+        }}>
           <DialogTrigger>
             <Share size={24} className="cursor-pointer text-[#ff6347] p-1 hover:bg-gray-700 rounded" />
           </DialogTrigger>
@@ -321,13 +386,17 @@ export default function PdfToolbar({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {groupList &&
-                        groupList.length > 0 &&
+                      {groupList && groupList.length > 0 ? (
                         groupList.map((group) => (
                           <SelectItem key={group.GroupId} value={group.GroupName} className="cursor-pointer">
                             {group.GroupName}
                           </SelectItem>
-                        ))}
+                        ))
+                      ) : (
+                        <SelectItem value="no-groups" disabled>
+                          No groups available
+                        </SelectItem>
+                      )}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -383,3 +452,5 @@ export default function PdfToolbar({
     </div>
   );
 }
+
+export default React.memo(PdfToolbar);

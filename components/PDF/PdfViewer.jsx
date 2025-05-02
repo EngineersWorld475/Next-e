@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { pdfjs } from 'react-pdf';
 import PdfToolbar from './PdfToolbar';
 import PdfDocument from './PdfDocument';
@@ -11,10 +11,11 @@ import useUserId from '@/hooks/useUserId';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { v4 as uuid } from 'uuid';
+import { throttle } from 'lodash';
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
-export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
+const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [isClient, setIsClient] = useState(false);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -45,21 +46,33 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
   const { groupList } = useSelector((state) => state.group);
   const userId = useUserId();
   const { user } = useSelector((state) => state.auth);
-  const zoomLevels = [1.0, 1.5, 2.0, 2.5, 3.0];
   const observerRef = useRef(null);
-  const zoomTimeoutRef = useRef(null);
   const isZoomingRef = useRef(false);
 
-  // Debounce utility
-  const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  };
+  // Memoized zoom levels
+  const zoomLevels = useMemo(() => [1.0, 1.5, 2.0, 2.5, 3.0], []);
 
-  // Handle textlayer aborted warning
+  // Throttle scroll observer callback
+  const observerCallback = useMemo(
+    () =>
+      throttle((entries) => {
+        if (isZoomingRef.current) return;
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const pageNum = parseInt(entry.target.getAttribute('data-page-number'));
+            setPageNumber(pageNum);
+            const pageNumDisplay = document.querySelector('.page-number-display');
+            if (pageNumDisplay) {
+              pageNumDisplay.classList.add('animate-page-number');
+              setTimeout(() => pageNumDisplay.classList.remove('animate-page-number'), 300);
+            }
+          }
+        });
+      }, 100),
+    []
+  );
+
+  // Handle console warnings for text layer aborts
   useEffect(() => {
     const originalWarn = console.warn;
     const originalError = console.error;
@@ -151,19 +164,20 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
   }, [numPages, showToast]);
 
   // Handle text selection
-  useEffect(() => {
-    const handleMouseUp = () => {
-      if (tool === 'text') {
-        const selection = window.getSelection().toString();
-        if (selection.length > 0) {
-          setSelectedText(selection);
-          setShowBox(true);
-        }
+  const handleMouseUp = useCallback(() => {
+    if (tool === 'text') {
+      const selection = window.getSelection().toString();
+      if (selection.length > 0) {
+        setSelectedText(selection);
+        setShowBox(true);
       }
-    };
+    }
+  }, [tool]);
+
+  useEffect(() => {
     document.addEventListener('mouseup', handleMouseUp);
     return () => document.removeEventListener('mouseup', handleMouseUp);
-  }, [tool]);
+  }, [handleMouseUp]);
 
   // Handle search input
   useEffect(() => {
@@ -190,23 +204,8 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showSearchInput]);
 
-  // Track visible page during scroll
+  // Track visible pages with IntersectionObserver
   useEffect(() => {
-    const observerCallback = debounce((entries) => {
-      if (isZoomingRef.current) return;
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const pageNum = parseInt(entry.target.getAttribute('data-page-number'));
-          setPageNumber(pageNum);
-          const pageNumDisplay = document.querySelector('.page-number-display');
-          if (pageNumDisplay) {
-            pageNumDisplay.classList.add('animate-page-number');
-            setTimeout(() => pageNumDisplay.classList.remove('animate-page-number'), 300);
-          }
-        }
-      });
-    }, 100);
-
     observerRef.current = new IntersectionObserver(observerCallback, { threshold: 0.6 });
 
     pageRefs.current.forEach((ref) => {
@@ -218,16 +217,16 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
         observerRef.current.disconnect();
       }
     };
-  }, [numPages]);
+  }, [numPages, observerCallback]);
 
-  const onDocumentLoadSuccess = ({ numPages }) => {
+  const onDocumentLoadSuccess = useCallback(({ numPages }) => {
     setNumPages(numPages);
     pageRefs.current = Array(numPages).fill().map((_, i) => pageRefs.current[i] || null);
     setRenderedPages({});
     setThumbnailRendered({});
-  };
+  }, []);
 
-  const handleFileSelect = (event) => {
+  const handleFileSelect = useCallback((event) => {
     const file = event.target.files[0];
     if (file && file.type === 'application/pdf') {
       const fileUrl = URL.createObjectURL(file);
@@ -242,13 +241,13 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
         variant: 'error',
       });
     }
-  };
+  }, [pdfUrl, showToast]);
 
-  const toggleThumbnails = () => {
+  const toggleThumbnails = useCallback(() => {
     setShowThumbnails((prev) => !prev);
-  };
+  }, []);
 
-  const goToPage = (pageNum) => {
+  const goToPage = useCallback((pageNum) => {
     if (pageNum >= 1 && pageNum <= numPages) {
       setPageNumber(pageNum);
       const tryScroll = (attempt = 0) => {
@@ -271,9 +270,9 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
       };
       setTimeout(() => tryScroll(), 50);
     }
-  };
+  }, [numPages]);
 
-  const goToNextMatch = () => {
+  const goToNextMatch = useCallback(() => {
     if (searchResults.length === 0) return;
     const nextMatch = Math.min(currentMatch + 1, searchResults.length - 1);
     setCurrentMatch(nextMatch);
@@ -282,9 +281,9 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
       matchPage.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     scrollToMatch(searchResults[nextMatch]);
-  };
+  }, [searchResults, currentMatch]);
 
-  const scrollToMatch = (match) => {
+  const scrollToMatch = useCallback((match) => {
     const textLayer = document.querySelector(`.react-pdf__Page__textLayer[data-page-number="${match.page}"]`);
     if (textLayer) {
       const highlight = textLayer.querySelector(`[data-match-index="${match.startIndex}"]`);
@@ -297,9 +296,9 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
     } else {
       console.warn(`Text layer not found for page ${match.page}`);
     }
-  };
+  }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     const data = {
       id: uuid(),
       selectedText,
@@ -309,7 +308,16 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
     setShowBox(false);
     setQuestion('');
     setSelectedText('');
-  };
+  }, [selectedText, question]);
+
+  // Virtualized page rendering
+  const visiblePages = useMemo(() => {
+    if (!numPages) return [];
+    const buffer = 2; // Render 2 pages before and after the current page
+    const start = Math.max(1, pageNumber - buffer);
+    const end = Math.min(numPages, pageNumber + buffer);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }, [numPages, pageNumber]);
 
   if (!isClient || !pdfUrl) {
     return (
@@ -334,9 +342,9 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
         goToPage={goToPage}
         searchText={searchText}
       />
-      <div className="flex-1 h-screen overflow-auto" style={{ marginLeft: showThumbnails ? '12rem' : '0' }} ref={containerRef}>
+      <div className="flex-1 h-screen overflow-auto" style={{ marginLeft: showThumbnails ? '12rem' : '0', transition: 'margin-left 0.3s ease-in-out' }} ref={containerRef}>
         {hasTextLayer === false && (
-          <div className="fixed top-10 left-4 bg-yellow-200 text-black p-2 rounded shadow z-50">
+          <div className="fixed top-10 left-4 bg-yellow-200 text-black p-2 rounded shadow z-50 animate-fadeIn">
             Warning: This PDF may lack a text layer. Search and highlighting may not work. Use a text-based PDF.
           </div>
         )}
@@ -390,9 +398,10 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
           setCurrentMatch={setCurrentMatch}
           showToast={showToast}
           isZoomingRef={isZoomingRef}
+          visiblePages={visiblePages}
         />
         {showBox && (
-          <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50">
+          <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate-fadeIn">
             <p className="mb-2 text-sm text-gray-700 font-medium">
               Selected: <i>{selectedText}</i>
             </p>
@@ -405,7 +414,7 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
             />
             <button
               onClick={handleSubmit}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
             >
               Submit Question
             </button>
@@ -414,30 +423,30 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
       </div>
       <style jsx>{`
         .react-pdf__Page__textLayer {
-          border: 2px solid red !important;
+          border: none !important;
         }
         .highlight {
-          background-color: green !important;
+          background-color: yellow !important;
           color: black !important;
         }
         .hand-tool-active .react-pdf__Page__canvas,
         .hand-tool-active .react-pdf__Page__textLayer {
-          cursor: inherit !important;
+          cursor: grab !important;
           user-select: none !important;
         }
         .zoom-transition .react-pdf__Page {
           transition: transform 0.2s ease-out;
         }
         @keyframes fadeIn {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out forwards;
+          animation: fadeIn 0.3s ease-out forwards;
         }
         .page-transition {
           transition: transform 0.2s ease-out;
-          transform: scale(1);
+          transform: scale(1.02);
         }
         .animate-page-number {
           animation: pulse 0.3s ease-in-out;
@@ -451,3 +460,5 @@ export default function PdfViewer({ pdfUrl: initialPdfUrl }) {
     </div>
   );
 }
+
+export default PdfViewer;
