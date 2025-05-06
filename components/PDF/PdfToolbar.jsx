@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '../ui/button';
-import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, ZoomIn, ZoomOut, Image, SquareArrowUp, SquareArrowDown, RotateCw, RotateCcw, MousePointer, Hand } from 'lucide-react';
+import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, ZoomIn, ZoomOut, Image, SquareArrowUp, SquareArrowDown, RotateCw, RotateCcw, MousePointer, Hand, Rows3, Columns3 } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Label } from '../ui/label';
@@ -42,7 +42,9 @@ const PdfToolbar = ({
   groupList,
   user,
   containerRef,
-  showToast
+  showToast,
+  scrollMode,
+  setScrollMode,
 }) => {
   const [copied, setCopied] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -444,6 +446,14 @@ const PdfToolbar = ({
               <DropdownMenuItem className="cursor-pointer" onClick={selectHandTool}>
                 <Hand size={22} className="text-gray-500" />
                 <span className="text-gray-600 text-sm">Hand Tool</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => setScrollMode('vertical')}>
+                <Rows3 size={22} className="text-gray-500" />
+                <span className="text-gray-600 text-sm">Vertical Scrolling</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => setScrollMode('horizontal')}>
+                <Columns3 size={22} className="text-gray-500" />
+                <span className="text-gray-600 text-sm">Horizontal Scrolling</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

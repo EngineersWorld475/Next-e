@@ -35,6 +35,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [selectedText, setSelectedText] = useState('');
   const [question, setQuestion] = useState('');
   const [showBox, setShowBox] = useState(false);
+  const [scrollMode, setScrollMode] = useState('vertical'); // New state for scroll mode
   const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
@@ -61,11 +62,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           if (entry.isIntersecting) {
             const pageNum = parseInt(entry.target.getAttribute('data-page-number'));
             setPageNumber(pageNum);
-            const pageNumDisplay = document.querySelector('.page-number-display');
-            if (pageNumDisplay) {
-              pageNumDisplay.classList.add('animate-page-number');
-              setTimeout(() => pageNumDisplay.classList.remove('animate-page-number'), 300);
-            }
           }
         });
       }, 100),
@@ -255,36 +251,56 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         const pageEl = pageRefs.current[pageNum - 1];
         if (!container || !pageEl || attempt > 10) return;
         const pageHeight = pageEl.offsetHeight;
-        if (pageHeight === 0) {
+        const pageWidth = pageEl.offsetWidth;
+        if (pageHeight === 0 || pageWidth === 0) {
           setTimeout(() => tryScroll(attempt + 1), 100);
           return;
         }
-        const scrollOffset = pageEl.offsetTop - container.offsetTop;
-        const centeredScroll = scrollOffset - (container.clientHeight / 2) + (pageHeight / 2);
-        container.scrollTo({
-          top: centeredScroll,
-          behavior: 'smooth',
-        });
+        if (scrollMode === 'vertical') {
+          const scrollOffset = pageEl.offsetTop - container.offsetTop;
+          const centeredScroll = scrollOffset - (container.clientHeight / 2) + (pageHeight / 2);
+          container.scrollTo({
+            top: centeredScroll,
+            behavior: 'smooth',
+          });
+        } else {
+          const scrollOffset = pageEl.offsetLeft - container.offsetLeft;
+          const centeredScroll = scrollOffset - (container.clientWidth / 2) + (pageWidth / 2);
+          container.scrollTo({
+            left: centeredScroll,
+            behavior: 'smooth',
+          });
+        }
         pageEl.classList.add('page-transition');
         setTimeout(() => pageEl.classList.remove('page-transition'), 300);
       };
       setTimeout(() => tryScroll(), 50);
     }
-  }, [numPages]);
+  }, [numPages, scrollMode]);
 
   const goToNextMatch = useCallback(() => {
     if (searchResults.length === 0) return;
     const nextMatch = Math.min(currentMatch + 1, searchResults.length - 1);
     setCurrentMatch(nextMatch);
-    const matchPage = pageRefs.current[searchResults[nextMatch].page - 1];
-    if (matchPage) {
-      matchPage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    scrollToMatch(searchResults[nextMatch]);
-  }, [searchResults, currentMatch]);
+    const matchPageNum = searchResults[nextMatch].page;
+    goToPage(matchPageNum); // Ensure page is rendered
+    setTimeout(() => scrollToMatch(searchResults[nextMatch]), 300); // Delay to allow rendering
+  }, [searchResults, currentMatch, goToPage]);
 
-  const scrollToMatch = useCallback((match) => {
+    // Virtualized page rendering
+    const visiblePages = useMemo(() => {
+      if (!numPages) return [];
+      const buffer = 2; // Render 2 pages before and after the current page
+      const start = Math.max(1, pageNumber - buffer);
+      const end = Math.min(numPages, pageNumber + buffer);
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    }, [numPages, pageNumber]);
+
+  const scrollToMatch = useCallback((match, retryCount = 0) => {
+    const maxRetries = 5;
+    const retryDelay = 200;
     const textLayer = document.querySelector(`.react-pdf__Page__textLayer[data-page-number="${match.page}"]`);
+    console.log('...textLayer', textLayer, 'Visible pages:', visiblePages);
     if (textLayer) {
       const highlight = textLayer.querySelector(`[data-match-index="${match.startIndex}"]`);
       if (highlight) {
@@ -293,10 +309,18 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
       } else {
         console.warn('Highlight not found for match:', match);
       }
+    } else if (retryCount < maxRetries) {
+      console.warn(`Text layer not found for page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`);
+      setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
     } else {
-      console.warn(`Text layer not found for page ${match.page}`);
+      console.warn(`Text layer not found for page ${match.page} after ${maxRetries} retries`);
+      showToast({
+        title: 'Search Error',
+        description: `Could not find text layer for page ${match.page}.`,
+        variant: 'error',
+      });
     }
-  }, []);
+  }, [showToast, visiblePages]);
 
   const handleSubmit = useCallback(() => {
     const data = {
@@ -310,14 +334,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     setSelectedText('');
   }, [selectedText, question]);
 
-  // Virtualized page rendering
-  const visiblePages = useMemo(() => {
-    if (!numPages) return [];
-    const buffer = 2; // Render 2 pages before and after the current page
-    const start = Math.max(1, pageNumber - buffer);
-    const end = Math.min(numPages, pageNumber + buffer);
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  }, [numPages, pageNumber]);
 
   if (!isClient || !pdfUrl) {
     return (
@@ -378,6 +394,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           user={user}
           containerRef={containerRef}
           showToast={showToast}
+          scrollMode={scrollMode}
+          setScrollMode={setScrollMode}
         />
         <PdfDocument
           pdfUrl={pdfUrl}
@@ -399,6 +417,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           showToast={showToast}
           isZoomingRef={isZoomingRef}
           visiblePages={visiblePages}
+          scrollMode={scrollMode}
         />
         {showBox && (
           <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate-fadeIn">
@@ -425,10 +444,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         .react-pdf__Page__textLayer {
           border: none !important;
         }
-        .highlight {
-          background-color: yellow !important;
-          color: black !important;
-        }
         .hand-tool-active .react-pdf__Page__canvas,
         .hand-tool-active .react-pdf__Page__textLayer {
           cursor: grab !important;
@@ -447,14 +462,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         .page-transition {
           transition: transform 0.2s ease-out;
           transform: scale(1.02);
-        }
-        .animate-page-number {
-          animation: pulse 0.3s ease-in-out;
-        }
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
         }
       `}</style>
     </div>

@@ -23,6 +23,7 @@ export default function PdfDocument({
   setCurrentMatch,
   showToast,
   isZoomingRef,
+  scrollMode,
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
@@ -52,8 +53,13 @@ export default function PdfDocument({
       animationFrameId = requestAnimationFrame(() => {
         const dx = (panStart.x - e.clientX) * scrollSpeedFactor;
         const dy = (panStart.y - e.clientY) * scrollSpeedFactor;
-        container.scrollLeft += dx;
-        container.scrollTop += dy;
+        if (scrollMode === 'vertical') {
+          container.scrollLeft += dx;
+          container.scrollTop += dy;
+        } else {
+          container.scrollLeft += dx;
+          container.scrollTop = 0; // Lock vertical scroll in horizontal mode
+        }
         setPanStart({ x: e.clientX, y: e.clientY });
       });
     };
@@ -99,7 +105,7 @@ export default function PdfDocument({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [tool, isPanning, pdfContainerRef]);
+  }, [tool, isPanning, pdfContainerRef, scrollMode]);
 
   const onPageRenderSuccess = async (pageNumber) => {
     try {
@@ -166,13 +172,13 @@ export default function PdfDocument({
   return (
     <div
       ref={pdfContainerRef}
-      className={`flex flex-col items-center py-3 overflow-auto will-change-transform ${tool === 'hand' ? (isPanning ? 'cursor-grabbing hand-tool-active' : 'cursor-grab hand-tool-active') : 'cursor-default'}`}
-      style={{ maxHeight: 'calc(100vh - 60px)' }}
+      className={`flex ${scrollMode === 'vertical' ? 'flex-col' : 'flex-row'} items-center py-3 overflow-auto will-change-transform ${tool === 'hand' ? (isPanning ? 'cursor-grabbing hand-tool-active' : 'cursor-grab hand-tool-active') : 'cursor-default'}`}
+      style={{ maxHeight: 'calc(100vh - 60px)', ...(scrollMode === 'horizontal' ? { overflowY: 'hidden' } : {}) }}
     >
       <Document
         file={decodeURIComponent(pdfUrl)}
         onLoadSuccess={onDocumentLoadSuccess}
-        className="flex flex-col items-center"
+        className={`flex ${scrollMode === 'vertical' ? 'flex-col' : 'flex-row'} items-center`}
         loading={
           <div className="flex items-center justify-center h-screen">
             <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
@@ -201,7 +207,7 @@ export default function PdfDocument({
               key={pageNum}
               ref={(el) => (pageRefs.current[index] = el)}
               data-page-number={pageNum}
-              className="mb-6 relative"
+              className={`mb-6 relative ${scrollMode === 'horizontal' ? 'mr-6' : ''}`}
             >
               {(isInView || hasRendered) ? (
                 <>
@@ -257,7 +263,7 @@ export default function PdfDocument({
                           }
 
                           parts.push(
-                            <mark key={index} style={{ backgroundColor: 'yellow', color: 'black', padding: 0 }}>
+                            <mark key={index} style={{ backgroundColor: 'yellow', color: 'black', padding: 0 }} data-match-index={lastIndex}>
                               {str.slice(index, index + searchText.length)}
                             </mark>
                           );
@@ -271,7 +277,7 @@ export default function PdfDocument({
                   </div>
                 </>
               ) : (
-                <div className="w-full h-[297mm] bg-gray-100 rounded animate-pulse" />
+                <div className={`w-[210mm] h-[297mm] bg-gray-100 rounded animate-pulse ${scrollMode === 'horizontal' ? 'mr-6' : ''}`} />
               )}
             </div>
           );
