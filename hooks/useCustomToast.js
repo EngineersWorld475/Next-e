@@ -13,7 +13,7 @@ export function useCustomToast() {
         toast.warning(title, { description, style: { backgroundColor: "#CC5500", color: "white", border: "none" } });
         break;
       case "info":
-        toast.info(title, { description, style: { backgroundColor: "#088F8F", color: "white", border: "none" } });
+        toast.info(title, { description, style: { backgroundColor: "#3B82F6", color: "white", border: "none" } });
         break;
       default:
         toast(title, { description });

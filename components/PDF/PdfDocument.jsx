@@ -25,6 +25,7 @@ export default function PdfDocument({
   isZoomingRef,
   scrollMode,
 }) {
+  console.log('textLayerRef', textLayerRef)
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const scrollSpeedFactor = 0.3;
@@ -148,7 +149,7 @@ export default function PdfDocument({
             startIndex: index,
             endIndex: index + text.length,
           });
-          index += 1;
+          index += lowerSearchText.length; // Skip past the current match
         }
       }
     });
@@ -162,6 +163,8 @@ export default function PdfDocument({
       if (firstMatchPage) {
         firstMatchPage.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+    } else {
+      console.log(`No matches found for "${text}"`)
     }
   };
 
@@ -233,45 +236,26 @@ export default function PdfDocument({
                   <div className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'}`}>
                     <Page
                       pageNumber={pageNum}
-                      renderTextLayer={!isZoomingRef.current}
+                      renderTextLayer={!isZoomingRef.current || !!searchText}
                       renderAnnotationLayer={!isZoomingRef.current}
                       scale={scale}
                       rotate={rotation}
                       onRenderSuccess={() => onPageRenderSuccess(pageNum)}
-                      customTextRenderer={({ str }) => {
+                      customTextRenderer={({ str, itemIndex }) => {
+                        console.log(`customTextRenderer: page=${pageNum}, itemIndex=${itemIndex}, str="${str}", searchText="${searchText}"`);
                         if (!searchText) return str;
-
                         const lowerStr = str.toLowerCase();
                         const lowerSearch = searchText.toLowerCase();
-
-                        if (!lowerStr.includes(lowerSearch)) {
-                          return str;
-                        }
-
-                        const parts = [];
-                        let lastIndex = 0;
-
-                        while (true) {
-                          const index = lowerStr.indexOf(lowerSearch, lastIndex);
-                          if (index === -1) {
-                            parts.push(str.slice(lastIndex));
-                            break;
-                          }
-
-                          if (index > lastIndex) {
-                            parts.push(str.slice(lastIndex, index));
-                          }
-
-                          parts.push(
-                            <mark key={index} style={{ backgroundColor: 'yellow', color: 'black', padding: 0 }} data-match-index={lastIndex}>
-                              {str.slice(index, index + searchText.length)}
-                            </mark>
-                          );
-
-                          lastIndex = index + searchText.length;
-                        }
-
-                        return parts;
+                        const index = lowerStr.indexOf(lowerSearch);
+                        if (index === -1) return str;
+                      
+                        const matchText = str.slice(index, index + searchText.length);
+                        console.log('matchText:', matchText);
+                      
+                        // Return a string with <mark> tags
+                        const result = `${str.slice(0, index)}<mark class="search-match" style="background-color: yellow; color: black; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
+                        console.log('Result string:', result);
+                        return result;
                       }}
                     />
                   </div>
