@@ -33,8 +33,8 @@ const Navbar = () => {
       </Link>
 
       <div className="flex gap-3 md:gap-6 lg:gap-6 text-gray-600 font-medium items-center justify-center">
-        <Link href={'/pdf/manage-groups'} prefetch={true}>
-          <span className='cursor-pointer hover:text-gray-500 transition text-sm md:text-base lg:text-base'>Manage Groups</span>
+        <Link href={'/pdf/manage-groups'} prefetch={true} className='cursor-pointer hover:text-gray-500 transition text-sm md:text-base lg:text-base'>
+          Manage Groups
         </Link>
         <div className='flex flex-row gap-3 md:gap-6 lg:gap-6 justify-center items-center'>
           <ThemeToggle />

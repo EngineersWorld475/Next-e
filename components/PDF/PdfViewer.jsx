@@ -35,7 +35,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [selectedText, setSelectedText] = useState('');
   const [question, setQuestion] = useState('');
   const [showBox, setShowBox] = useState(false);
-  const [scrollMode, setScrollMode] = useState('vertical'); // New state for scroll mode
+  const [scrollMode, setScrollMode] = useState('vertical');
   const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
@@ -50,10 +50,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const observerRef = useRef(null);
   const isZoomingRef = useRef(false);
 
-  // Memoized zoom levels
   const zoomLevels = useMemo(() => [1.0, 1.5, 2.0, 2.5, 3.0], []);
 
-  // Throttle scroll observer callback
   const observerCallback = useMemo(
     () =>
       throttle((entries) => {
@@ -68,7 +66,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     []
   );
 
-  // Handle console warnings for text layer aborts
   useEffect(() => {
     const originalWarn = console.warn;
     const originalError = console.error;
@@ -101,7 +98,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
   }, [dispatch, userId, user?.token]);
 
-  // Restore view from URL parameters
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const pdfParam = params.get('pdf');
@@ -159,7 +155,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     }
   }, [numPages, showToast]);
 
-  // Handle text selection
   const handleMouseUp = useCallback(() => {
     if (tool === 'text') {
       const selection = window.getSelection().toString();
@@ -175,7 +170,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     return () => document.removeEventListener('mouseup', handleMouseUp);
   }, [handleMouseUp]);
 
-  // Handle search input
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
@@ -200,7 +194,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [showSearchInput]);
 
-  // Track visible pages with IntersectionObserver
   useEffect(() => {
     observerRef.current = new IntersectionObserver(observerCallback, { threshold: 0.6 });
 
@@ -263,13 +256,16 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
             top: centeredScroll,
             behavior: 'smooth',
           });
-        } else {
+        } else if (scrollMode === 'horizontal') {
           const scrollOffset = pageEl.offsetLeft - container.offsetLeft;
           const centeredScroll = scrollOffset - (container.clientWidth / 2) + (pageWidth / 2);
           container.scrollTo({
             left: centeredScroll,
             behavior: 'smooth',
           });
+        } else if (scrollMode === 'wrapped') {
+          // For wrapped mode, scroll to ensure the page is visible
+          pageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
         }
         pageEl.classList.add('page-transition');
         setTimeout(() => pageEl.classList.remove('page-transition'), 300);
@@ -283,18 +279,17 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     const nextMatch = Math.min(currentMatch + 1, searchResults.length - 1);
     setCurrentMatch(nextMatch);
     const matchPageNum = searchResults[nextMatch].page;
-    goToPage(matchPageNum); // Ensure page is rendered
-    setTimeout(() => scrollToMatch(searchResults[nextMatch]), 300); // Delay to allow rendering
+    goToPage(matchPageNum);
+    setTimeout(() => scrollToMatch(searchResults[nextMatch]), 300);
   }, [searchResults, currentMatch, goToPage]);
 
-    // Virtualized page rendering
-    const visiblePages = useMemo(() => {
-      if (!numPages) return [];
-      const buffer = 2; // Render 2 pages before and after the current page
-      const start = Math.max(1, pageNumber - buffer);
-      const end = Math.min(numPages, pageNumber + buffer);
-      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-    }, [numPages, pageNumber]);
+  const visiblePages = useMemo(() => {
+    if (!numPages) return [];
+    const buffer = 2;
+    const start = Math.max(1, pageNumber - buffer);
+    const end = Math.min(numPages, pageNumber + buffer);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }, [numPages, pageNumber]);
 
   const scrollToMatch = useCallback((match, retryCount = 0) => {
     const maxRetries = 5;
@@ -302,7 +297,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     const textLayer = document.querySelector(`.react-pdf__Page__textLayer[data-page-number="${match.page}"]`);
     console.log('...textLayer', textLayer, 'Visible pages:', visiblePages);
     if (textLayer) {
-      const highlight = textLayer.querySelector(`[data-match-index="${match.startIndex}"]`);
+      const highlight = textLayer.querySelector(`[data-match-index="${match.start("_index")}]`);
       if (highlight) {
         highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
         console.log(`Scrolled to match on page ${match.page}, index ${match.startIndex}`);
@@ -333,7 +328,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     setQuestion('');
     setSelectedText('');
   }, [selectedText, question]);
-
 
   if (!isClient || !pdfUrl) {
     return (
