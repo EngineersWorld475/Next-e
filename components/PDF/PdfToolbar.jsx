@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getGroupsByUserId } from '@/store/group-slice';
 import useUserId from '@/hooks/useUserId';
+import { Document, Page, pdfjs } from 'react-pdf';
 
 const PdfToolbar = ({
   pageNumber,
@@ -140,20 +141,96 @@ const PdfToolbar = ({
       return;
     }
 
-    const printWindow = window.open(pdfUrl, '_blank');
-    if (!printWindow) {
-      showToast({
-        title: 'Popup Blocked',
-        description: 'Please allow popups to print the PDF',
-        variant: 'error',
-      });
-      return;
-    }
+    // Create a hidden container for printing
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-container';
+    printContainer.style.position = 'absolute';
+    printContainer.style.left = '-9999px';
+    printContainer.style.top = '-9999px';
+    printContainer.style.display = 'flex';
+    printContainer.style.justifyContent = 'center';
+    printContainer.style.alignItems = 'center';
+    printContainer.style.width = '100vw';
+    printContainer.style.height = '100vh';
+    document.body.appendChild(printContainer);
 
-    printWindow.addEventListener('load', () => {
-      printWindow.focus();
-      printWindow.print();
-    });
+    // Create a style element to hide all other content during printing and center the page
+    const printStyles = document.createElement('style');
+    printStyles.setAttribute('id', 'print-styles');
+    printStyles.innerHTML = `
+      @media print {
+        body > *:not(#print-container) {
+          display: none !important;
+        }
+        #print-container {
+          display: flex !important;
+          position: static !important;
+          justify-content: center !important;
+          align-items: center !important;
+          width: 100% !important;
+          height: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        #print-container .react-pdf__Page {
+          margin: 0 auto !important;
+          box-shadow: none !important;
+          background: white !important;
+        }
+        #print-container .react-pdf__Page__canvas {
+          max-width: 100% !important;
+          height: auto !important;
+          display: block !important;
+          margin: 0 auto !important;
+        }
+      }
+    `;
+    document.head.appendChild(printStyles);
+
+    // Render the selected page using react-pdf
+    const renderPage = async () => {
+      try {
+        // Use pdfjs to get the page
+        const pdf = await pdfjs.getDocument(decodeURIComponent(pdfUrl)).promise;
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 1.0 });
+
+        // Create a canvas for rendering
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.display = 'block';
+        canvas.style.margin = '0 auto';
+        const context = canvas.getContext('2d');
+
+        // Render the page to the canvas
+        await page.render({
+          canvasContext: context,
+          viewport: viewport,
+        }).promise;
+
+        // Append the canvas to the print container
+        printContainer.appendChild(canvas);
+
+        // Trigger print
+        window.print();
+
+        // Cleanup
+        setTimeout(() => {
+          document.body.removeChild(printContainer);
+          document.head.removeChild(printStyles);
+        }, 1000);
+      } catch (error) {
+        console.error('Error rendering page for print:', error);
+        showToast({
+          title: 'Print Error',
+          description: 'Failed to print the selected page',
+          variant: 'error',
+        });
+      }
+    };
+
+    renderPage();
   };
 
   const handleCurrentView = () => {
@@ -322,13 +399,7 @@ const PdfToolbar = ({
         <button
           title="Print PDF"
           className="p-1 hover:bg-gray-700 rounded"
-          onClick={() => {
-            setIsPrinting(true);
-            setTimeout(() => {
-              window.print();
-              setIsPrinting(false);
-            }, 100);
-          }}
+          onClick={handlePrintPDF}
         >
           <Printer size={18} className="cursor-pointer" />
         </button>
