@@ -294,15 +294,43 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const scrollToMatch = useCallback((match, retryCount = 0) => {
     const maxRetries = 5;
     const retryDelay = 200;
-    const textLayer = document.querySelector(`.react-pdf__Page__textLayer[data-page-number="${match.page}"]`);
+    // Find the parent div with data-page-number
+    const pageContainer = document.querySelector(`div[data-page-number="${match.page}"]`);
+    if (!pageContainer) {
+      if (retryCount < maxRetries) {
+        console.warn(`Page container not found for page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`);
+        setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
+      } else {
+        console.warn(`Page container not found for page ${match.page} after ${maxRetries} retries`);
+        showToast({
+          title: 'Search Error',
+          description: `Could not find page container for page ${match.page}.`,
+          variant: 'error',
+        });
+      }
+      return;
+    }
+    // Find the textLayer within the page container
+    const textLayer = pageContainer.querySelector('.react-pdf__Page__textContent.textLayer');
     console.log('...textLayer', textLayer, 'Visible pages:', visiblePages);
     if (textLayer) {
-      const highlight = textLayer.querySelector(`[data-match-index="${match.start("_index")}]`);
+      const highlight = textLayer.querySelector(`[data-match-index="${match.matchIndex}"]`);
+      console.log('....highlight', highlight);
       if (highlight) {
         highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        console.log(`Scrolled to match on page ${match.page}, index ${match.startIndex}`);
+        console.log(`Scrolled to match on page ${match.page}, index ${match.matchIndex}`);
       } else {
         console.warn('Highlight not found for match:', match);
+        if (retryCount < maxRetries) {
+          console.warn(`Retrying (${retryCount + 1}/${maxRetries})`);
+          setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
+        } else {
+          showToast({
+            title: 'Search Error',
+            description: `Could not find highlighted match on page ${match.page}.`,
+            variant: 'error',
+          });
+        }
       }
     } else if (retryCount < maxRetries) {
       console.warn(`Text layer not found for page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`);

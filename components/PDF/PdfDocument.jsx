@@ -267,7 +267,6 @@ export default function PdfDocument({
                       rotate={rotation}
                       onRenderSuccess={() => onPageRenderSuccess(pageNum)}
                       customTextRenderer={({ str, itemIndex }) => {
-                        console.log(`customTextRenderer: page=${pageNum}, itemIndex=${itemIndex}, str="${str}", searchText="${searchText}"`);
                         if (!searchText) return str;
                         const lowerStr = str.toLowerCase();
                         const lowerSearch = searchText.toLowerCase();
@@ -278,7 +277,6 @@ export default function PdfDocument({
                         console.log('matchText:', matchText);
 
                         const result = `${str.slice(0, index)}<mark class="search-match" style="background-color: yellow; color: black; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
-                        console.log('Result string:', result);
                         return result;
                       }}
                     />
