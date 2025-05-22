@@ -28,7 +28,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [currentMatch, setCurrentMatch] = useState(0);
   const [hasTextLayer, setHasTextLayer] = useState(true);
   const [tool, setTool] = useState('text');
-  const [showThumbnails, setShowThumbnails] = useState(false);
+  const [showThumbnails, setShowThumbnails] = useState(true);
   const [renderedPages, setRenderedPages] = useState({});
   const [thumbnailRendered, setThumbnailRendered] = useState({});
   const [pdfUrl, setPdfUrl] = useState(initialPdfUrl);
@@ -274,28 +274,9 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     }
   }, [numPages, scrollMode]);
 
-  const goToNextMatch = useCallback(() => {
-    if (searchResults.length === 0) return;
-    const nextMatch = Math.min(currentMatch + 1, searchResults.length - 1);
-    setCurrentMatch(nextMatch);
-    const matchPageNum = searchResults[nextMatch].page;
-    goToPage(matchPageNum);
-    setTimeout(() => scrollToMatch(searchResults[nextMatch]), 300);
-  }, [searchResults, currentMatch, goToPage]);
-
-  const visiblePages = useMemo(() => {
-    if (!numPages) return [];
-    const buffer = 2;
-    const start = Math.max(1, pageNumber - buffer);
-    const end = Math.min(numPages, pageNumber + buffer);
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  }, [numPages, pageNumber]);
-
   const scrollToMatch = useCallback((match, retryCount = 0) => {
-    console.log('...match', match)
-    const maxRetries = 5;
-    const retryDelay = 200;
-    // Find the parent div with data-page-number
+    const maxRetries = 10; // Increased retries
+    const retryDelay = 300; // Increased delay to account for rendering time
     const pageContainer = document.querySelector(`div[data-page-number="${match.page}"]`);
     if (!pageContainer) {
       if (retryCount < maxRetries) {
@@ -311,27 +292,23 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
       }
       return;
     }
-    // Find the textLayer within the page container
     const textLayer = pageContainer.querySelector('.react-pdf__Page__textContent.textLayer');
-    console.log('...textLayer', textLayer, 'Visible pages:', visiblePages);
     if (textLayer) {
       const highlight = textLayer.querySelector(`[data-match-index="${match.matchIndex}"]`);
-      console.log('....highlight', highlight);
       if (highlight) {
         highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
         console.log(`Scrolled to match on page ${match.page}, index ${match.matchIndex}`);
+      } else if (retryCount < maxRetries) {
+        console.warn(`Highlight not found for match on page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`);
+        setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
       } else {
-        console.warn('Highlight not found for match:', match);
-        if (retryCount < maxRetries) {
-          console.warn(`Retrying (${retryCount + 1}/${maxRetries})`);
-          setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
-        } else {
-          showToast({
-            title: 'Search Error',
-            description: `Could not find highlighted match on page ${match.page}.`,
-            variant: 'error',
-          });
-        }
+        console.warn(`Highlight not found for match on page ${match.page} after ${maxRetries} retries`);
+        // Optionally show toast, but avoid spamming the user
+        // showToast({
+        //   title: 'Search Error',
+        //   description: `Could not find highlighted match on page ${match.page}.`,
+        //   variant: 'error',
+        // });
       }
     } else if (retryCount < maxRetries) {
       console.warn(`Text layer not found for page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`);
@@ -344,7 +321,29 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         variant: 'error',
       });
     }
-  }, [showToast, visiblePages]);
+  }, [showToast]);
+
+  const goToNextMatch = useCallback(() => {
+    if (searchResults.length === 0) return;
+    const nextMatch = Math.min(currentMatch + 1, searchResults.length - 1);
+    setCurrentMatch(nextMatch);
+    const matchPageNum = searchResults[nextMatch].page;
+    goToPage(matchPageNum);
+    setTimeout(() => scrollToMatch(searchResults[nextMatch]), 500); // Increased to 500ms
+  }, [searchResults, currentMatch, goToPage, scrollToMatch]);
+
+  const visiblePages = useMemo(() => {
+    if (!numPages) return [];
+    const buffer = 2;
+    const start = Math.max(1, pageNumber - buffer);
+    const end = Math.min(numPages, pageNumber + buffer);
+    const nearbyPages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+    // Include all pages that have search matches
+    const matchPages = searchResults.map((match) => match.page);
+    return [...new Set([...nearbyPages, ...matchPages])].sort((a, b) => a - b);
+  }, [numPages, pageNumber, searchResults]);
+
 
   const handleSubmit = useCallback(() => {
     const data = {
@@ -443,6 +442,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           scrollMode={scrollMode}
           searchResults={searchResults}
           currentMatch={currentMatch}
+          scrollToMatch={scrollToMatch}
         />
         {showBox && (
           <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate-fadeIn">

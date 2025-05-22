@@ -25,7 +25,8 @@ export default function PdfDocument({
   isZoomingRef,
   scrollMode,
   searchResults,
-  currentMatch
+  currentMatch,
+  scrollToMatch
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
@@ -144,7 +145,7 @@ export default function PdfDocument({
     let globalMatchIndex = 0;
 
     Object.keys(textLayerRef.current).forEach((pageNum) => {
-      const pageText = textLayerRef.current[pageNum].toLowerCase();
+      const pageText = textLayerRef.current[pageNum]?.toLowerCase() || '';
       let index = 0;
       while (index !== -1) {
         index = pageText.indexOf(lowerSearchText, index);
@@ -168,6 +169,7 @@ export default function PdfDocument({
       const firstMatchPage = pageRefs.current[matches[0].page - 1];
       if (firstMatchPage) {
         firstMatchPage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => scrollToMatch(matches[0]), 500);
       }
     } else {
       console.log(`No matches found for "${text}"`);
@@ -224,9 +226,6 @@ export default function PdfDocument({
           const pageNum = index + 1;
           const isRendered = renderedPages[pageNum];
           const isInView = Math.abs(pageNumber - pageNum) <= visibleRange;
-          const hasRendered = renderedPages[pageNum];
-          let matchIndexCounter = 0
-
 
           return (
             <div
@@ -237,7 +236,7 @@ export default function PdfDocument({
                 }`}
               style={scrollMode === 'wrapped' ? { flex: '0 0 auto', maxWidth: '45%' } : {}}
             >
-              {(isInView || hasRendered) ? (
+              {(isInView || renderedPages[pageNum]) ? (
                 <>
                   <Card
                     className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-md flex flex-col justify-center items-center p-6 mx-auto ${isRendered ? 'hidden' : 'block'
@@ -249,7 +248,7 @@ export default function PdfDocument({
                         <div className="h-5 bg-gray-200 rounded w-3/4 mx-auto animate-pulse" />
                         <div className="h-5 bg-gray-200 rounded w-5/6 mx-auto animate-pulse" />
                         <div className="h-5 bg-gray-200 rounded w-2/3 mx-auto animate-pulse" />
-                        <div className="h-5 bg-gray-200 rounded W-4/5 mx-auto animate-pulse" />
+                        <div className="h-5 bg-gray-200 rounded w-4/5 mx-auto animate-pulse" />
                       </div>
                       <div className="mt-6 flex justify-center">
                         <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
@@ -262,7 +261,7 @@ export default function PdfDocument({
                   <div className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'}`}>
                     <Page
                       pageNumber={pageNum}
-                      renderTextLayer={!isZoomingRef.current || !!searchText}
+                      renderTextLayer={true}
                       renderAnnotationLayer={!isZoomingRef.current}
                       scale={scale}
                       rotate={rotation}
@@ -270,30 +269,20 @@ export default function PdfDocument({
                       customTextRenderer={({ str }) => {
                         if (!searchText || !searchResults || searchResults.length === 0) return str;
 
-                        const pageNum = pageNumber;
-                        const textLayer = textLayerRef.current[pageNum];
                         const lowerStr = str.toLowerCase();
                         const lowerSearch = searchText.toLowerCase();
                         const index = lowerStr.indexOf(lowerSearch);
-
                         if (index === -1) return str;
 
-                        const absoluteStartIndex = textLayer.indexOf(str) + index;
-
+                        const absoluteStartIndex = textLayerRef.current[pageNum]?.indexOf(str) + index;
                         const match = searchResults.find(
                           (m) => m.page === pageNum && m.startIndex === absoluteStartIndex
                         );
-
-                        if (!match) return str;
-
-                        const isActiveMatch = match.matchIndex === currentMatch;
+                        if (!match || match.matchIndex !== currentMatch) return str; // Only highlight active match
 
                         const matchText = str.slice(index, index + searchText.length);
-
-                        return `${str.slice(0, index)}<mark class="search-match ${isActiveMatch ? 'active-match' : ''}" data-match-index="${match.matchIndex}" style="background-color: ${isActiveMatch ? 'red' : 'yellow'}; color: ${isActiveMatch ? 'white' : 'black'}; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
+                        return `${str.slice(0, index)}<mark class="search-match active-match" data-match-index="${match.matchIndex}" style="background-color: red; color: white; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
                       }}
-
-
                     />
                   </div>
                 </>
