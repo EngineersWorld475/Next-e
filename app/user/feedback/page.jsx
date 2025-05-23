@@ -6,7 +6,7 @@ import React from 'react'
 
 const UserFeedback = () => {
   return (
-    <div className="relative flex items-center justify-center bg-cover bg-center bg-[#f3f4f6] dark:bg-black dark:text-white">
+    <div className="relative flex items-center justify-center bg-cover bg-center bg-[#f3f4f6] dark:bg-gray-800 dark:text-white">
       <div className="flex flex-col justify-center items-center relative w-full md:w-max lg:w-max bg-white p-6 md:rounded-lg shadow-md md:mx-20 lg:mx-20 md:my-10 lg:my-10 dark:bg-gray-800 dark:text-white">
         <div className='flex flex-col md:flex-row mt-3 justify-center items-center gap-7 dark:bg-gray-800 dark:text-white'>
           <div className='bg-cover bg-center overflow-hidden w-full md:w-1/2 '>

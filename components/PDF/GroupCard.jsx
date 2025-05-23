@@ -172,7 +172,7 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
                                     <p>{groupName}</p>
                                     <div className='flex flex-row'>
                                         <FaUsers className='h-5 w-5 mx-2' />
-                                        <Badge variant="destructive" className='rounded-full w-3 flex justify-center mr-1'>{count}</Badge>
+                                        <Badge variant="destructive" className='rounded-full w-3 flex justify-center mr-1 dark:bg-blue-600'>{count}</Badge>
                                     </div>
                                 </CardTitle>
                             </AccordionTrigger>

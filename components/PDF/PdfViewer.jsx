@@ -30,6 +30,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [tool, setTool] = useState('text');
   const [showThumbnails, setShowThumbnails] = useState(true);
   const [renderedPages, setRenderedPages] = useState({});
+  const [matchCase, setMatchCase] = useState(false)
   const [thumbnailRendered, setThumbnailRendered] = useState({});
   const [pdfUrl, setPdfUrl] = useState(initialPdfUrl);
   const [selectedText, setSelectedText] = useState('');
@@ -380,6 +381,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         setThumbnailRendered={setThumbnailRendered}
         goToPage={goToPage}
         searchText={searchText}
+        matchCase={matchCase}
       />
       <div className="flex-1 h-screen overflow-auto" style={{ marginLeft: showThumbnails ? '12rem' : '0', transition: 'margin-left 0.3s ease-in-out' }} ref={containerRef}>
         {hasTextLayer === false && (
@@ -421,6 +423,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           setScrollMode={setScrollMode}
           highlightAll={highlightAll} 
           setHighlightAll={setHighlightAll} 
+          matchCase={matchCase} 
+          setMatchCase={setMatchCase}
         />
         <PdfDocument
           pdfUrl={pdfUrl}
@@ -447,6 +451,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           currentMatch={currentMatch}
           scrollToMatch={scrollToMatch}
           highlightAll={highlightAll}
+          matchCase={matchCase} 
         />
         {showBox && (
           <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate-fadeIn">
@@ -457,7 +462,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               rows={3}
-              className="w-full border p-2 rounded text-sm mb-2"
+              className="w-full border p-2 rounded text-sm mb-2 dark:bg-white text-black"
               placeholder="Ask your question here..."
             />
             <button

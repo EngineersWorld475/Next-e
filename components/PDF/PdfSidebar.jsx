@@ -20,7 +20,7 @@ const PdfSidebar = ({
 
   return (
     <div
-      className={`bg-gray-300 h-full items-center overflow-y-auto transform transition-transform duration-300 ease-in-out`}
+      className={`bg-gray-300 dark:bg-gray-700 h-full items-center overflow-y-auto transform transition-transform duration-300 ease-in-out`}
       style={{
         transform: showThumbnails ? 'translateX(0)' : 'translateX(-100%)',
         width: '12rem',

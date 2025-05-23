@@ -179,9 +179,8 @@ const PdfList = () => {
     setLoadingCollections(true)
   }, [])
 
-  console.log('...listofcollections', listOfCollections)
   return (
-    <div className="flex flex-col gap-5 h-screen bg-white dark:bg-black dark:text-white">
+    <div className="flex flex-col gap-5 h-full bg-white dark:bg-gray-800 dark:text-white">
       <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue'>Dashboard</h1>
       {/* Upload PDF */}
       <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 rounded-lg">
@@ -195,7 +194,7 @@ const PdfList = () => {
       <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex flex-col px-7 flex-1 dark:bg-gray-900 rounded-lg">
         <h1 className='font-semibold text-blue-600 my-3'>My collections</h1>
         {loadingCollections ? (
-          <div>
+          <div className="py-5">
             <h3 className='text-gray-500 text-sm'>Loading collections...</h3>
           </div>
         ) : (

@@ -28,6 +28,7 @@ export default function PdfDocument({
   currentMatch,
   scrollToMatch,
   highlightAll,
+  matchCase,
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
@@ -142,14 +143,15 @@ export default function PdfDocument({
     }
 
     const matches = [];
-    const lowerSearchText = text.toLowerCase();
     let globalMatchIndex = 0;
 
     Object.keys(textLayerRef.current).forEach((pageNum) => {
-      const pageText = textLayerRef.current[pageNum]?.toLowerCase() || '';
+      const pageText = textLayerRef.current[pageNum] || '';
       let index = 0;
       while (index !== -1) {
-        index = pageText.indexOf(lowerSearchText, index);
+        index = matchCase
+          ? pageText.indexOf(text, index)
+          : pageText.toLowerCase().indexOf(text.toLowerCase(), index);
         if (index !== -1) {
           matches.push({
             page: parseInt(pageNum),
@@ -157,14 +159,14 @@ export default function PdfDocument({
             endIndex: index + text.length,
             matchIndex: globalMatchIndex++,
           });
-          index += lowerSearchText.length;
+          index += text.length;
         }
       }
     });
 
     setSearchResults(matches);
     setCurrentMatch(0);
-    console.log(`Found ${matches.length} matches for "${text}"`);
+    console.log(`Found ${matches.length} matches for "${text}" (matchCase: ${matchCase})`);
 
     if (matches.length > 0) {
       const firstMatchPage = pageRefs.current[matches[0].page - 1];
@@ -179,12 +181,12 @@ export default function PdfDocument({
 
   useEffect(() => {
     searchInPDF(searchText);
-  }, [searchText]);
+  }, [searchText, matchCase]);
 
   return (
     <div
       ref={pdfContainerRef}
-      className={`flex ${scrollMode === 'vertical'
+      className={`flex dark:bg-gray-800 ${scrollMode === 'vertical'
         ? 'flex-col'
         : scrollMode === 'horizontal'
           ? 'flex-row'
@@ -262,6 +264,7 @@ export default function PdfDocument({
                   <div className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'}`}>
                     <Page
                       pageNumber={pageNum}
+                      canvasBackground='#f2f2f2'
                       renderTextLayer={true}
                       renderAnnotationLayer={!isZoomingRef.current}
                       scale={scale}
@@ -270,16 +273,18 @@ export default function PdfDocument({
                       customTextRenderer={({ str }) => {
                         if (!searchText || !searchResults || searchResults.length === 0) return str;
 
-                        let lowerStr = str.toLowerCase();
-                        const lowerSearch = searchText.toLowerCase();
+                        let lowerStr = str;
+                        const searchTextForMatch = matchCase ? searchText : searchText.toLowerCase();
                         let index = 0;
                         let parts = [];
                         let absoluteIndex = textLayerRef.current[pageNum]?.indexOf(str) || 0;
 
                         while (index !== -1) {
-                          index = lowerStr.indexOf(lowerSearch, index);
+                          index = matchCase
+                            ? str.indexOf(searchText, index)
+                            : str.toLowerCase().indexOf(searchTextForMatch, index);
                           if (index === -1) {
-                            if (parts.length === 0) return str; // No matches in this string
+                            if (parts.length === 0) return str;
                             break;
                           }
 
@@ -292,10 +297,10 @@ export default function PdfDocument({
                             const matchText = str.slice(index, index + searchText.length);
                             const highlightStyle =
                               highlightAll && match.matchIndex !== currentMatch
-                                ? 'background-color: #FADADD; color: black; padding: 2px 4px;' // Added padding
+                                ? 'background-color: #FADADD; color: black; padding: 2px 4px;'
                                 : match.matchIndex === currentMatch
-                                  ? 'background-color: red; color: white; padding: 2px 4px;' // Added padding
-                                  : ''; // No highlight if not highlightAll and not current match
+                                  ? 'background-color: red; color: white; padding: 2px 4px;'
+                                  : '';
 
                             if (highlightStyle) {
                               parts.push(str.slice(0, index));
@@ -306,7 +311,6 @@ export default function PdfDocument({
                               parts.push(str.slice(0, index + searchText.length));
                             }
                           } else {
-                            // If no match object found, include the text without highlighting
                             parts.push(str.slice(0, index + searchText.length));
                           }
 
@@ -317,7 +321,7 @@ export default function PdfDocument({
                         }
 
                         if (parts.length > 0) {
-                          parts.push(str); // Append remaining text
+                          parts.push(str);
                           return parts.join('');
                         }
 

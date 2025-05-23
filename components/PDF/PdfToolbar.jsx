@@ -15,6 +15,7 @@ import useUserId from '@/hooks/useUserId';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Checkbox } from '../ui/checkbox';
 
+
 const PdfToolbar = ({
   pageNumber,
   numPages,
@@ -48,7 +49,9 @@ const PdfToolbar = ({
   scrollMode,
   setScrollMode,
   highlightAll, 
-  setHighlightAll
+  setHighlightAll,
+  matchCase,
+  setMatchCase,
 }) => {
   const [copied, setCopied] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -323,7 +326,7 @@ const PdfToolbar = ({
             <Search size={16} className="cursor-pointer" />
           </button>
           {showSearchInput && (
-            <div className="absolute top-10 left-0 w-64 md:w-[620px] lg:w-[620px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-200 ease-in-out">
+            <div className="absolute top-10 left-0 w-64 md:w-[620px] lg:w-[620px] bg-white dark:bg-gray-600 dark:text-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-200 ease-in-out">
               <div className="flex items-center p-2 gap-2 w-full">
                 <Search size={16} className="text-gray-500 flex-shrink-0" />
                 <input
@@ -331,7 +334,7 @@ const PdfToolbar = ({
                   placeholder="Search document..."
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
-                  className="px-2 py-1 text-sm text-gray-800 border-none focus:outline-none placeholder-gray-400 truncate"
+                  className="px-2 py-1 text-sm text-gray-800 dark:bg-gray-800 dark:text-white dark:rounded-lg border-none focus:outline-none placeholder-gray-400 truncate"
                 />
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button className="p-1 hover:bg-gray-300 rounded" onClick={() => setCurrentMatch((prev) => Math.max(prev - 1, 0))} disabled={searchResults.length === 0}>
@@ -344,14 +347,15 @@ const PdfToolbar = ({
                     <div className="flex items-center space-x-2">
                       <Checkbox id="highlight" checked={highlightAll}
                         onCheckedChange={(checked) => setHighlightAll(checked)} />
-                      <label htmlFor="highlight" className="text-xs font-medium text-black leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Highlight all</label>
+                      <label htmlFor="highlight" className="text-xs font-medium text-black dark:text-white leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Highlight all</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="match"/>
-                      <label htmlFor="match" className="text-xs font-medium text-black leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Match case</label>
+                      <Checkbox id="match" checked={matchCase}
+                        onCheckedChange={(checked) => setMatchCase(checked)} />
+                      <label htmlFor="match" className="text-xs font-medium text-black dark:text-white leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Match case</label>
                     </div>
                   </div>
-                  <span className="text-black text-xs px-2 py-1 rounded border border-black whitespace-nowrap">
+                  <span className="text-black text-xs px-2 py-1 rounded border border-black dark:border-white dark:text-white whitespace-nowrap">
                     {searchResults.length ? `${currentMatch + 1} of ${searchResults.length} matches` : 'No matches'}
                   </span>
                 </div>
