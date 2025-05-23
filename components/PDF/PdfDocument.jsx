@@ -281,7 +281,7 @@ export default function PdfDocument({
                         if (!match || match.matchIndex !== currentMatch) return str; // Only highlight active match
 
                         const matchText = str.slice(index, index + searchText.length);
-                        return `${str.slice(0, index)}<mark class="search-match active-match" data-match-index="${match.matchIndex}" style="background-color: green; color: white; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
+                        return `${str.slice(0, index)}<mark class="search-match active-match" data-match-index="${match.matchIndex}" style="background-color: red; color: white; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
                       }}
                     />
                   </div>

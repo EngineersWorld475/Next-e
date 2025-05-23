@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getGroupsByUserId } from '@/store/group-slice';
 import useUserId from '@/hooks/useUserId';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { Checkbox } from '../ui/checkbox';
 
 const PdfToolbar = ({
   pageNumber,
@@ -320,7 +321,7 @@ const PdfToolbar = ({
             <Search size={16} className="cursor-pointer" />
           </button>
           {showSearchInput && (
-            <div className="absolute top-10 left-0 w-64 md:w-[420px] lg:w-[420px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-200 ease-in-out">
+            <div className="absolute top-10 left-0 w-64 md:w-[620px] lg:w-[620px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-200 ease-in-out">
               <div className="flex items-center p-2 gap-2 w-full">
                 <Search size={16} className="text-gray-500 flex-shrink-0" />
                 <input
@@ -337,6 +338,16 @@ const PdfToolbar = ({
                   <button className="p-1 hover:bg-gray-300 rounded" onClick={goToNextMatch} disabled={searchResults.length === 0}>
                     <ChevronLast size={16} className="cursor-pointer text-black" />
                   </button>
+                  <div className='flex flex-row items-center gap-2'>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="highlight"/>
+                      <label htmlFor="highlight" className="text-xs font-medium text-black leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Highlight all</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="match"/>
+                      <label htmlFor="match" className="text-xs font-medium text-black leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Match case</label>
+                    </div>
+                  </div>
                   <span className="text-black text-xs px-2 py-1 rounded border border-black whitespace-nowrap">
                     {searchResults.length ? `${currentMatch + 1} of ${searchResults.length} matches` : 'No matches'}
                   </span>
