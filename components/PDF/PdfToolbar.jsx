@@ -47,6 +47,8 @@ const PdfToolbar = ({
   showToast,
   scrollMode,
   setScrollMode,
+  highlightAll, 
+  setHighlightAll
 }) => {
   const [copied, setCopied] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -340,7 +342,8 @@ const PdfToolbar = ({
                   </button>
                   <div className='flex flex-row items-center gap-2'>
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="highlight"/>
+                      <Checkbox id="highlight" checked={highlightAll}
+                        onCheckedChange={(checked) => setHighlightAll(checked)} />
                       <label htmlFor="highlight" className="text-xs font-medium text-black leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Highlight all</label>
                     </div>
                     <div className="flex items-center space-x-2">

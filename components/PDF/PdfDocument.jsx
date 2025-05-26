@@ -26,7 +26,8 @@ export default function PdfDocument({
   scrollMode,
   searchResults,
   currentMatch,
-  scrollToMatch
+  scrollToMatch,
+  highlightAll,
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
@@ -269,19 +270,58 @@ export default function PdfDocument({
                       customTextRenderer={({ str }) => {
                         if (!searchText || !searchResults || searchResults.length === 0) return str;
 
-                        const lowerStr = str.toLowerCase();
+                        let lowerStr = str.toLowerCase();
                         const lowerSearch = searchText.toLowerCase();
-                        const index = lowerStr.indexOf(lowerSearch);
-                        if (index === -1) return str;
+                        let index = 0;
+                        let parts = [];
+                        let absoluteIndex = textLayerRef.current[pageNum]?.indexOf(str) || 0;
 
-                        const absoluteStartIndex = textLayerRef.current[pageNum]?.indexOf(str) + index;
-                        const match = searchResults.find(
-                          (m) => m.page === pageNum && m.startIndex === absoluteStartIndex
-                        );
-                        if (!match || match.matchIndex !== currentMatch) return str; // Only highlight active match
+                        while (index !== -1) {
+                          index = lowerStr.indexOf(lowerSearch, index);
+                          if (index === -1) {
+                            if (parts.length === 0) return str; // No matches in this string
+                            break;
+                          }
 
-                        const matchText = str.slice(index, index + searchText.length);
-                        return `${str.slice(0, index)}<mark class="search-match active-match" data-match-index="${match.matchIndex}" style="background-color: red; color: white; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
+                          const absoluteStartIndex = absoluteIndex + index;
+                          const match = searchResults.find(
+                            (m) => m.page === pageNum && m.startIndex === absoluteStartIndex
+                          );
+
+                          if (match) {
+                            const matchText = str.slice(index, index + searchText.length);
+                            const highlightStyle =
+                              highlightAll && match.matchIndex !== currentMatch
+                                ? 'background-color: #FADADD; color: black; padding: 2px 4px;' // Added padding
+                                : match.matchIndex === currentMatch
+                                  ? 'background-color: red; color: white; padding: 2px 4px;' // Added padding
+                                  : ''; // No highlight if not highlightAll and not current match
+
+                            if (highlightStyle) {
+                              parts.push(str.slice(0, index));
+                              parts.push(
+                                `<mark class="search-match${match.matchIndex === currentMatch ? ' active-match' : ''}" data-match-index="${match.matchIndex}" style="${highlightStyle}">${matchText}</mark>`
+                              );
+                            } else {
+                              parts.push(str.slice(0, index + searchText.length));
+                            }
+                          } else {
+                            // If no match object found, include the text without highlighting
+                            parts.push(str.slice(0, index + searchText.length));
+                          }
+
+                          str = str.slice(index + searchText.length);
+                          lowerStr = lowerStr.slice(index + searchText.length);
+                          absoluteIndex += index + searchText.length;
+                          index = 0;
+                        }
+
+                        if (parts.length > 0) {
+                          parts.push(str); // Append remaining text
+                          return parts.join('');
+                        }
+
+                        return str;
                       }}
                     />
                   </div>

@@ -36,6 +36,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [question, setQuestion] = useState('');
   const [showBox, setShowBox] = useState(false);
   const [scrollMode, setScrollMode] = useState('vertical');
+  const [highlightAll, setHighlightAll] = useState(false)
   const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
@@ -418,6 +419,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           showToast={showToast}
           scrollMode={scrollMode}
           setScrollMode={setScrollMode}
+          highlightAll={highlightAll} 
+          setHighlightAll={setHighlightAll} 
         />
         <PdfDocument
           pdfUrl={pdfUrl}
@@ -443,6 +446,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           searchResults={searchResults}
           currentMatch={currentMatch}
           scrollToMatch={scrollToMatch}
+          highlightAll={highlightAll}
         />
         {showBox && (
           <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate-fadeIn">
