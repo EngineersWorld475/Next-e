@@ -9,7 +9,7 @@ const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <nav className='bg-[#ff6347] text-white p-3 flex justify-between items-center px-5 md:px-20 fixed top-0 left-0 w-full z-20'>
+    <nav className='text-white p-3 flex justify-between items-center px-5 md:px-20 top-0 left-0 w-full z-20'>
       <Image
         src="/images/scholarly-logo.png"
         alt="scholarly-logo"
@@ -23,10 +23,10 @@ const Navbar = () => {
         </Link>
       ) : (
         <div className='flex space-x-5 text-white'>
-          <Link href={'/auth/login'} className='hover:text-black text-sm md:text-base lg:text-base'>
+          <Link href={'/auth/login'} className='text-sm md:text-base lg:text-base py-1 px-2 rounded-lg'>
             Log In
           </Link>
-          <Link href={'/auth/register'} className='hover:text-black text-sm md:text-base lg:text-base'> 
+          <Link href={'/auth/register'} className='text-sm md:text-base lg:text-base py-1 px-2 rounded-lg'> 
             Sign Up
           </Link>
         </div>

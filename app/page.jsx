@@ -6,115 +6,311 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useState } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
+
+// Animation variants for sections
+const sectionVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
+};
+
+// Animation for the feedback button
+const buttonVariants = {
+  hover: { scale: 1.05, rotate: 90, transition: { duration: 0.3 } },
+  tap: { scale: 0.95 },
+};
 
 export default function Home() {
-
   const [openFeedbackDialogue, setOpenFeedbackDialogue] = useState(false);
 
   return (
     <>
-      <div className="relative">
+      <div className="relative bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen">
         <Navbar />
-        {/* Feedback button */}
-        <Button onClick={() => setOpenFeedbackDialogue(true)} className='fixed top-1/3 right-10 transform -translate-y-1/3 rotate-90 bg-[#ff6347] origin-bottom-right z-20 text-white hover:bg-gray-800'>🚀 Feedback</Button>
-        {/* section 1 */}
-        <div className="flex flex-col justify-center bg-white items-center overflow-hidden h-96 md:h-72 lg:h-72 gap-3 shadow-md">
-          <h1 className="text-4xl text-gray-700 font-semibold text-center mt-24 md:mt-10">
-            <span className='block sm:inline'>Welcome to</span>
-            <span className='block sm:inline'> Scholarly</span>
-          </h1>
-          <p className="text-customGrayBlue flex flex-col md:flex-row lg:flex-row items-center ">
-            <span className='block sm:inline'>"A good scientist (or student) knows the </span>
-            <span className='block sm:inline'>right answers. A great scientist (or student)</span>
-            <span className='block sm:inline'> knows the right questions."</span>
-            <span className='block sm:inline'>- Claude Lévi-Strauss</span>
+        {/* Feedback button with animation */}
+        <div
+          variants={buttonVariants}
+          className="fixed top-1/3 right-8 z-20"
+        >
+          <Button
+            onClick={() => setOpenFeedbackDialogue(true)}
+            className="transform -translate-y-1/3 rotate-90 bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg transition-all duration-300 origin-bottom-right px-4 py-2 rounded-full"
+          >
+            Feedback
+          </Button>
+        </div>
+
+        {/* Section 1 - Hero Section */}
+        <motion.div
+          className="flex flex-col justify-center items-center h-screen gap-6 text-center px-5 bg-gray-900/50 backdrop-blur-xl shadow-xl"
+          style={{
+            backgroundImage: "url('/images/blurred-cityscape.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+        >
+          <motion.h1
+            className="text-4xl sm:text-5xl md:text-6xl text-white font-bold tracking-tight bg-gray-900/60 backdrop-blur-sm rounded-lg px-4 py-2 drop-shadow-lg"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+          >
+            <span className="block sm:inline">Welcome to</span>{" "}
+            <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">
+              Scholarly
+            </span>
+          </motion.h1>
+          <motion.p
+            className="text-lg sm:text-xl md:text-2xl text-white max-w-3xl mx-auto leading-relaxed bg-gray-900/60 backdrop-blur-sm rounded-lg px-4 py-2 drop-shadow-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.4 }}
+          >
+            <span className="block sm:inline">"A good scientist (or student) knows</span>
+            <span className="block sm:inline">the right answers. A great scientist</span>
+            <span className="block sm:inline">(or student) knows the right questions."</span>
+            <span className="block sm:inline italic">— Claude Lévi-Strauss</span>
+          </motion.p>
+        </motion.div>
+
+        {/* Section 2 - What is Scholarly */}
+        <motion.div
+          className="bg-gray-800/50 backdrop-blur-md h-auto py-12 md:py-16 flex flex-col md:flex-row text-white"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={sectionVariants}
+        >
+          <div className="w-full md:w-2/3 md:py-10 md:px-28 px-6 py-8">
+            <h2 className="text-2xl md:text-3xl font-semibold text-indigo-300 mb-4">
+              What is Scholarly?
+            </h2>
+            <p className="text-gray-200 leading-relaxed">
+              Scholarly is a research article annotation tool that enhances a scientist’s ability to interactively read and understand research articles more effectively. It offers a unique analytical dashboard for users to organize, track, and retrieve content from research papers. Gain new insights by working in groups or allowing the public to review and improve your annotations.
+            </p>
+          </div>
+          <div className="w-full md:w-1/3 flex justify-center items-center px-6 py-8">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 2 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Image
+                src="/images/annotation-img.jpg"
+                alt="annotation-img"
+                className="rounded-lg shadow-lg"
+                width={500}
+                height={500}
+                priority
+              />
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Carousel Section */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={sectionVariants}
+        >
+          <CarouselComponent />
+        </motion.div>
+
+        {/* Section 3 - Who Should Use Scholarly */}
+        <motion.div
+          className="bg-gray-800/50 backdrop-blur-md h-auto py-12 md:py-16 flex flex-col md:flex-row text-white"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={sectionVariants}
+        >
+          <div className="w-full md:w-1/3 flex justify-center items-center px-6 py-8">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: -2 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Image
+                src="/images/searching-img.jpg"
+                alt="searching-img"
+                className="rounded-lg shadow-lg"
+                width={600}
+                height={600}
+              />
+            </motion.div>
+          </div>
+          <div className="w-full md:w-2/3 md:py-10 md:px-28 px-6 py-8">
+            <h2 className="text-2xl md:text-3xl font-semibold text-indigo-300 mb-4">
+              Who Should Use Scholarly?
+            </h2>
+            <p className="text-gray-200 leading-relaxed">
+              Do you read research articles? Have you ever missed a critical point in an article or understood it better after a discussion? If yes, Scholarly is for you! Designed for students, researchers, and scientists across all fields, Scholarly helps you gain new insights with a click of a button.
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Section 4 - Who Are We */}
+        <motion.div
+          className="bg-white h-auto py-12 md:py-16 flex flex-col md:flex-row text-gray-800"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={sectionVariants}
+        >
+          <div className="w-full md:w-2/3 md:py-10 md:px-28 px-6 py-8">
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
+              Who Are We and What Are We Up To?
+            </h2>
+            <p className="text-gray-700 leading-relaxed">
+              We are research scientists who’ve walked your path. We believe understanding a research article depends on the reader’s subject knowledge. Seminars, webinars, and presentations are great, but reading and understanding an article sharpens analytical thinking. We aim to make reading and retaining information effortless.
+            </p>
+          </div>
+          <div className="w-full md:w-1/3 flex justify-center items-center px-6 py-8">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 2 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Image
+                src="/images/personal-website-wp-img.jpg"
+                alt="personal-website-weap-img"
+                className="rounded-lg shadow-lg"
+                width={500}
+                height={500}
+              />
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Section 5 - The Tool is Helpful */}
+        <motion.div
+          className="bg-gray-800/50 backdrop-blur-md h-auto py-12 md:py-16 flex flex-col md:flex-row text-white"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={sectionVariants}
+        >
+          <div className="w-full md:w-1/3 flex justify-center items-center px-6 py-8">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: -2 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Image
+                src="/images/helpful-sign-img.jpg"
+                alt="searching-img"
+                className="rounded-lg shadow-lg"
+                width={500}
+                height={500}
+              />
+            </motion.div>
+          </div>
+          <div className="w-full md:w-2/3 md:py-10 md:px-28 px-6 py-8">
+            <h2 className="text-2xl md:text-3xl font-semibold text-indigo-300 mb-4">
+              The Tool is Helpful, But…?
+            </h2>
+            <p className="text-gray-200 leading-relaxed">
+              We’re continually learning the needs of scientists and students, adding user-friendly features to keep you engaged. Your feedback is invaluable as we assess the service’s value to the community. Our goal is to keep Scholarly free and impactful. Don’t hesitate to reach out!
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Summary Stats Section */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={sectionVariants}
+        >
+          <SummaryStats />
+        </motion.div>
+
+        {/* Footer */}
+        <footer className="flex justify-center items-center bg-gradient-to-t from-gray-900 to-gray-800 py-6">
+          <p className="text-gray-400 text-sm">
+            Copyright © Scholarly Web Book powered by xAI 2025
           </p>
-        </div>
-        {/* section 2 */}
-        <div className="bg-[#FCE8BD] h-full md:h-72 lg:h-72 flex flex-col md:flex-row">
-          <div className="w-full md:w-2/3 md:py-10 md:px-28 px-5 py-5">
-            <p className='text-[#3a3a3a]'>What is Scholarly?</p>
-            <p className='w-full text-[#3a3a3a]'>
-              Scholarly is a research article annotation tool which enhances scientist’s ability to interactively read and understand a research article more effectively. It offers a unique analytical dashboard for users to organize, track and retrieve their content from research papers. You can acquire new insights by working in groups or allowing public to review or improve your annotations.
-            </p>
-          </div>
-          <div className="w-full md:w-1/3 overflow-hidden object-cover">
-            <Image src="/images/annotation-img.jpg" alt="annotation-img" className="px-10 py-5" width={500} height={500} />
-          </div>
-        </div>
-        {/* carousel section */}
-        <CarouselComponent />
-        {/* section 3 */}
-        <div className=" h-full md:h-72 lg:h-72 flex flex-col md:flex-row bg-white">
-          <div className="flex justify-center items-center w-full md:w-1/3 md:py-10 md:px-28 overflow-hidden px-5 py-5 object-cover">
-            <Image src="/images/searching-img.jpg" alt="searching-img" width={600} height={600} />
-          </div>
-          <div className="flex flex-col gap-3 justify-center w-full md:w-2/3 overflow-hidden w-30 px-5 py-5">
-            <h1 className='text-gray-600'>Who should use Scholarly?</h1>
-            <p className=' w-full text-customGrayBlue'>Do you read research articles? Have you ever faced a situation that you read an article but somehow missed “that point”? Did you ever fell that you understood an article better after discussion? If your answer is Yes, Scholarly is for you!! Scholarly is for students, researchers, and scientists in all fields of sciences who intend to acquire new insights with a click of a button.</p>
-          </div>
-        </div>
-        {/* section 4 */}
-        <div className='bg-[#FCE8BD] h-full md:h-72 lg:h-72 flex flex-col md:flex-row lg:flex-row overflow-hidden'>
-          <div className="w-full md:w-2/3 md:py-10 md:px-28 px-5 py-5">
-            <p className='text-[#3a3a3a]'>Who are we and what are we up to?</p>
-            <p className='w-full text-[#3a3a3a]'>
-              We are research scientists who traveled your path. We believe that the level of understanding of a research article varies with the experience in subject knowledge of the reader. Seminars, Webinars, and other presentations are our interactive avenues to learn about various research studies. However, reading and understanding an article grows our ability to think analytically.
-
-              You probably heard this “Reading is active process and watching is passive process”. Reading requires lot of attention and all researcher can relate to this, we lose track of our article after reading 3 pages. This is what we would like to change, reading an article and retaining the information should be as easy as possible.
-
-
-            </p>
-          </div>
-          <div className="w-full md:w-1/3 overflow-hidden object-cover">
-            <Image src="/images/personal-website-wp-img.jpg" alt="personal-website-weap-img" className="px-10 py-5" width={500} height={500} />
-          </div>
-        </div>
-        {/* section 5 */}
-        <div className=" h-full md:h-72 lg:h-72 flex flex-col md:flex-row bg-white">
-          <div className="flex justify-center items-center w-full md:w-1/3 md:py-7 md:px-10 overflow-hidden px-5 py-5 object-cover">
-            <Image src="/images/helpful-sign-img.jpg" alt="searching-img" width={500} height={500} />
-          </div>
-          <div className="flex flex-col gap-3 justify-center w-full md:w-2/3 overflow-hidden w-30 px-5 py-5">
-            <h1 className='text-gray-600'>The tool is helpful, but …?</h1>
-            <p className='w-full text-customGrayBlue'>We’re in process of understanding the needs of scientists and students. We’re constantly working in adding new user friendly features to engage the user interests. Your feedback and suggestions are appreciated. We are learning the costs to operate this service and whether it is adding value to the community. Our goal is to keep this service free and add value to the user. Don’t hesitate to drop an email.</p>
-          </div>
-        </div>
-        {/* summary stats section */}
-        <SummaryStats />
-        {/* footer */}
-        <footer className='flex justify-center items-center bg-gray-700'>
-          <p className="text-white py-5 text-xs">Copyright © Scholarly Web Book 2019</p>
         </footer>
       </div>
-      <Sheet open={openFeedbackDialogue} onOpenChange={() => (
-        setOpenFeedbackDialogue(false)
-      )}>
-        <SheetContent side="right" className="overflow-auto bg-white transition-all duration-500 ease-in-out transform text-black" aria-describedby="feedback-description" >
-          <SheetTitle className='text-[#ff6347] text-2xl'>Feedback</SheetTitle>
-          <form action="" className="flex flex-col gap-3">
+
+      {/* Feedback Sheet */}
+      <Sheet
+        open={openFeedbackDialogue}
+        onOpenChange={() => setOpenFeedbackDialogue(false)}
+      >
+        <SheetContent
+          side="right"
+          className="overflow-auto bg-white/90 backdrop-blur-md text-black p-6 rounded-l-xl shadow-2xl w-full sm:w-96"
+          aria-describedby="feedback-description"
+        >
+          <SheetTitle className="text-2xl font-semibold text-indigo-600">
+            Feedback
+          </SheetTitle>
+          <motion.form
+            action=""
+            className="flex flex-col gap-4 mt-4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <div>
-              <select id='message_type' name='message_type' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' required>
-                <option value=''>Select</option>
-                <option value='suggestion'>Suggestion</option>
-                <option value='request_new_feature'>Request New Feature</option>
-                <option value='bug_report'>Bug report</option>
-                <option value='complement'>Complement</option>
-                <option value='other'>Other</option>
+              <label htmlFor="message_type" className="block text-sm font-medium text-gray-700">
+                Message Type
+              </label>
+              <select
+                id="message_type"
+                name="message_type"
+                className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 bg-white/50 transition-all duration-300"
+                required
+              >
+                <option value="">Select</option>
+                <option value="suggestion">Suggestion</option>
+                <option value="request_new_feature">Request New Feature</option>
+                <option value="bug_report">Bug Report</option>
+                <option value="complement">Complement</option>
+                <option value="other">Other</option>
               </select>
             </div>
-            <div>  
-              <input type='text' id='name' name='name' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' placeholder="Name" required />
-            </div>
-            <div>  
-              <input type='text' id='name' name='name' className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none sm:text-sm p-2 bg-white' placeholder="Email or UID" required />
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 bg-white/50 transition-all duration-300"
+                placeholder="Name"
+                required
+              />
             </div>
             <div>
-              <textarea className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Message">
-              </textarea>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email or UID
+              </label>
+              <input
+                type="text"
+                id="email"
+                name="email"
+                className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-3 bg-white/50 transition-all duration-300"
+                placeholder="Email or UID"
+                required
+              />
             </div>
-            <Button className="bg-black text-white">Send</Button>
-          </form>
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                Message
+              </label>
+              <textarea
+                id="message"
+                className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 bg-white/50 transition-all duration-300"
+                placeholder="Message"
+              />
+            </div>
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 rounded-lg py-2 transition-all duration-300">
+              Send
+            </Button>
+          </motion.form>
         </SheetContent>
       </Sheet>
     </>
