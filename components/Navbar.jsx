@@ -9,7 +9,8 @@ const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <nav className='text-white p-3 flex justify-between items-center px-5 md:px-20 top-0 left-0 w-full z-20'>
+    <nav className='text-white
+ p-3 flex justify-between items-center px-5 md:px-20 top-0 left-0 w-full z-20'>
       <Image
         src="/images/scholarly-logo.png"
         alt="scholarly-logo"
