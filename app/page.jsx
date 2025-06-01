@@ -53,7 +53,7 @@ export default function Home() {
           variants={sectionVariants}
         >
           <motion.h1
-            className="text-4xl sm:text-5xl md:text-6xl text-white font-bold tracking-tight bg-gray-900/60 backdrop-blur-sm rounded-lg px-4 py-2 drop-shadow-lg"
+            className="text-4xl sm:text-5xl md:text-6xl text-white font-bold tracking-tight bg-gray-900/60 backdrop-blur-lg rounded-lg px-4 py-2 drop-shadow-lg"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
@@ -64,7 +64,7 @@ export default function Home() {
             </span>
           </motion.h1>
           <motion.p
-            className="text-lg sm:text-xl md:text-2xl text-white max-w-3xl mx-auto leading-relaxed bg-gray-900/60 backdrop-blur-sm rounded-lg px-4 py-2 drop-shadow-lg"
+            className="text-lg sm:text-xl md:text-2xl text-white max-w-3xl mx-auto leading-relaxed bg-gray-900/60 backdrop-blur-lg rounded-lg px-4 py-2 drop-shadow-lg"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.4 }}

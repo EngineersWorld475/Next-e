@@ -20,7 +20,6 @@ import { MdHighlight } from 'react-icons/md';
 import { FaEraser } from 'react-icons/fa';
 import { FaHandPointer } from 'react-icons/fa';
 
-
 const PdfToolbar = ({
   pageNumber,
   numPages,
@@ -63,9 +62,36 @@ const PdfToolbar = ({
   const [radioItem, setRadioItem] = useState('group');
   const [toggleNotesBar, setToggleNotesBar] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showColorPalette, setShowColorPalette] = useState(false);
+  const [selectedColor, setSelectedColor] = useState('#FFFF00'); // Default to yellow
   const link = "https://ui.shadcn.com/docs/installation";
   const dispatch = useDispatch();
   const userId = useUserId();
+
+  // Color palette colors with Tailwind classes
+  const colors = [
+    { name: 'Yellow', value: '#FFFF00', bgClass: 'bg-yellow-500/20', borderClass: 'border-yellow-400/50' },
+    { name: 'Green', value: '#00FF00', bgClass: 'bg-green-600/20', borderClass: 'border-green-400/50' },
+    { name: 'Skyblue', value: '#87CEEB', bgClass: 'bg-blue-600/20', borderClass: 'border-blue-300/50' },
+    { name: 'Purple', value: '#800080', bgClass: 'bg-purple-500/20', borderClass: 'border-purple-500/50' },
+  ];
+
+  // Find the selected colors in tailwind's classes
+  const selectedColorClasses = colors.find((color) => color.value === selectedColor) || colors[0];
+
+  // Toggle color palette and set tool to highlight
+  const toggleColorPalette = () => {
+    setShowColorPalette((prev) => !prev);
+    setTool('highlight');
+  };
+
+  // Handle color selection
+  const handleColorSelect = (color) => {
+    setSelectedColor(color.value);
+    console.log(`Selected color: ${color.name}`);
+    // Add logic here to apply the selected color to the highlight tool
+    setShowColorPalette(false);
+  };
 
   const goToPreviousPage = () => {
     if (pageNumber > 1) {
@@ -275,273 +301,426 @@ const PdfToolbar = ({
       <AnimatePresence>
         {toggleNotesBar && (
           <motion.div
-            initial={{ x: 256, opacity: 0 }}
+            initial={{ x: 300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 256, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed top-0 right-0 bottom-0 w-16 bg-gray-dark text-white px-4 py-3 flex flex-col gap-4 z-10"
+            exit={{ x: 300, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed top-0 right-0 bottom-0 w-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl border-l border-slate-700/50 shadow-2xl z-20"
           >
-            <button className='text-white pt-20'>
-              <FaPen className="w-5 h-5 text-gray-500 hover:text-white" />
-            </button>
-            <button className='text-white pt-5'>
-              <MdHighlight className="w-5 h-5 text-gray-500 hover:text-white" />
-            </button>
-            <button className='text-white pt-5'>
-              <FaEraser className="w-5 h-5 text-gray-500 hover:text-white" />
-            </button>
-            <button className='text-white pt-5'>
-              <FaHandPointer className="w-5 h-5 text-gray-500 hover:text-white" />
-            </button>
-
+            <div className="flex flex-col items-center gap-6 pt-24 px-2">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="group p-3 rounded-xl bg-slate-800/60 hover:bg-blue-600/20 border border-slate-600/50 hover:border-blue-400/50 transition-all duration-300 backdrop-blur-sm"
+              >
+                <FaPen className="w-5 h-5 text-slate-400 group-hover:text-blue-400 transition-colors" />
+              </motion.button>
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`group p-3 rounded-xl ${
+                    showColorPalette
+                      ? `${selectedColorClasses.bgClass} ${selectedColorClasses.borderClass}`
+                      : `bg-slate-800/60 border border-slate-600/50 hover:${selectedColorClasses.bgClass} hover:${selectedColorClasses.borderClass}`
+                  } transition-all duration-300 backdrop-blur-sm`}
+                  onClick={toggleColorPalette}
+                >
+                  <MdHighlight className="w-5 h-5" style={{ color: selectedColor }} />
+                </motion.button>
+                {showColorPalette && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-14 top-7 bg-slate-800/95 backdrop-blur-xl border border-slate-600/50 rounded-lg shadow-xl p-2 z-50"
+                  >
+                    <div className="flex flex-col gap-2">
+                      {colors.map((color) => (
+                        <button
+                          key={color.name}
+                          className="w-8 h-8 rounded-full hover:ring-2 hover:ring-white/50 transition-all"
+                          style={{ backgroundColor: color.value }}
+                          onClick={() => handleColorSelect(color)}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="group p-3 rounded-xl bg-slate-800/60 hover:bg-red-600/20 border border-slate-600/50 hover:border-red-400/50 transition-all duration-300 backdrop-blur-sm"
+              >
+                <FaEraser className="w-5 h-5 text-slate-400 group-hover:text-red-400 transition-colors" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="group p-3 rounded-xl bg-slate-800/60 hover:bg-green-600/20 border border-slate-600/50 hover:border-green-400/50 transition-all duration-300 backdrop-blur-sm"
+              >
+                <FaHandPointer className="w-5 h-5 text-slate-400 group-hover:text-green-400 transition-colors" />
+              </motion.button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="sticky top-0 bg-gray-dark text-white px-4 py-3 flex justify-between items-center gap-4 z-10">
-        <div className="flex flex-row gap-5 items-center">
-          <button
-            title="Toggle Thumbnails"
-            onClick={toggleThumbnails}
-            className="p-1 hover:bg-gray-700 rounded"
-          >
-            <Image size={16} className="cursor-pointer" />
-          </button>
-          <div className="relative" ref={searchInputRef}>
-            <button
-              title="Find in Document"
-              onClick={toggleSearchInput}
-              className="p-1 hover:bg-gray-700 rounded"
-            >
-              <Search size={16} className="cursor-pointer" />
-            </button>
-            {showSearchInput && (
-              <div className="absolute top-10 left-0 w-64 md:w-[620px] lg:w-[620px] bg-white dark:bg-gray-600 dark:text-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-200 ease-in-out">
-                <div className="flex items-center p-2 gap-2 w-full">
-                  <Search size={16} className="text-gray-500 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Search document..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    className="px-2 py-1 text-sm text-gray-800 dark:bg-gray-800 dark:text-white dark:rounded-lg border-none focus:outline-none placeholder-gray-400 truncate"
-                  />
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button className="p-1 hover:bg-gray-300 rounded" onClick={() => setCurrentMatch((prev) => Math.max(prev - 1, 0))} disabled={searchResults.length === 0}>
-                      <ChevronFirst size={16} className="cursor-pointer text-black" />
-                    </button>
-                    <button className="p-1 hover:bg-gray-300 rounded" onClick={goToNextMatch} disabled={searchResults.length === 0}>
-                      <ChevronLast size={16} className="cursor-pointer text-black" />
-                    </button>
-                    <div className='flex flex-row items-center gap-2'>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="highlight" checked={highlightAll}
-                          onCheckedChange={(checked) => setHighlightAll(checked)} />
-                        <label htmlFor="highlight" className="text-xs font-medium text-black dark:text-white leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Highlight all</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="match" checked={matchCase}
-                          onCheckedChange={(checked) => setMatchCase(checked)} />
-                        <label htmlFor="match" className="text-xs font-medium text-black dark:text-white leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Match case</label>
+
+      <motion.div
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        className="sticky top-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl border-b border-slate-700/50 shadow-sm z-30"
+      >
+        <div className="px-6 py-4">
+          <div className="flex justify-between items-center gap-6">
+            {/* Left Section */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Toggle Thumbnails"
+                  onClick={toggleThumbnails}
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                >
+                  <Image size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
+                </motion.button>
+
+                <div className="relative" ref={searchInputRef}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    title="Find in Document"
+                    onClick={toggleSearchInput}
+                    className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                  >
+                    <Search size={18} className="text-slate-300 group-hover:text-emerald-400 transition-colors" />
+                  </motion.button>
+
+                  {showSearchInput && (
+                    <div className="absolute top-16 left-0 w-64 md:w-[620px] lg:w-[620px] bg-white dark:bg-gray-600 dark:text-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-200 ease-in-out">
+                      <div className="flex items-center p-2 gap-2 w-full">
+                        <Search size={16} className="text-gray-500 flex-shrink-0" />
+                        <input
+                          type="text"
+                          placeholder="Search document..."
+                          value={searchText}
+                          onChange={(e) => setSearchText(e.target.value)}
+                          className="px-2 py-1 text-sm text-gray-800 dark:bg-gray-800 dark:text-white dark:rounded-lg border-none focus:outline-none placeholder-gray-400 truncate"
+                        />
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button className="p-1 hover:bg-gray-300 rounded" onClick={() => setCurrentMatch((prev) => Math.max(prev - 1, 0))} disabled={searchResults.length === 0}>
+                            <ChevronFirst size={16} className="cursor-pointer text-black" />
+                          </button>
+                          <button className="p-1 hover:bg-gray-300 rounded" onClick={goToNextMatch} disabled={searchResults.length === 0}>
+                            <ChevronLast size={16} className="cursor-pointer text-black" />
+                          </button>
+                          <div className='flex flex-row items-center gap-2'>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox id="highlight" checked={highlightAll}
+                                onCheckedChange={(checked) => setHighlightAll(checked)} />
+                              <label htmlFor="highlight" className="text-xs font-medium text-black dark:text-white leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Highlight all</label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox id="match" checked={matchCase}
+                                onCheckedChange={(checked) => setMatchCase(checked)} />
+                              <label htmlFor="match" className="text-xs font-medium text-black dark:text-white leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Match case</label>
+                            </div>
+                          </div>
+                          <span className="text-black text-xs px-2 py-1 rounded border border-black dark:border-white dark:text-white whitespace-nowrap">
+                            {searchResults.length ? `${currentMatch + 1} of ${searchResults.length} matches` : 'No matches'}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <span className="text-black text-xs px-2 py-1 rounded border border-black dark:border-white dark:text-white whitespace-nowrap">
-                      {searchResults.length ? `${currentMatch + 1} of ${searchResults.length} matches` : 'No matches'}
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-          <div className="flex flex-row gap-3 items-center">
-            <button
-              title="Previous Page"
-              className="p-1 hover:bg-gray-700 rounded"
-              onClick={goToPreviousPage}
-              disabled={pageNumber <= 1}
-            >
-              <ChevronFirst size={18} className="cursor-pointer" />
-            </button>
-            <span className="text-xs page-number-display">
-              {pageNumber} / {numPages || '?'}
-            </span>
-            <button
-              title="Next Page"
-              className="p-1 hover:bg-gray-700 rounded"
-              onClick={goToNextPage}
-              disabled={pageNumber >= numPages}
-            >
-              <ChevronLast size={18} className="cursor-pointer" />
-            </button>
-          </div>
-        </div>
-        <div className="md:absolute md:left-1/2 md:-translate-x-1/2 flex flex-row gap-5 items-center">
-          <button title="Zoom In" className="p-1 hover:bg-gray-700 rounded" onClick={zoomIn}>
-            <ZoomIn size={18} className="cursor-pointer" />
-          </button>
-          <button title="Zoom Out" className="p-1 hover:bg-gray-700 rounded" onClick={zoomOut}>
-            <ZoomOut size={18} className="cursor-pointer" />
-          </button>
-          <span className="text-xs">Zoom: {(scale * 100).toFixed(0)}%</span>
-        </div>
-        <div className="flex flex-row gap-5 md:gap-7 lg:gap-7 items-center">
-          <button title="My Annotations" className="p-1 hover:bg-gray-700 rounded">
-            <Eye size={18} className="cursor-pointer text-[#ff6347]" />
-          </button>
-          <div>
-            <button
-              title="Open File"
-              className="p-1 hover:bg-gray-700 rounded"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <FileUp size={18} className="cursor-pointer" />
-            </button>
-            <input
-              type="file"
-              accept="application/pdf"
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </div>
-          <button
-            title="Print PDF"
-            className="p-1 hover:bg-gray-700 rounded"
-            onClick={handlePrintPDF}
-          >
-            <Printer size={18} className="cursor-pointer" />
-          </button>
-          <button title="Download" onClick={handleDownload} className="p-1 hover:bg-gray-700 rounded">
-            <DownloadIcon size={18} className="cursor-pointer" />
-          </button>
-          <button
-            title="Add notes"
-            onClick={handleToggleNotesbar}
-            className="p-1 hover:bg-gray-700 rounded"
-            disabled={!pdfUrl}
-          >
-            <PencilLine size={18} className="cursor-pointer" />
-          </button>
-          <Dialog open={dialogOpen} onOpenChange={(open) => {
-            if (open) handleDialogOpen();
-            else handleDialogClose();
-          }}>
-            <DialogTrigger>
-              <Share size={24} className="cursor-pointer text-[#ff634f] p-1 hover:bg-gray-700 rounded" />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
-              <DialogHeader>
-                <DialogTitle>Share Annotation</DialogTitle>
-                <DialogDescription>Share your annotation to group or individual.</DialogDescription>
-              </DialogHeader>
-              <div className="flex items-center space-x-2">
-                <div className="grid flex-1 gap-2">
-                  <Label htmlFor="link" className="sr-only">Link</Label>
-                  <Input id="link" value={link} readOnly />
+
+              {/* Navigation */}
+              <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Previous Page"
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group disabled:opacity-50"
+                  onClick={goToPreviousPage}
+                  disabled={pageNumber <= 1}
+                >
+                  <ChevronFirst size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
+                </motion.button>
+
+                <div className="px-3 py-1 bg-slate-700/60 rounded-lg">
+                  <span className="text-sm font-medium text-slate-200">
+                    {pageNumber} / {numPages || '?'}
+                  </span>
                 </div>
-                <Button type="button" size="sm" className="px-3" onClick={handleCopy}>
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </Button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Next Page"
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group disabled:opacity-50"
+                  onClick={goToNextPage}
+                  disabled={pageNumber >= numPages}
+                >
+                  <ChevronLast size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
+                </motion.button>
               </div>
-              <RadioGroup
-                defaultValue="group"
-                value={radioItem}
-                className="flex gap-3 mx-2"
-                onValueChange={(value) => setRadioItem(value)}
+            </div>
+
+            {/* Center Section - Zoom Controls */}
+            <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Zoom Out"
+                className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                onClick={zoomOut}
               >
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="group" id="r1" />
-                  <Label htmlFor="r1">Group</Label>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="individual" id="r2" />
-                  <Label htmlFor="r2">Individual</Label>
-                </div>
-              </RadioGroup>
-              {radioItem === 'group' ? (
+                <ZoomOut size={18} className="text-slate-300 group-hover:text-emerald-400 transition-colors" />
+              </motion.button>
+
+              <div className="px-3 py-1 bg-slate-700/60 rounded-lg min-w-[80px] text-center">
+                <span className="text-sm font-medium text-slate-200">
+                  {(scale * 100).toFixed(0)}%
+                </span>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Zoom In"
+                className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                onClick={zoomIn}
+              >
+                <ZoomIn size={18} className="text-slate-300 group-hover:text-emerald-400 transition-colors" />
+              </motion.button>
+            </div>
+
+            {/* Right Section */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="My Annotations"
+                  className="p-2 hover:bg-orange-600/20 rounded-lg transition-all duration-200 group"
+                >
+                  <Eye size={18} className="text-orange-400 group-hover:text-orange-300 transition-colors" />
+                </motion.button>
+
                 <div>
-                  <Label>Group</Label>
-                  <Select>
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Select Group" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {groupList && groupList.length > 0 ? (
-                          groupList.map((group) => (
-                            <SelectItem key={group.GroupId} value={group.GroupName} className="cursor-pointer">
-                              {group.GroupName}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no-groups" disabled>
-                            No groups available
-                          </SelectItem>
-                        )}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    title="Open File"
+                    className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <FileUp size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
+                  </motion.button>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
                 </div>
-              ) : (
-                <div>
-                  <Label>Email</Label>
-                  <Input placeholder="Enter E-mail address" />
-                </div>
-              )}
-              <DialogFooter className="sm:justify-start">
-                <Button type="button">Send</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <button title="Switch to Presentation Mode" onClick={toggleFullScreen} className="p-1 hover:bg-gray-700 rounded">
-            {isFullScreen ? <Minimize2 size={18} className="cursor-pointer" /> : <Expand size={18} className="cursor-pointer" />}
-          </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <ChevronsRight size={22} className="cursor-pointer" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuGroup>
-                <DropdownMenuItem className="cursor-pointer" onClick={goToFirstPage}>
-                  <SquareArrowUp size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Go to First Page</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={goToLastPage}>
-                  <SquareArrowDown size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Go to Last Page</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={rotateClockwise}>
-                  <RotateCw size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Rotate Clockwise</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={rotateCounterclockwise}>
-                  <RotateCcw size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Rotate Counterclockwise</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={selectTextTool}>
-                  <MousePointer size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Text Selection Tool</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={selectHandTool}>
-                  <Hand size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Hand Tool</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => setScrollMode('vertical')}>
-                  <Rows3 size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Vertical Scrolling</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => setScrollMode('horizontal')}>
-                  <Columns3 size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Horizontal Scrolling</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => setScrollMode('wrapped')}>
-                  <StretchHorizontal size={22} className="text-gray-500" />
-                  <span className="text-gray-600 text-sm">Wrapped Scrolling</span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Print PDF"
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                  onClick={handlePrintPDF}
+                >
+                  <Printer size={18} className="text-slate-300 group-hover:text-purple-400 transition-colors" />
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Download"
+                  onClick={handleDownload}
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                >
+                  <DownloadIcon size={18} className="text-slate-300 group-hover:text-green-400 transition-colors" />
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Add notes"
+                  onClick={handleToggleNotesbar}
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group disabled:opacity-50"
+                  disabled={!pdfUrl}
+                >
+                  <PencilLine size={18} className={`${toggleNotesBar ? 'text-yellow-400' : 'text-slate-300 group-hover:text-yellow-400 transition-colors'}`} />
+                </motion.button>
+              </div>
+
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
+                <Dialog open={dialogOpen} onOpenChange={(open) => {
+                  if (open) handleDialogOpen();
+                  else handleDialogClose();
+                }}>
+                  <DialogTrigger asChild>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="p-2 hover:bg-orange-600/20 rounded-lg transition-all duration-200 group"
+                    >
+                      <Share size={18} className="text-orange-400 group-hover:text-orange-300 transition-colors" />
+                    </motion.button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 border border-slate-200/50 dark:border-slate-600/50" onOpenAutoFocus={(e) => e.preventDefault()}>
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Share Annotation
+                      </DialogTitle>
+                      <DialogDescription className="text-slate-600 dark:text-slate-400">
+                        Share your annotation to group or individual.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="grid flex-1 gap-2">
+                          <Label htmlFor="link" className="sr-only">Link</Label>
+                          <Input id="link" value={link} readOnly className="bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600" />
+                        </div>
+                        <Button type="button" size="sm" className="px-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" onClick={handleCopy}>
+                          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                      <RadioGroup
+                        defaultValue="group"
+                        value={radioItem}
+                        className="flex gap-6"
+                        onValueChange={(value) => setRadioItem(value)}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="group" id="r1" />
+                          <Label htmlFor="r1" className="font-medium">Group</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="individual" id="r2" />
+                          <Label htmlFor="r2" className="font-medium">Individual</Label>
+                        </div>
+                      </RadioGroup>
+                      {radioItem === 'group' ? (
+                        <div className="space-y-2">
+                          <Label className="font-medium">Group</Label>
+                          <Select>
+                            <SelectTrigger className="bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600">
+                              <SelectValue placeholder="Select Group" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600">
+                              <SelectGroup>
+                                {groupList && groupList.length > 0 ? (
+                                  groupList.map((group) => (
+                                    <SelectItem key={group.GroupId} value={group.GroupName} className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
+                                      {group.GroupName}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <SelectItem value="no-groups" disabled>
+                                    No groups available
+                                  </SelectItem>
+                                )}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Label className="font-medium">Email</Label>
+                          <Input placeholder="Enter E-mail address" className="bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600" />
+                        </div>
+                      )}
+                    </div>
+                    <DialogFooter className="sm:justify-start">
+                      <Button type="button" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                        Send
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Toggle Fullscreen"
+                  onClick={toggleFullScreen}
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                >
+                  {isFullScreen ?
+                    <Minimize2 size={18} className="text-slate-300 group-hover:text-red-400 transition-colors" /> :
+                    <Expand size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
+                  }
+                </motion.button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                    >
+                      <ChevronsRight size={18} className="text-slate-300 group-hover:text-purple-400 transition-colors" />
+                    </motion.button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-600/50 shadow-2xl">
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={goToFirstPage}>
+                        <SquareArrowUp size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Go to First Page</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={goToLastPage}>
+                        <SquareArrowDown size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Go to Last Page</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={rotateClockwise}>
+                        <RotateCw size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Rotate Clockwise</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={rotateCounterclockwise}>
+                        <RotateCcw size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Rotate Counterclockwise</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={selectTextTool}>
+                        <MousePointer size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Text Selection Tool</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={selectHandTool}>
+                        <Hand size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Hand Tool</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setScrollMode('vertical')}>
+                        <Rows3 size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Vertical Scrolling</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setScrollMode('horizontal')}>
+                        <Columns3 size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Horizontal Scrolling</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setScrollMode('wrapped')}>
+                        <StretchHorizontal size={18} className="text-slate-500 mr-3" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">Wrapped Scrolling</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };

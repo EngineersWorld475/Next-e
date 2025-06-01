@@ -383,7 +383,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         searchText={searchText}
         matchCase={matchCase}
       />
-      <div className="flex-1 h-screen overflow-auto" style={{ marginLeft: showThumbnails ? '12rem' : '0', transition: 'margin-left 0.3s ease-in-out' }} ref={containerRef}>
+      <div className="flex-1 h-screen" style={{ marginLeft: showThumbnails ? '12rem' : '0', transition: 'margin-left 0.3s ease-in-out' }} ref={containerRef}>
         {hasTextLayer === false && (
           <div className="fixed top-10 left-4 bg-yellow-200 text-black p-2 rounded shadow z-50 animate-fadeIn">
             Warning: This PDF may lack a text layer. Search and highlighting may not work. Use a text-based PDF.
