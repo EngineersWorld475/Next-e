@@ -80,15 +80,15 @@ export default function Home() {
           variants={sectionVariants}
         >
           {/* decorative elements */}
-          <motion.div animate="animate" className="absolute top-20 left-10 text-purple-400/30">
+          <div className="absolute top-20 left-10 text-purple-400/30">
             <Sparkles className="w-8 h-8" />
-          </motion.div>
-          <motion.div animate="animate" className="absolute top-40 right-20 text-indigo-400/30">
+          </div>
+          <div className="absolute top-40 right-20 text-indigo-400/30">
             <Brain className="w-6 h-6" />
-          </motion.div>
-          <motion.div animate="animate" className="absolute bottom-40 left-20 text-pink-400/30">
+          </div>
+          <div className="absolute bottom-40 left-20 text-pink-400/30">
             <Target className="w-10 h-10" />
-          </motion.div>
+          </div>
 
           <motion.div variants={itemVariants} className="relative">
             <motion.h1
