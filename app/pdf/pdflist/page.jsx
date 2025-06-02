@@ -181,17 +181,15 @@ const PdfList = () => {
 
   return (
     <div className="flex flex-col gap-5 h-full bg-white dark:bg-gray-800 dark:text-white">
-      <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue'>Dashboard</h1>
+      {/* <h1 className='flex items-center justify-center text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>Dashboard</h1> */}
       {/* Upload PDF */}
-      <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 rounded-lg">
         <UploadPdf setFile={setFile} fileUrl={fileUrl} setFileUrl={setFileUrl} formData={formData} setFormData={setFormData} isSubmitting={isSubmitting} fileInputRef={fileInputRef} handleUploadCollection={handleUploadCollection} />
-      </div>
       {/* Search PDF */}
-      <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 rounded-lg">
+      {/* <div className="group border-l-4 border-transparent bg-white shadow-lg flex items-center px-7 py-10 md:py-7 lg:py-7 dark:bg-gray-900 rounded-lg">
         <SearchPdf handleSearchCollection={handleSearchCollection} setSearchingCollections={setSearchingCollections} searchedCollectionList={searchedCollectionList} setSearchedCollectionList={setSearchedCollectionList} searchingCollections={searchingCollections} />
-      </div>
+      </div> */}
       {/* List PDFs */}
-      <div className="group border-l-4 border-transparent hover:border-blue-600 dark:hover:border-gray-300 bg-white shadow-lg flex flex-col px-7 flex-1 dark:bg-gray-900 rounded-lg">
+      <div className="group border-l-4 border-transparent bg-white shadow-lg flex flex-col px-7 flex-1 dark:bg-gray-900 rounded-lg">
         <h1 className='font-semibold text-blue-600 my-3'>My collections</h1>
         {loadingCollections ? (
           <div className="py-5">

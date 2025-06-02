@@ -37,7 +37,7 @@ const ConfirmDialog = ({
           </Button>
           <Button 
             onClick={() => { setOpenModal(false); onConfirm && onConfirm(); }}  
-            className="px-4 py-2 text-white bg-gray-700 border-gray-300 transition-all rounded-lg outline-none border-none hover:bg-gray-800"
+            className="px-4 py-2 text-white bg-gray-800 border-gray-300 transition-all rounded-lg outline-none border-none hover:bg-gray-800"
           >
             {confirmText}
           </Button>
