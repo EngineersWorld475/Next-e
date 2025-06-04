@@ -1,18 +1,19 @@
+
 'use client'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { FaUsers } from "react-icons/fa";
+import { Users } from "lucide-react";
 import { Badge } from '../ui/badge';
-import { Loader2, TrashIcon } from 'lucide-react';
+import { Loader2, Trash } from 'lucide-react';
 
-import ConfirmDialog from '@/common/ConfirmDialog';
 import { useDispatch, useSelector } from 'react-redux';
 import useUserId from '@/hooks/useUserId';
 import { addNewEmail, deleteEmail, deleteGroup, getGroupsByUserId } from '@/store/group-slice';
 import { useCustomToast } from '@/hooks/useCustomToast';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import ConfirmDialog from '@/common/ConfirmDialog';
 
 const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting, listOfGroups, setListOfGroups }) => {
     const dispatch = useDispatch();
@@ -22,7 +23,6 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
     const { showToast } = useCustomToast()
     const [newEmail, setNewEmail] = useState('');
     const [isAddingEmail, setIsAddingEmail] = useState(false)
-
 
     const handleChange = useCallback((e) => {
         setNewEmail(e.target.value)
@@ -63,7 +63,6 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
         }
 
         setIsMounting(false)
-
 
         try {
             const result = await dispatch(addNewEmail({ userId, email: newEmail, groupId, authToken: user?.token })).unwrap();
@@ -111,7 +110,6 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
             });
         }
     }, [dispatch, userId, groupId, user?.token, showToast, setIsMounting, setListOfGroups]);
-    
 
     // DELETE GROUP EMAIL FUNCTION
     const handleDeleteEmail = useCallback((email) => {
@@ -159,67 +157,116 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
         });
     }, [dispatch, userId, user?.token, groupId, showToast, setIsMounting, setListOfGroups, error])
 
-
-
     return (
-        <div>
+        <div className="group">
             <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="card-1">
-                    <Card className="shadow border">
-                        <CardHeader className="p-4">
-                            <AccordionTrigger className="w-full text-left">
+                <AccordionItem value="card-1" className="border-none">
+                    <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+                        <CardHeader className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-b border-blue-100 dark:border-blue-800/50">
+                            <AccordionTrigger className="w-full text-left hover:no-underline group/trigger">
                                 <CardTitle className="w-full flex flex-row justify-between items-center">
-                                    <p>{groupName}</p>
-                                    <div className='flex flex-row'>
-                                        <FaUsers className='h-5 w-5 mx-2' />
-                                        <Badge variant="destructive" className='rounded-full w-3 flex justify-center mr-1 dark:bg-blue-600'>{count}</Badge>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg group-hover/trigger:bg-blue-200 dark:group-hover/trigger:bg-blue-800/70 transition-colors duration-200">
+                                            <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <span className="text-sm md:text-sm lg:text-sm font-semibold text-gray-800 dark:text-gray-100 group-hover/trigger:text-blue-700 dark:group-hover/trigger:text-blue-300 transition-colors duration-200">
+                                            {groupName}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 mx-1">
+                                        <Badge
+                                            variant="secondary"
+                                            className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 px-3 py-1 rounded-full font-medium shadow-sm"
+                                        >
+                                            {count} {count === 1 ? 'member' : 'members'}
+                                        </Badge>
                                     </div>
                                 </CardTitle>
                             </AccordionTrigger>
                         </CardHeader>
-                        <AccordionContent>
-                            <CardContent className="relative p-4">
-                                {emails?.map((item, index) => (
-                                    <div key={item?.GroupEmailId} className='flex flex-row gap-5 items-center mb-3'>
-                                        <p>{item?.Email}</p>
+
+                        <AccordionContent className="overflow-hidden">
+                            <CardContent className="p-6 space-y-6">
+                                {/* Email List */}
+                                {emails && emails.length > 0 && (
+                                    <div className="space-y-3">
+                                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                                            Group Members
+                                        </h4>
+                                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                                            {emails.map((item, index) => (
+                                                <div
+                                                    key={item?.GroupEmailId}
+                                                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-200 group/email"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                        <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                                            {item?.Email}
+                                                        </span>
+                                                    </div>
+                                                    <ConfirmDialog
+                                                        iconTrigger={
+                                                            <div className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md transition-colors duration-200 opacity-0 group-hover/email:opacity-100">
+                                                                <Trash className="h-4 w-4 text-red-500 hover:text-red-600 cursor-pointer" />
+                                                            </div>
+                                                        }
+                                                        title="Are you sure you want to delete this email?"
+                                                        onConfirm={() => handleDeleteEmail(item)}
+                                                        onCancel={() => console.log("Cancelled")}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Add Email Section */}
+                                <div className="space-y-4">
+                                    <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                                        Add New Member
+                                    </h4>
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <div className="flex-1">
+                                            <Input
+                                                disabled={isAddingEmail}
+                                                type="email"
+                                                placeholder="Enter email address..."
+                                                value={newEmail}
+                                                onChange={handleChange}
+                                                className="h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 transition-all duration-200"
+                                            />
+                                        </div>
+                                        <Button
+                                            onClick={handleAddEmail}
+                                            disabled={newEmail === '' || isAddingEmail}
+                                            className="h-11 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px]"
+                                            aria-busy={isAddingEmail}
+                                        >
+                                            {isAddingEmail ? (
+                                                <div className="flex items-center gap-2">
+                                                    <Loader2 className="animate-spin h-4 w-4" />
+                                                    <span>Adding...</span>
+                                                </div>
+                                            ) : (
+                                                'Add Member'
+                                            )}
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Delete Group Section */}
+                                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="flex justify-end">
                                         <ConfirmDialog
-                                            iconTrigger={<TrashIcon className='h-4 w-4 cursor-pointer' />}
-                                            title="Are you sure you want to delete this email?"
-                                            onConfirm={() => handleDeleteEmail(item)}
+                                            triggerText="Delete Group"
+                                            title="Are you sure you want to delete this group?"
+                                            onConfirm={handleDeleteGroup}
                                             onCancel={() => console.log("Cancelled")}
+                                            ButtonStyle="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 px-6 py-2"
                                         />
                                     </div>
-                                ))}
-
-                                <div className='flex flex-col md:flex-row lg:flex-row gap-3 w-full md:w-`/3 lg:w-1/3'>
-                                    <Input
-                                        disabled={isAddingEmail}
-                                        type="text"
-                                        placeholder="Enter E-mailId"
-                                        value={newEmail}
-                                        onChange={handleChange}
-                                    />
-                                    <Button
-                                        className="w-1/3"
-                                        onClick={handleAddEmail}
-                                        disabled={newEmail === '' || isAddingEmail}
-                                        aria-busy={isAddingEmail}
-                                    >
-                                        {isAddingEmail ? (
-                                            <>
-                                                <Loader2 className="animate-spin h-5 w-5 text-center" />
-                                            </>
-                                        ) : 'Add'}
-                                    </Button>
                                 </div>
-                                {/* confirm dialog box */}
-                                <ConfirmDialog
-                                    triggerText="Delete"
-                                    title="Are you sure you want to delete this group?"
-                                    onConfirm={handleDeleteGroup}
-                                    onCancel={() => console.log("Cancelled")}
-                                    ButtonStyle={'absolute right-0 bottom-0'}
-                                />
                             </CardContent>
                         </AccordionContent>
                     </Card>

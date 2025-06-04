@@ -31,12 +31,8 @@ const GroupList = () => {
     setListOfGroups(groupList);
   }, [groupList]);
   return (
-    <div className='group border-l-4 border-l-transparent hover:border-blue-600 hover:dark:border-gray-300 bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg relative'>
-      <Button className="absolute top-0 right-7 bg-red-500 dark:bg-blue-600 hover:bg-red-600 dark:text-white shadow-lg hidden md:block" onClick={() => {
-        router.push('/pdf/pdflist')
-      }}>Go To Dashboard</Button>
-      <h1 className='text-xl md:text-3xl lg:text-3xl text-customGrayBlue mb-4 px-5'>Manage Groups</h1>
-      <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-white p-4 shadow-lg rounded-xl dark:bg-gray-900 dark:text-white'>
+    <div className='group border-l-4 border-l-transparent bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg relative'>
+      <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-gray-100 mt-5 p-4 shadow-sm rounded-xl dark:bg-gray-900 dark:text-white'>
         {isLoading && isMounting ? (
           <div className='w-full md:w-2/3 lg:w-2/3 bg-white flex justify-center items-center gap-1 dark:bg-gray-800 dark:text-white dark:rounded-lg px-3 py-2'>
             <Loader className="animate-spin text-gray-600 w-7 h-7 text-center" />

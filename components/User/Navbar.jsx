@@ -6,7 +6,7 @@ import { CircleUser, LogOut, User, MessageSquare, Key, Menu } from 'lucide-react
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ThemeToggle from '../Theme/ThemeToggle';
 import { useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { logout } from '@/store/auth-slice';
 import { persistor } from '@/store/store';
 import { Button } from '../ui/button';
@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 const Navbar = () => {
   const dispatch = useDispatch();
   const router =  useRouter();
+  const pathname = usePathname()
 
   const handleLogout = async () => {
     dispatch(logout()); 
@@ -26,17 +27,20 @@ const Navbar = () => {
     <nav className="flex justify-between items-center px-3 md:px-10 lg:px-10 py-3 shadow-md bg-white dark:bg-gray-900 dark:text-white">
       <Link href={'/pdf/pdflist'}>
         <Image
-          src="/images/scholarly-logo-auth.png"
-          width={120}
+          src="/images/scholarly-logo-latest.png"
+          width={140}
           height={40}
           alt="Scholarly Logo"
           className="w-24 h-10 md:w-36 md:h-14"
         />
       </Link>
 
-      <div className="flex gap-3 md:gap-6 lg:gap-6 text-gray-600 font-medium items-center justify-center">
-        <Link href={'/pdf/manage-groups'} className='cursor-pointer hover:text-gray-500 transition text-sm md:text-base lg:text-base'>
-          Manage Groups
+      <div className="flex gap-3 md:gap-6 lg:gap-6 dark:text-gray-100 font-medium items-center justify-center">
+        <Link href={'/pdf/pdflist'} className={`cursor-pointer hover:text-gray-500 transition text-sm md:text-sm lg:text-sm ${pathname === '/pdf/pdflist' ? 'text-blue-600 dark:text-blue-200' : 'text-gray-500 hover:text-blue-600'}`}>
+          dashboard
+        </Link>
+        <Link href={'/pdf/manage-groups'} className={`cursor-pointer hover:text-gray-500 transition text-sm md:text-sm lg:text-sm ${pathname === '/pdf/manage-groups' ? 'text-blue-600 dark:text-blue-200' : 'text-gray-500 hover:text-blue-600'}`}>
+          manage groups
         </Link>
         <div className='flex flex-row gap-3 md:gap-6 lg:gap-6 justify-center items-center'>
           <ThemeToggle />
@@ -44,7 +48,7 @@ const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button  variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10 ring-2 ring-background transition-all hover:ring-primary/20">
+                  <Avatar className="h-8 w-8 ring-2 ring-background transition-all hover:ring-primary/20">
                     <AvatarImage src="/placeholder-avatar.jpg" alt="User avatar" />
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                       <CircleUser className="h-5 w-5" />

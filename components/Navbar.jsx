@@ -14,8 +14,8 @@ const Navbar = () => {
       <Image
         src="/images/scholarly-logo.png"
         alt="scholarly-logo"
-        width={150}
-        height={150}
+        width={140}
+        height={40}
         className="w-24 h-10 md:w-36 md:h-14"
       />
       {user ? (
