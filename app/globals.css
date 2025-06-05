@@ -136,3 +136,7 @@
 /* In globals.css or your stylesheet */
 /* In globals.css or your stylesheet */
 
+.pdf-viewer .textLayer ::selection {
+  background-color: var(--selected-color);
+  color: black;
+}

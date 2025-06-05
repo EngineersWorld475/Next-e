@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '../ui/button';
-import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, ZoomIn, ZoomOut, Image, SquareArrowUp, SquareArrowDown, RotateCw, RotateCcw, MousePointer, Hand, Rows3, Columns3, StretchHorizontal, PencilLine, PenLine } from 'lucide-react';
+import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, ZoomIn, ZoomOut, Image, SquareArrowUp, SquareArrowDown, RotateCw, RotateCcw, MousePointer, Hand, Rows3, Columns3, StretchHorizontal, PencilLine } from 'lucide-react';
 import { v4 as uuid } from 'uuid';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Label } from '../ui/label';
@@ -56,6 +56,8 @@ const PdfToolbar = ({
   setHighlightAll,
   matchCase,
   setMatchCase,
+  selectedColor,
+  setSelectedColor,
 }) => {
   const [copied, setCopied] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -63,33 +65,26 @@ const PdfToolbar = ({
   const [toggleNotesBar, setToggleNotesBar] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showColorPalette, setShowColorPalette] = useState(false);
-  const [selectedColor, setSelectedColor] = useState('#FFFF00'); // Default to yellow
-  const link = "https://ui.shadcn.com/docs/installation";
   const dispatch = useDispatch();
   const userId = useUserId();
 
-  // Color palette colors with Tailwind classes
   const colors = [
-    { name: 'Yellow', value: '#FFFF00', bgClass: 'bg-yellow-500/20', borderClass: 'border-yellow-400/50' },
-    { name: 'Green', value: '#00FF00', bgClass: 'bg-green-600/20', borderClass: 'border-green-400/50' },
+    { name: 'Yellow', value: '#FFFB99', bgClass: 'bg-yellow-500/20', borderClass: 'border-yellow-400/50' },
+    { name: 'Green', value: '#99FF99', bgClass: 'bg-green-600/20', borderClass: 'border-green-400/50' },
     { name: 'Skyblue', value: '#87CEEB', bgClass: 'bg-blue-600/20', borderClass: 'border-blue-300/50' },
-    { name: 'Purple', value: '#800080', bgClass: 'bg-purple-500/20', borderClass: 'border-purple-500/50' },
+    { name: 'Purple', value: '#E0B0FF', bgClass: 'bg-purple-500/20', borderClass: 'border-purple-300/50' },
   ];
 
-  // Find the selected colors in tailwind's classes
   const selectedColorClasses = colors.find((color) => color.value === selectedColor) || colors[0];
 
-  // Toggle color palette and set tool to highlight
   const toggleColorPalette = () => {
     setShowColorPalette((prev) => !prev);
     setTool('highlight');
   };
 
-  // Handle color selection
   const handleColorSelect = (color) => {
     setSelectedColor(color.value);
     console.log(`Selected color: ${color.name}`);
-    // Add logic here to apply the selected color to the highlight tool
     setShowColorPalette(false);
   };
 
@@ -247,7 +242,7 @@ const PdfToolbar = ({
 
         setTimeout(() => {
           document.body.removeChild(printContainer);
-          document.head.appendChild(printStyles);
+          document.head.removeChild(printStyles);
         }, 1000);
       } catch (error) {
         console.error('Error rendering page for print:', error);
@@ -263,6 +258,7 @@ const PdfToolbar = ({
   };
 
   const handleCopy = async () => {
+    const link = "https://ui.shadcn.com/docs/installation";
     await navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
@@ -377,7 +373,6 @@ const PdfToolbar = ({
       >
         <div className="px-6 py-4">
           <div className="flex justify-between items-center gap-6">
-            {/* Left Section */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
                 <motion.button
@@ -389,7 +384,6 @@ const PdfToolbar = ({
                 >
                   <Image size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
                 </motion.button>
-
                 <div className="relative" ref={searchInputRef}>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -400,7 +394,6 @@ const PdfToolbar = ({
                   >
                     <Search size={18} className="text-slate-300 group-hover:text-emerald-400 transition-colors" />
                   </motion.button>
-
                   {showSearchInput && (
                     <div className="absolute top-16 left-0 w-64 md:w-[620px] lg:w-[620px] bg-white dark:bg-gray-600 dark:text-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-200 ease-in-out">
                       <div className="flex items-center p-2 gap-2 w-full">
@@ -440,8 +433,6 @@ const PdfToolbar = ({
                   )}
                 </div>
               </div>
-
-              {/* Navigation */}
               <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -453,13 +444,11 @@ const PdfToolbar = ({
                 >
                   <ChevronFirst size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
                 </motion.button>
-
                 <div className="px-3 py-1 bg-slate-700/60 rounded-lg">
                   <span className="text-sm font-medium text-slate-200">
                     {pageNumber} / {numPages || '?'}
                   </span>
                 </div>
-
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -472,8 +461,6 @@ const PdfToolbar = ({
                 </motion.button>
               </div>
             </div>
-
-            {/* Center Section - Zoom Controls */}
             <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -484,13 +471,11 @@ const PdfToolbar = ({
               >
                 <ZoomOut size={18} className="text-slate-300 group-hover:text-emerald-400 transition-colors" />
               </motion.button>
-
               <div className="px-3 py-1 bg-slate-700/60 rounded-lg min-w-[80px] text-center">
                 <span className="text-sm font-medium text-slate-200">
                   {(scale * 100).toFixed(0)}%
                 </span>
               </div>
-
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -501,8 +486,6 @@ const PdfToolbar = ({
                 <ZoomIn size={18} className="text-slate-300 group-hover:text-emerald-400 transition-colors" />
               </motion.button>
             </div>
-
-            {/* Right Section */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
                 <motion.button
@@ -513,7 +496,6 @@ const PdfToolbar = ({
                 >
                   <Eye size={18} className="text-orange-400 group-hover:text-orange-300 transition-colors" />
                 </motion.button>
-
                 <div>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -532,7 +514,6 @@ const PdfToolbar = ({
                     className="hidden"
                   />
                 </div>
-
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -542,7 +523,6 @@ const PdfToolbar = ({
                 >
                   <Printer size={18} className="text-slate-300 group-hover:text-purple-400 transition-colors" />
                 </motion.button>
-
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -552,7 +532,6 @@ const PdfToolbar = ({
                 >
                   <DownloadIcon size={18} className="text-slate-300 group-hover:text-green-400 transition-colors" />
                 </motion.button>
-
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -564,7 +543,6 @@ const PdfToolbar = ({
                   <PencilLine size={18} className={`${toggleNotesBar ? 'text-yellow-400' : 'text-slate-300 group-hover:text-yellow-400 transition-colors'}`} />
                 </motion.button>
               </div>
-
               <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
                 <Dialog open={dialogOpen} onOpenChange={(open) => {
                   if (open) handleDialogOpen();
@@ -592,7 +570,7 @@ const PdfToolbar = ({
                       <div className="flex items-center space-x-2">
                         <div className="grid flex-1 gap-2">
                           <Label htmlFor="link" className="sr-only">Link</Label>
-                          <Input id="link" value={link} readOnly className="bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600" />
+                          <Input id="link" value="https://ui.shadcn.com/docs/installation" readOnly className="bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600" />
                         </div>
                         <Button type="button" size="sm" className="px-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" onClick={handleCopy}>
                           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -651,7 +629,6 @@ const PdfToolbar = ({
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -664,7 +641,6 @@ const PdfToolbar = ({
                     <Expand size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
                   }
                 </motion.button>
-
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <motion.button

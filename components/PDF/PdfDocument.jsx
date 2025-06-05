@@ -29,27 +29,31 @@ export default function PdfDocument({
   scrollToMatch,
   highlightAll,
   matchCase,
+  selectedColor,
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [highlightedText, setHighlightedText] = useState([]);
   const scrollSpeedFactor = 0.3;
-  const visibleRange = 4;
+  // const visibleRange = scale > 1.4 ? 30 : 4;
 
   useEffect(() => {
     const container = pdfContainerRef.current;
-    if (!container || tool !== 'hand') return;
+    if (!container) return;
 
     let animationFrameId = null;
 
     const handleMouseDown = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsPanning(true);
-      setPanStart({ x: e.clientX, y: e.clientY });
+      if (tool === 'hand') {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsPanning(true);
+        setPanStart({ x: e.clientX, y: e.clientY });
+      }
     };
 
     const handleMouseMove = (e) => {
-      if (!isPanning) return;
+      if (!isPanning || tool !== 'hand') return;
 
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
@@ -72,30 +76,88 @@ export default function PdfDocument({
       });
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e) => {
       setIsPanning(false);
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
+      }
+      if (tool === 'highlight') {
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+        console.log('Highlight MouseUp - Selected Text:', selectedText);
+        if (selectedText) {
+          const anchorNode = selection.anchorNode;
+          const pageElement = anchorNode?.parentElement?.closest(
+            '[data-page-number]'
+          );
+          const pageNum = pageElement
+            ? parseInt(pageElement.getAttribute('data-page-number'))
+            : null;
+          console.log(
+            'Highlight MouseUp - Page Number:',
+            pageNum,
+            'Color:',
+            selectedColor
+          );
+          if (pageNum) {
+            setHighlightedText((prev) => [
+              ...prev,
+              {
+                id: Date.now(),
+                text: selectedText,
+                page: pageNum,
+                color: selectedColor,
+              },
+            ]);
+            console.log('Highlight Added:', {
+              id: Date.now(),
+              text: selectedText,
+              page: pageNum,
+              color: selectedColor,
+            });
+            selection.removeAllRanges();
+          } else {
+            console.warn('Could not determine page number for highlight.');
+            showToast({
+              title: 'Highlight Error',
+              description: 'Unable to identify page for highlighting.',
+              variant: 'error',
+            });
+          }
+        }
       }
     };
 
     const disablePointerEvents = () => {
       const canvases = container.querySelectorAll('.react-pdf__Page__canvas');
-      const textLayers = container.querySelectorAll('.react-pdf__Page__textLayer');
+      const textLayers = container.querySelectorAll(
+        '.react-pdf__Page__textLayer'
+      );
       canvases.forEach((canvas) => (canvas.style.pointerEvents = 'none'));
-      textLayers.forEach((textLayer) => (textLayer.style.pointerEvents = 'none'));
+      textLayers.forEach(
+        (textLayer) =>
+          (textLayer.style.pointerEvents =
+            tool === 'highlight' || tool === 'text' ? 'auto' : 'none')
+      );
     };
 
     const restorePointerEvents = () => {
       const canvases = container.querySelectorAll('.react-pdf__Page__canvas');
-      const textLayers = container.querySelectorAll('.react-pdf__Page__textLayer');
+      const textLayers = container.querySelectorAll(
+        '.react-pdf__Page__textLayer'
+      );
       canvases.forEach((canvas) => (canvas.style.pointerEvents = 'auto'));
       textLayers.forEach((textLayer) => (textLayer.style.pointerEvents = 'auto'));
     };
 
-    if (tool === 'hand') {
-      container.style.userSelect = 'none';
-      disablePointerEvents();
+    if (tool === 'hand' || tool === 'highlight' || tool === 'text') {
+      if (tool === 'hand') {
+        container.style.userSelect = 'none';
+        disablePointerEvents();
+      } else {
+        container.style.userSelect = 'auto';
+        disablePointerEvents();
+      }
       container.addEventListener('mousedown', handleMouseDown, { capture: true });
       container.addEventListener('mousemove', handleMouseMove, { capture: true });
       container.addEventListener('mouseup', handleMouseUp, { capture: true });
@@ -103,25 +165,40 @@ export default function PdfDocument({
     }
 
     return () => {
-      container.style.userSelect = 'auto';
-      restorePointerEvents();
-      container.removeEventListener('mousedown', handleMouseDown, { capture: true });
-      container.removeEventListener('mousemove', handleMouseMove, { capture: true });
-      container.removeEventListener('mouseup', handleMouseUp, { capture: true });
-      container.removeEventListener('mouseleave', handleMouseUp, { capture: true });
+      if (container) {
+        container.style.userSelect = 'auto';
+        restorePointerEvents();
+        container.removeEventListener('mousedown', handleMouseDown, {
+          capture: true,
+        });
+        container.removeEventListener('mousemove', handleMouseMove, {
+          capture: true,
+        });
+        container.removeEventListener('mouseup', handleMouseUp, {
+          capture: true,
+        });
+        container.removeEventListener('mouseleave', handleMouseUp, {
+          capture: true,
+        });
+      }
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [tool, isPanning, pdfContainerRef, scrollMode]);
+  }, [tool, isPanning, pdfContainerRef, scrollMode, selectedColor, showToast]);
 
   const onPageRenderSuccess = async (pageNumber) => {
     try {
-      const page = await pdfjs.getDocument(decodeURIComponent(pdfUrl)).promise.then((pdf) => pdf.getPage(pageNumber));
+      const page = await pdfjs
+        .getDocument(decodeURIComponent(pdfUrl))
+        .promise.then((pdf) => pdf.getPage(pageNumber));
       const textContent = await page.getTextContent();
       const text = textContent.items.map((item) => item.str).join(' ');
       textLayerRef.current[pageNumber] = text;
-      console.log(`Text extracted for page ${pageNumber}:`, text.substring(0, 100) + '...');
+      console.log(
+        `Text extracted for page ${pageNumber}:`,
+        text.substring(0, 100) + '...'
+      );
       if (!text.trim()) {
         console.warn(`No text content found on page ${pageNumber}. PDF may lack text layer.`);
         setHasTextLayer(false);
@@ -157,16 +234,19 @@ export default function PdfDocument({
             page: parseInt(pageNum),
             startIndex: index,
             endIndex: index + text.length,
+            text: pageText.slice(index, index + text.length),
             matchIndex: globalMatchIndex++,
           });
-          index += text.length;
+          index += 1;
         }
       }
     });
 
     setSearchResults(matches);
     setCurrentMatch(0);
-    console.log(`Found ${matches.length} matches for "${text}" (matchCase: ${matchCase})`);
+    console.log(
+      `Found ${matches.length} matches for "${text}" (matchCase: ${matchCase})`
+    );
 
     if (matches.length > 0) {
       const firstMatchPage = pageRefs.current[matches[0].page - 1];
@@ -186,33 +266,49 @@ export default function PdfDocument({
   return (
     <div
       ref={pdfContainerRef}
-      className={`flex dark:bg-gray-800 ${scrollMode === 'vertical'
-        ? 'flex-col'
-        : scrollMode === 'horizontal'
+      className={`flex dark:bg-gray-800 ${
+        scrollMode === 'vertical'
+          ? 'flex-col'
+          : scrollMode === 'horizontal'
           ? 'flex-row'
           : 'flex-row flex-wrap'
-        } items-center py-3 overflow-auto will-change-transform ${tool === 'hand' ? (isPanning ? 'cursor-grabbing hand-tool-active' : 'cursor-grab hand-tool-active') : 'cursor-default'
-        }`}
+      } items-center py-3 overflow-auto will-change-transform ${
+        tool === 'hand'
+          ? isPanning
+            ? 'cursor-grabbing hand-tool-active'
+            : 'cursor-grab hand-tool-active'
+          : tool === 'highlight' || tool === 'text'
+          ? 'cursor-text'
+          : 'cursor-default'
+      }`}
       style={{
         maxHeight: 'calc(100vh - 60px)',
         ...(scrollMode === 'horizontal' ? { overflowY: 'hidden' } : {}),
         ...(scrollMode === 'wrapped' ? { justifyContent: 'center', gap: '1rem' } : {}),
       }}
     >
-      <Document
+      <div className="pdf-viewer" style={{ '--selected-color': selectedColor, color: 'black' }}>
+        <Document
         file={decodeURIComponent(pdfUrl)}
         onLoadSuccess={onDocumentLoadSuccess}
-        className={`flex ${scrollMode === 'vertical'
-          ? 'flex-col'
-          : scrollMode === 'horizontal'
+        className={`flex ${
+          scrollMode === 'vertical'
+            ? 'flex-col'
+            : scrollMode === 'horizontal'
             ? 'flex-row'
             : 'flex-row flex-wrap'
-          } items-center`}
+        } items-center`}
         loading={
           <div className="flex items-center justify-center h-screen">
-            <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
+            <div
+              className="flex flex-col items-center justify-center gap-3"
+              role="status"
+              aria-live="alert"
+            >
               <div className="w-12 h-12 animate-spin text-gray-500" />
-              <p className="text-sm text-gray-600 font-medium">Loading PDF document...</p>
+              <p className="text-sm text-gray-600 font-medium">
+                Loading PDF document...
+              </p>
             </div>
           </div>
         }
@@ -228,22 +324,28 @@ export default function PdfDocument({
         {Array.from({ length: numPages || 0 }, (_, index) => {
           const pageNum = index + 1;
           const isRendered = renderedPages[pageNum];
-          const isInView = Math.abs(pageNumber - pageNum) <= visibleRange;
+          const isInView = true;
 
           return (
             <div
               key={pageNum}
               ref={(el) => (pageRefs.current[index] = el)}
               data-page-number={pageNum}
-              className={`mb-6 relative ${scrollMode === 'horizontal' ? 'mr-6' : scrollMode === 'wrapped' ? 'm-2' : ''
-                }`}
+              className={`mb-6 relative ${
+                scrollMode === 'horizontal'
+                  ? 'mr-6'
+                  : scrollMode === 'wrapped'
+                  ? 'm-2'
+                  : ''
+              }`}
               style={scrollMode === 'wrapped' ? { flex: '0 0 auto', maxWidth: '45%' } : {}}
             >
               {(isInView || renderedPages[pageNum]) ? (
                 <>
                   <Card
-                    className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-md flex flex-col justify-center items-center p-6 mx-auto ${isRendered ? 'hidden' : 'block'
-                      }`}
+                    className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-md shadow-md flex flex-col justify-center items-center p-6 mx-auto ${
+                      isRendered ? 'hidden' : 'block'
+                    }`}
                     style={{ transition: 'opacity 0.3s ease' }}
                   >
                     <CardContent className="w-full relative z-10">
@@ -251,89 +353,141 @@ export default function PdfDocument({
                         <div className="h-5 bg-gray-200 rounded w-3/4 mx-auto animate-pulse" />
                         <div className="h-5 bg-gray-200 rounded w-5/6 mx-auto animate-pulse" />
                         <div className="h-5 bg-gray-200 rounded w-2/3 mx-auto animate-pulse" />
-                        <div className="h-5 bg-gray-200 rounded w-4/5 mx-auto animate-pulse" />
-                      </div>
-                      <div className="mt-6 flex justify-center">
-                        <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
-                          <div className="w-8 h-8 animate-spin text-gray-500" />
-                          <p className="text-sm text-gray-600 font-medium">Loading page {pageNum}...</p>
-                        </div>
                       </div>
                     </CardContent>
                   </Card>
-                  <div className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'}`}>
+                  <div
+                    className={`transition-opacity duration-300 ${
+                      isRendered ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
                     <Page
                       pageNumber={pageNum}
-                      canvasBackground='#f2f2f2'
+                      canvasBackground="#f2f2f2"
                       renderTextLayer={true}
                       renderAnnotationLayer={!isZoomingRef.current}
                       scale={scale}
                       rotate={rotation}
                       onRenderSuccess={() => onPageRenderSuccess(pageNum)}
                       customTextRenderer={({ str }) => {
-                        if (!searchText || !searchResults || searchResults.length === 0) return str;
+                        let result = str;
 
-                        let lowerStr = str;
-                        const searchTextForMatch = matchCase ? searchText : searchText.toLowerCase();
-                        let index = 0;
-                        let parts = [];
-                        let absoluteIndex = textLayerRef.current[pageNum]?.indexOf(str) || 0;
+                        // Apply search highlights
+                        if (searchText && searchResults.length > 0) {
+                          const searchTextForMatch = matchCase
+                            ? searchText
+                            : searchText.toLowerCase();
+                          const parts = [];
+                          let index = 0;
+                          const pageText = textLayerRef.current[pageNum] || '';
+                          let absoluteIndex = pageText.indexOf(str);
 
-                        while (index !== -1) {
-                          index = matchCase
-                            ? str.indexOf(searchText, index)
-                            : str.toLowerCase().indexOf(searchTextForMatch, index);
-                          if (index === -1) {
-                            if (parts.length === 0) return str;
-                            break;
-                          }
+                          while (index < str.length) {
+                            const searchIndex = matchCase
+                              ? str.indexOf(searchText, index)
+                              : str.toLowerCase().indexOf(searchTextForMatch, index);
+                            if (searchIndex === -1) {
+                              parts.push(str.slice(index));
+                              break;
+                            }
 
-                          const absoluteStartIndex = absoluteIndex + index;
-                          const match = searchResults.find(
-                            (m) => m.page === pageNum && m.startIndex === absoluteStartIndex
-                          );
+                            const absoluteStartIndex = absoluteIndex + searchIndex;
+                            const match = searchResults.find(
+                              (m) =>
+                                m.page === pageNum &&
+                                m.startIndex === absoluteStartIndex
+                            );
 
-                          if (match) {
-                            const matchText = str.slice(index, index + searchText.length);
-                            const highlightStyle =
-                              highlightAll && match.matchIndex !== currentMatch
-                                ? 'background-color: #FADADD; color: black; padding: 2px 4px;'
-                                : match.matchIndex === currentMatch
-                                  ? 'background-color: red; color: white; padding: 2px 4px;'
+                            if (match) {
+                              const matchText = str.slice(
+                                searchIndex,
+                                searchIndex + searchText.length
+                              );
+                              const highlightStyle =
+                                highlightAll && match.matchIndex !== currentMatch
+                                  ? 'background-color: #ADD8E6; color: black; padding: 2px 4px;'
+                                  : match.matchIndex === currentMatch
+                                  ? 'background-color: #4169E1; color: white; padding: 2px 4px;'
                                   : '';
 
-                            if (highlightStyle) {
-                              parts.push(str.slice(0, index));
-                              parts.push(
-                                `<mark class="search-match${match.matchIndex === currentMatch ? ' active-match' : ''}" data-match-index="${match.matchIndex}" style="${highlightStyle}">${matchText}</mark>`
+                              console.log(
+                                `Applying search highlight on page ${pageNum}:`,
+                                {
+                                  text: matchText,
+                                  isActive: match.matchIndex === currentMatch,
+                                  style: highlightStyle,
+                                  matchIndex: match.matchIndex,
+                                  absoluteStartIndex,
+                                }
                               );
+
+                              if (highlightStyle) {
+                                parts.push(str.slice(index, searchIndex));
+                                parts.push(
+                                  `<mark class="search-match${
+                                    match.matchIndex === currentMatch
+                                      ? ' active-match'
+                                      : ''
+                                  }" data-match-index="${
+                                    match.matchIndex
+                                  }" style="${highlightStyle}">${matchText}</mark>`
+                                );
+                              } else {
+                                parts.push(
+                                  str.slice(index, searchIndex + searchText.length)
+                                );
+                              }
                             } else {
-                              parts.push(str.slice(0, index + searchText.length));
+                              parts.push(
+                                str.slice(index, searchIndex + searchText.length)
+                              );
                             }
-                          } else {
-                            parts.push(str.slice(0, index + searchText.length));
+
+                            index = searchIndex + searchText.length;
+                            absoluteIndex += searchIndex + searchText.length;
                           }
 
-                          str = str.slice(index + searchText.length);
-                          lowerStr = lowerStr.slice(index + searchText.length);
-                          absoluteIndex += index + searchText.length;
-                          index = 0;
+                          if (parts.length > 0) {
+                            result = parts.join('');
+                          }
                         }
 
-                        if (parts.length > 0) {
-                          parts.push(str);
-                          return parts.join('');
-                        }
+                        // Apply manual highlights
+                        highlightedText.forEach((highlight) => {
+                          if (highlight.page === pageNum) {
+                            const escapedText = highlight.text.replace(
+                              /[.*+?^${}()|[\]\\]/g,
+                              '\\$&'
+                            );
+                            const regex = new RegExp(`(${escapedText})`, 'g');
+                            result = result.replace(
+                              regex,
+                              `<mark class="manual-highlight" style="background-color: ${highlight.color}; color: black; padding: 2px 4px;">$1</mark>`
+                            );
+                            console.log(
+                              `Applying manual highlight on page ${pageNum}:`,
+                              {
+                                text: highlight.text,
+                                color: highlight.color,
+                              }
+                            );
+                          }
+                        });
 
-                        return str;
+                        return result;
                       }}
                     />
                   </div>
                 </>
               ) : (
                 <div
-                  className={`w-[210mm] h-[297mm] bg-gray-100 rounded animate-pulse ${scrollMode === 'horizontal' ? 'mr-6' : scrollMode === 'wrapped' ? 'm-2' : ''
-                    }`}
+                  className={`w-[210mm] h-[297mm] bg-gray-100 rounded animate-pulse ${
+                    scrollMode === 'horizontal'
+                      ? 'mr-6'
+                      : scrollMode === 'wrapped'
+                      ? 'm-2'
+                      : ''
+                  }`}
                   style={scrollMode === 'wrapped' ? { flex: '0 0 auto', maxWidth: '45%' } : {}}
                 />
               )}
@@ -341,6 +495,7 @@ export default function PdfDocument({
           );
         })}
       </Document>
+      </div>
     </div>
   );
 }

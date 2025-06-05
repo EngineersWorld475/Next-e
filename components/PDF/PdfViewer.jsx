@@ -19,7 +19,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [isClient, setIsClient] = useState(false);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.0);
+  const [scale, setScale] = useState(1.5);
   const [rotation, setRotation] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
@@ -30,14 +30,15 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [tool, setTool] = useState('text');
   const [showThumbnails, setShowThumbnails] = useState(true);
   const [renderedPages, setRenderedPages] = useState({});
-  const [matchCase, setMatchCase] = useState(false)
+  const [matchCase, setMatchCase] = useState(false);
   const [thumbnailRendered, setThumbnailRendered] = useState({});
   const [pdfUrl, setPdfUrl] = useState(initialPdfUrl);
   const [selectedText, setSelectedText] = useState('');
   const [question, setQuestion] = useState('');
   const [showBox, setShowBox] = useState(false);
   const [scrollMode, setScrollMode] = useState('vertical');
-  const [highlightAll, setHighlightAll] = useState(false)
+  const [highlightAll, setHighlightAll] = useState(false);
+  const [selectedColor, setSelectedColor] = useState('#87CEEB');
   const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
@@ -212,118 +213,154 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
 
   const onDocumentLoadSuccess = useCallback(({ numPages }) => {
     setNumPages(numPages);
-    pageRefs.current = Array(numPages).fill().map((_, i) => pageRefs.current[i] || null);
+    pageRefs.current = Array(numPages)
+      .fill()
+      .map((_, i) => pageRefs.current[i] || null);
     setRenderedPages({});
     setThumbnailRendered({});
   }, []);
 
-  const handleFileSelect = useCallback((event) => {
-    const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      const fileUrl = URL.createObjectURL(file);
-      setPdfUrl(fileUrl);
-      if (pdfUrl && pdfUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(pdfUrl);
+  const handleFileSelect = useCallback(
+    (event) => {
+      const file = event.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        const fileUrl = URL.createObjectURL(file);
+        setPdfUrl(fileUrl);
+        if (pdfUrl && pdfUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(pdfUrl);
+        }
+      } else {
+        showToast({
+          title: 'Invalid File',
+          description: 'Please select a valid PDF file',
+          variant: 'error',
+        });
       }
-    } else {
-      showToast({
-        title: 'Invalid File',
-        description: 'Please select a valid PDF file',
-        variant: 'error',
-      });
-    }
-  }, [pdfUrl, showToast]);
+    },
+    [pdfUrl, showToast]
+  );
 
   const toggleThumbnails = useCallback(() => {
     setShowThumbnails((prev) => !prev);
   }, []);
 
-  const goToPage = useCallback((pageNum) => {
-    if (pageNum >= 1 && pageNum <= numPages) {
-      setPageNumber(pageNum);
-      const tryScroll = (attempt = 0) => {
-        const container = pdfContainerRef.current;
-        const pageEl = pageRefs.current[pageNum - 1];
-        if (!container || !pageEl || attempt > 10) return;
-        const pageHeight = pageEl.offsetHeight;
-        const pageWidth = pageEl.offsetWidth;
-        if (pageHeight === 0 || pageWidth === 0) {
-          setTimeout(() => tryScroll(attempt + 1), 100);
-          return;
-        }
-        if (scrollMode === 'vertical') {
-          const scrollOffset = pageEl.offsetTop - container.offsetTop;
-          const centeredScroll = scrollOffset - (container.clientHeight / 2) + (pageHeight / 2);
-          container.scrollTo({
-            top: centeredScroll,
-            behavior: 'smooth',
-          });
-        } else if (scrollMode === 'horizontal') {
-          const scrollOffset = pageEl.offsetLeft - container.offsetLeft;
-          const centeredScroll = scrollOffset - (container.clientWidth / 2) + (pageWidth / 2);
-          container.scrollTo({
-            left: centeredScroll,
-            behavior: 'smooth',
-          });
-        } else if (scrollMode === 'wrapped') {
-          // For wrapped mode, scroll to ensure the page is visible
-          pageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-        }
-        pageEl.classList.add('page-transition');
-        setTimeout(() => pageEl.classList.remove('page-transition'), 300);
-      };
-      setTimeout(() => tryScroll(), 50);
-    }
-  }, [numPages, scrollMode]);
+  const goToPage = useCallback(
+    (pageNum) => {
+      if (pageNum >= 1 && pageNum <= numPages) {
+        setPageNumber(pageNum);
+        const tryScroll = (attempt = 0) => {
+          const container = pdfContainerRef.current;
+          const pageEl = pageRefs.current[pageNum - 1];
+          if (!container || !pageEl || attempt > 10) return;
+          const pageHeight = pageEl.offsetHeight;
+          const pageWidth = pageEl.offsetWidth;
+          if (pageHeight === 0 || pageWidth === 0) {
+            setTimeout(() => tryScroll(attempt + 1), 100);
+            return;
+          }
+          if (scrollMode === 'vertical') {
+            const scrollOffset = pageEl.offsetTop - container.offsetTop;
+            const centeredScroll =
+              scrollOffset - container.clientHeight / 2 + pageHeight / 2;
+            container.scrollTo({
+              top: centeredScroll,
+              behavior: 'smooth',
+            });
+          } else if (scrollMode === 'horizontal') {
+            const scrollOffset = pageEl.offsetLeft - container.offsetLeft;
+            const centeredScroll =
+              scrollOffset - container.clientWidth / 2 + pageWidth / 2;
+            container.scrollTo({
+              left: centeredScroll,
+              behavior: 'smooth',
+            });
+          } else if (scrollMode === 'wrapped') {
+            pageEl.scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+              inline: 'nearest',
+            });
+          }
+          pageEl.classList.add('page-transition');
+          setTimeout(() => pageEl.classList.remove('page-transition'), 300);
+        };
+        setTimeout(() => tryScroll(), 50);
+      }
+    },
+    [numPages, scrollMode]
+  );
 
-  const scrollToMatch = useCallback((match, retryCount = 0) => {
-    const maxRetries = 10; // Increased retries
-    const retryDelay = 300; // Increased delay to account for rendering time
-    const pageContainer = document.querySelector(`div[data-page-number="${match.page}"]`);
-    if (!pageContainer) {
-      if (retryCount < maxRetries) {
-        console.warn(`Page container not found for page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`);
+  const scrollToMatch = useCallback(
+    (match, retryCount = 0) => {
+      const maxRetries = 10;
+      const retryDelay = 300;
+      const pageContainer = document.querySelector(
+        `div[data-page-number="${match.page}"]`
+      );
+      if (!pageContainer) {
+        if (retryCount < maxRetries) {
+          console.warn(
+            `Page container not found for page ${match.page}, retrying (${
+              retryCount + 1
+            }/${maxRetries})`
+          );
+          setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
+        } else {
+          console.warn(
+            `Page container not found for page ${match.page} after ${maxRetries} retries`
+          );
+          showToast({
+            title: 'Search Error',
+            description: `Could not find page container for page ${match.page}.`,
+            variant: 'error',
+          });
+        }
+        return;
+      }
+      const textLayer = pageContainer.querySelector(
+        '.react-pdf__Page__textContent.textLayer'
+      );
+      if (textLayer) {
+        const highlight = textLayer.querySelector(
+          `[data-match-index="${match.matchIndex}"]`
+        );
+        if (highlight) {
+          highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          console.log(
+            `Scrolled to match on page ${match.page}, index ${match.matchIndex}`
+          );
+        } else if (retryCount < maxRetries) {
+          console.warn(
+            `Highlight not found for match on page ${match.page}, retrying (${
+              retryCount + 1
+            }/${maxRetries})`
+          );
+          setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
+        } else {
+          console.warn(
+            `Highlight not found for match on page ${match.page} after ${maxRetries} retries`
+          );
+        }
+      } else if (retryCount < maxRetries) {
+        console.warn(
+          `Text layer not found for page ${match.page}, retrying (${
+            retryCount + 1
+          }/${maxRetries})`
+        );
         setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
       } else {
-        console.warn(`Page container not found for page ${match.page} after ${maxRetries} retries`);
+        console.warn(
+          `Text layer not found for page ${match.page} after ${maxRetries} retries`
+        );
         showToast({
           title: 'Search Error',
-          description: `Could not find page container for page ${match.page}.`,
+          description: `Could not find text layer for page ${match.page}.`,
           variant: 'error',
         });
       }
-      return;
-    }
-    const textLayer = pageContainer.querySelector('.react-pdf__Page__textContent.textLayer');
-    if (textLayer) {
-      const highlight = textLayer.querySelector(`[data-match-index="${match.matchIndex}"]`);
-      if (highlight) {
-        highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        console.log(`Scrolled to match on page ${match.page}, index ${match.matchIndex}`);
-      } else if (retryCount < maxRetries) {
-        console.warn(`Highlight not found for match on page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`);
-        setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
-      } else {
-        console.warn(`Highlight not found for match on page ${match.page} after ${maxRetries} retries`);
-        // Optionally show toast, but avoid spamming the user
-        // showToast({
-        //   title: 'Search Error',
-        //   description: `Could not find highlighted match on page ${match.page}.`,
-        //   variant: 'error',
-        // });
-      }
-    } else if (retryCount < maxRetries) {
-      console.warn(`Text layer not found for page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`);
-      setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
-    } else {
-      console.warn(`Text layer not found for page ${match.page} after ${maxRetries} retries`);
-      showToast({
-        title: 'Search Error',
-        description: `Could not find text layer for page ${match.page}.`,
-        variant: 'error',
-      });
-    }
-  }, [showToast]);
+    },
+    [showToast]
+  );
 
   const goToNextMatch = useCallback(() => {
     if (searchResults.length === 0) return;
@@ -331,7 +368,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     setCurrentMatch(nextMatch);
     const matchPageNum = searchResults[nextMatch].page;
     goToPage(matchPageNum);
-    setTimeout(() => scrollToMatch(searchResults[nextMatch]), 500); // Increased to 500ms
+    setTimeout(() => scrollToMatch(searchResults[nextMatch]), 500);
   }, [searchResults, currentMatch, goToPage, scrollToMatch]);
 
   const visiblePages = useMemo(() => {
@@ -339,13 +376,13 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     const buffer = 2;
     const start = Math.max(1, pageNumber - buffer);
     const end = Math.min(numPages, pageNumber + buffer);
-    const nearbyPages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
-
-    // Include all pages that have search matches
+    const nearbyPages = Array.from(
+      { length: end - start + 1 },
+      (_, i) => start + i
+    );
     const matchPages = searchResults.map((match) => match.page);
     return [...new Set([...nearbyPages, ...matchPages])].sort((a, b) => a - b);
   }, [numPages, pageNumber, searchResults]);
-
 
   const handleSubmit = useCallback(() => {
     const data = {
@@ -362,9 +399,9 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   if (!isClient || !pdfUrl) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
-          <div className="w-12 h-12 animate-spin text-gray-500" />
-          <p className="text-sm text-gray-600 font-medium">Loading PDF viewer...</p>
+        <div className="flex flex-col items-center justify-center gap-2" role="status" aria-live="polite">
+          <div className="w-12 h-12 animate-spin text-gray-400" />
+          <p className="text-sm font-medium text-gray-600">Loading PDF viewer...</p>
         </div>
       </div>
     );
@@ -383,7 +420,14 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         searchText={searchText}
         matchCase={matchCase}
       />
-      <div className="flex-1 h-screen" style={{ marginLeft: showThumbnails ? '12rem' : '0', transition: 'margin-left 0.3s ease-in-out' }} ref={containerRef}>
+      <div
+        className="flex-1 h-screen"
+        style={{
+          marginLeft: showThumbnails ? '12rem' : '0',
+          transition: 'margin-left 0.3s ease-in-out',
+        }}
+        ref={containerRef}
+      >
         {hasTextLayer === false && (
           <div className="fixed top-10 left-4 bg-yellow-200 text-black p-2 rounded shadow z-50 animate-fadeIn">
             Warning: This PDF may lack a text layer. Search and highlighting may not work. Use a text-based PDF.
@@ -421,10 +465,12 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           showToast={showToast}
           scrollMode={scrollMode}
           setScrollMode={setScrollMode}
-          highlightAll={highlightAll} 
-          setHighlightAll={setHighlightAll} 
-          matchCase={matchCase} 
+          highlightAll={highlightAll}
+          setHighlightAll={setHighlightAll}
+          matchCase={matchCase}
           setMatchCase={setMatchCase}
+          selectedColor={selectedColor}
+          setSelectedColor={setSelectedColor}
         />
         <PdfDocument
           pdfUrl={pdfUrl}
@@ -451,10 +497,11 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           currentMatch={currentMatch}
           scrollToMatch={scrollToMatch}
           highlightAll={highlightAll}
-          matchCase={matchCase} 
+          matchCase={matchCase}
+          selectedColor={selectedColor}
         />
         {showBox && (
-          <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate-fadeIn">
+          <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate">
             <p className="mb-2 text-sm text-gray-700 font-medium">
               Selected: <i>{selectedText}</i>
             </p>
@@ -487,10 +534,16 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           transition: transform 0.2s ease-out;
         }
         @keyframes fadeIn {
-          0% { opacity: 0; transform: translateY(10px); }
-          100% { opacity: 1; transform: translateY(0); }
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        .animate-fadeIn {
+        .animate {
           animation: fadeIn 0.3s ease-out forwards;
         }
         .page-transition {
@@ -500,6 +553,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
       `}</style>
     </div>
   );
-}
+};
 
-export default PdfViewer;
+export default PdfViewer; 
