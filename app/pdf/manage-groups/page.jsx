@@ -6,7 +6,7 @@ import useUserId from '@/hooks/useUserId'
 import { getGroupsByUserId } from '@/store/group-slice'
 import { Loader } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 const GroupList = () => {
@@ -17,19 +17,19 @@ const GroupList = () => {
   const { user } = useSelector((state) => state.auth);
   const [listOfGroups, setListOfGroups] = useState([]);
   const router = useRouter();
+  const hasFetchedGroups = useRef(false);
 
   useEffect(() => {
-    if(user?.token) {
-      dispatch(getGroupsByUserId({ userId, authToken: user?.token }))
+    if (user?.token && userId && !hasFetchedGroups.current) {
+      hasFetchedGroups.current = true;
+      dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
     }
-  }, [dispatch, userId, user?.token])
+  }, [dispatch, userId, user?.token]);
 
-  useEffect(() => {
-    setIsMounting(true)
-  }, [])
   useEffect(() => {
     setListOfGroups(groupList);
   }, [groupList]);
+
   return (
     <div className='group border-l-4 border-l-transparent bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg relative'>
       <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-gray-100 mt-5 p-4 shadow-sm rounded-xl dark:bg-gray-900 dark:text-white'>
@@ -63,7 +63,7 @@ const GroupList = () => {
           <CreateGroup setIsMounting={setIsMounting} listOfGroups={listOfGroups} setListOfGroups={setListOfGroups} />
         </div>
       </div>
-    </ div>
+    </div>
   )
 }
 

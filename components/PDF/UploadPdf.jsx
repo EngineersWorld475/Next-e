@@ -114,7 +114,7 @@ const UploadPdf = ({
               <Upload className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <CardTitle className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 Upload Academic Paper
               </CardTitle>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -123,12 +123,12 @@ const UploadPdf = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
             <Badge variant="outline" className="text-xs font-medium">
               Step 1 of 2
             </Badge>
             <Separator className="flex-1" />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col md:flex-row items-center gap-2">
               <span className="text-xs text-gray-500 font-medium">SOURCE TYPE</span>
               <RadioGroup
                 value={uploadType}

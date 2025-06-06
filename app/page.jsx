@@ -72,7 +72,7 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* Hero Section - Enhanced */}
+        {/* Hero Section */}
         <motion.div
           className="relative flex flex-col justify-center items-center min-h-screen gap-8 text-center px-6 pt-10 pb-19 -mt-10"
           initial="hidden"
