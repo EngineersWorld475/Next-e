@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import useUserId from '@/hooks/useUserId'
 import { getGroupsByUserId } from '@/store/group-slice'
 import { Loader } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import React, { useEffect, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -16,7 +15,6 @@ const GroupList = () => {
   const { groupList, isLoading } = useSelector((state) => state.group);
   const { user } = useSelector((state) => state.auth);
   const [listOfGroups, setListOfGroups] = useState([]);
-  const router = useRouter();
   const hasFetchedGroups = useRef(false);
 
   useEffect(() => {

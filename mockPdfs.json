@@ -38,35 +38,5 @@
     "userId": "26",
     "pdfFile": "/uploads/1744906681168-MI-AKS-IPC-10 ABS.pdf",
     "createdAt": "2025-04-17T16:18:01.171Z"
-  },
-  {
-    "id": "1746713035704",
-    "article": "Story",
-    "pubmedid": "12",
-    "author": "sanjay",
-    "doi": "32",
-    "userId": "23",
-    "pdfFile": "/uploads/1746713035698-story.pdf",
-    "createdAt": "2025-05-08T14:03:55.704Z"
-  },
-  {
-    "id": "1746943039741",
-    "article": "Organic principles",
-    "pubmedid": "33",
-    "author": "sanjay",
-    "doi": "32",
-    "userId": "23",
-    "pdfFile": "/uploads/1746943039735-MI-AKS-IPC-10 ABS (1).pdf",
-    "createdAt": "2025-05-11T05:57:19.741Z"
-  },
-  {
-    "id": "1746955089199",
-    "article": "dummy",
-    "pubmedid": "12",
-    "author": "sanjay",
-    "doi": "21",
-    "userId": "23",
-    "pdfFile": "/uploads/1746955089191-dummy-pdf_2.pdf",
-    "createdAt": "2025-05-11T09:18:09.200Z"
   }
 ]

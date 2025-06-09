@@ -80,15 +80,30 @@ export default function Home() {
           variants={sectionVariants}
         >
           {/* decorative elements */}
-          <div className="absolute top-20 left-10 text-purple-400/30">
+          <motion.div
+            className="absolute top-20 left-10 text-purple-400/30"
+            animate={{ y: [0, -15, 0] }}
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          >
             <Sparkles className="w-8 h-8" />
-          </div>
-          <div className="absolute top-40 right-20 text-indigo-400/30">
+          </motion.div>
+
+          <motion.div
+            className="absolute top-40 right-20 text-indigo-400/30"
+            animate={{ rotate: [0, 15, -15, 0] }}
+            transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+          >
             <Brain className="w-6 h-6" />
-          </div>
-          <div className="absolute bottom-40 left-20 text-pink-400/30">
+          </motion.div>
+
+          <motion.div
+            className="absolute bottom-40 left-20 text-pink-400/30"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+          >
             <Target className="w-10 h-10" />
-          </div>
+          </motion.div>
+
 
           <motion.div variants={itemVariants} className="relative">
             <motion.h1
