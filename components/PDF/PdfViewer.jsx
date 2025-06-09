@@ -292,6 +292,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   }, [numPages, pageNumber]);
 
   const scrollToMatch = useCallback((match, retryCount = 0) => {
+    console.log('...match', match)
     const maxRetries = 5;
     const retryDelay = 200;
     // Find the parent div with data-page-number
@@ -440,6 +441,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           isZoomingRef={isZoomingRef}
           visiblePages={visiblePages}
           scrollMode={scrollMode}
+          searchResults={searchResults}
+          currentMatch={currentMatch}
         />
         {showBox && (
           <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate-fadeIn">

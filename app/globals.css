@@ -135,16 +135,4 @@
 
 /* In globals.css or your stylesheet */
 /* In globals.css or your stylesheet */
-.react-pdf__Page__textLayer {
-  position: absolute !important;
-  z-index: 5 !important; /* Above canvas */
-  opacity: 1 !important; /* Ensure visible */
-  pointer-events: auto !important; /* Allow selection */
-}
-.search-match {
-  background-color: yellow !important; /* Yellow highlight */
-  color: black !important;
-  z-index: 10 !important;
-  padding: 0 !important;
-  display: inline !important; /* Ensure inline rendering */
-}
+

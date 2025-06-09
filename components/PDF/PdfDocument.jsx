@@ -24,6 +24,8 @@ export default function PdfDocument({
   showToast,
   isZoomingRef,
   scrollMode,
+  searchResults,
+  currentMatch
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
@@ -139,6 +141,7 @@ export default function PdfDocument({
 
     const matches = [];
     const lowerSearchText = text.toLowerCase();
+    let globalMatchIndex = 0;
 
     Object.keys(textLayerRef.current).forEach((pageNum) => {
       const pageText = textLayerRef.current[pageNum].toLowerCase();
@@ -150,6 +153,7 @@ export default function PdfDocument({
             page: parseInt(pageNum),
             startIndex: index,
             endIndex: index + text.length,
+            matchIndex: globalMatchIndex++,
           });
           index += lowerSearchText.length;
         }
@@ -177,15 +181,13 @@ export default function PdfDocument({
   return (
     <div
       ref={pdfContainerRef}
-      className={`flex ${
-        scrollMode === 'vertical'
-          ? 'flex-col'
-          : scrollMode === 'horizontal'
+      className={`flex ${scrollMode === 'vertical'
+        ? 'flex-col'
+        : scrollMode === 'horizontal'
           ? 'flex-row'
           : 'flex-row flex-wrap'
-      } items-center py-3 overflow-auto will-change-transform ${
-        tool === 'hand' ? (isPanning ? 'cursor-grabbing hand-tool-active' : 'cursor-grab hand-tool-active') : 'cursor-default'
-      }`}
+        } items-center py-3 overflow-auto will-change-transform ${tool === 'hand' ? (isPanning ? 'cursor-grabbing hand-tool-active' : 'cursor-grab hand-tool-active') : 'cursor-default'
+        }`}
       style={{
         maxHeight: 'calc(100vh - 60px)',
         ...(scrollMode === 'horizontal' ? { overflowY: 'hidden' } : {}),
@@ -195,13 +197,12 @@ export default function PdfDocument({
       <Document
         file={decodeURIComponent(pdfUrl)}
         onLoadSuccess={onDocumentLoadSuccess}
-        className={`flex ${
-          scrollMode === 'vertical'
-            ? 'flex-col'
-            : scrollMode === 'horizontal'
+        className={`flex ${scrollMode === 'vertical'
+          ? 'flex-col'
+          : scrollMode === 'horizontal'
             ? 'flex-row'
             : 'flex-row flex-wrap'
-        } items-center`}
+          } items-center`}
         loading={
           <div className="flex items-center justify-center h-screen">
             <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
@@ -224,23 +225,23 @@ export default function PdfDocument({
           const isRendered = renderedPages[pageNum];
           const isInView = Math.abs(pageNumber - pageNum) <= visibleRange;
           const hasRendered = renderedPages[pageNum];
+          let matchIndexCounter = 0
+
 
           return (
             <div
               key={pageNum}
               ref={(el) => (pageRefs.current[index] = el)}
               data-page-number={pageNum}
-              className={`mb-6 relative ${
-                scrollMode === 'horizontal' ? 'mr-6' : scrollMode === 'wrapped' ? 'm-2' : ''
-              }`}
+              className={`mb-6 relative ${scrollMode === 'horizontal' ? 'mr-6' : scrollMode === 'wrapped' ? 'm-2' : ''
+                }`}
               style={scrollMode === 'wrapped' ? { flex: '0 0 auto', maxWidth: '45%' } : {}}
             >
               {(isInView || hasRendered) ? (
                 <>
                   <Card
-                    className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-md flex flex-col justify-center items-center p-6 mx-auto ${
-                      isRendered ? 'hidden' : 'block'
-                    }`}
+                    className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-md flex flex-col justify-center items-center p-6 mx-auto ${isRendered ? 'hidden' : 'block'
+                      }`}
                     style={{ transition: 'opacity 0.3s ease' }}
                   >
                     <CardContent className="w-full relative z-10">
@@ -266,27 +267,40 @@ export default function PdfDocument({
                       scale={scale}
                       rotate={rotation}
                       onRenderSuccess={() => onPageRenderSuccess(pageNum)}
-                      customTextRenderer={({ str, itemIndex }) => {
-                        if (!searchText) return str;
+                      customTextRenderer={({ str }) => {
+                        if (!searchText || !searchResults || searchResults.length === 0) return str;
+
+                        const pageNum = pageNumber;
+                        const textLayer = textLayerRef.current[pageNum];
                         const lowerStr = str.toLowerCase();
                         const lowerSearch = searchText.toLowerCase();
                         const index = lowerStr.indexOf(lowerSearch);
+
                         if (index === -1) return str;
 
-                        const matchText = str.slice(index, index + searchText.length);
-                        console.log('matchText:', matchText);
+                        const absoluteStartIndex = textLayer.indexOf(str) + index;
 
-                        const result = `${str.slice(0, index)}<mark class="search-match" style="background-color: yellow; color: black; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
-                        return result;
+                        const match = searchResults.find(
+                          (m) => m.page === pageNum && m.startIndex === absoluteStartIndex
+                        );
+
+                        if (!match) return str;
+
+                        const isActiveMatch = match.matchIndex === currentMatch;
+
+                        const matchText = str.slice(index, index + searchText.length);
+
+                        return `${str.slice(0, index)}<mark class="search-match ${isActiveMatch ? 'active-match' : ''}" data-match-index="${match.matchIndex}" style="background-color: ${isActiveMatch ? 'red' : 'yellow'}; color: ${isActiveMatch ? 'white' : 'black'}; padding: 0;">${matchText}</mark>${str.slice(index + searchText.length)}`;
                       }}
+
+
                     />
                   </div>
                 </>
               ) : (
                 <div
-                  className={`w-[210mm] h-[297mm] bg-gray-100 rounded animate-pulse ${
-                    scrollMode === 'horizontal' ? 'mr-6' : scrollMode === 'wrapped' ? 'm-2' : ''
-                  }`}
+                  className={`w-[210mm] h-[297mm] bg-gray-100 rounded animate-pulse ${scrollMode === 'horizontal' ? 'mr-6' : scrollMode === 'wrapped' ? 'm-2' : ''
+                    }`}
                   style={scrollMode === 'wrapped' ? { flex: '0 0 auto', maxWidth: '45%' } : {}}
                 />
               )}
