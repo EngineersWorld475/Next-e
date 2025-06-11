@@ -82,24 +82,24 @@ export default function Home() {
           {/* decorative elements */}
           <motion.div
             className="absolute top-20 left-10 text-purple-400/30"
-            animate={{ y: [0, -15, 0] }}
-            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+            // animate={{ y: [0, -15, 0] }}
+            // transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
           >
             <Sparkles className="w-8 h-8" />
           </motion.div>
 
           <motion.div
             className="absolute top-40 right-20 text-indigo-400/30"
-            animate={{ rotate: [0, 15, -15, 0] }}
-            transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+            // animate={{ rotate: [0, 15, -15, 0] }}
+            // transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
           >
             <Brain className="w-6 h-6" />
           </motion.div>
 
           <motion.div
             className="absolute bottom-40 left-20 text-pink-400/30"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+            // animate={{ scale: [1, 1.2, 1] }}
+            // transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
           >
             <Target className="w-10 h-10" />
           </motion.div>
@@ -218,8 +218,8 @@ export default function Home() {
                 </div>
               </motion.div>
               <motion.div variants={itemVariants} className="space-y-6 order-1 lg:order-2">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center">
+                <div className="relative flex gap-3 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center mt-1.5">
                     <Users className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-4xl md:text-5xl font-bold text-white">

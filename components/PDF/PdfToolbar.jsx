@@ -58,6 +58,8 @@ const PdfToolbar = ({
   setMatchCase,
   selectedColor,
   setSelectedColor,
+  selectedPenColor,
+  setSelectedPenColor,
 }) => {
   const [copied, setCopied] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -65,6 +67,7 @@ const PdfToolbar = ({
   const [toggleNotesBar, setToggleNotesBar] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showColorPalette, setShowColorPalette] = useState(false);
+  const [showPenColorPalette, setShowPenColorPalette] = useState(false);
   const dispatch = useDispatch();
   const userId = useUserId();
 
@@ -75,6 +78,13 @@ const PdfToolbar = ({
     { name: 'Purple', value: '#E0B0FF', bgClass: 'bg-purple-500/20', borderClass: 'border-purple-300/50' },
   ];
 
+  const penColors = [
+    '#000000', '#FF0000', '#00FF00', '#87CEEB', '#FFFF00',
+    '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#008000',
+    '#FF69B4', '#8B4513', '#808080', '#FFB6C1', '#40E0D0',
+    '#DDA0DD', '#98FB98', '#F0E68C', '#FF6347', '#4682B4'
+  ];
+
   const selectedColorClasses = colors.find((color) => color.value === selectedColor) || colors[0];
 
   const toggleColorPalette = () => {
@@ -82,10 +92,21 @@ const PdfToolbar = ({
     setTool('highlight');
   };
 
+  const togglePenColorPalette = () => {
+    setShowPenColorPalette((prev) => !prev);
+    setTool('pen');
+  };
+
   const handleColorSelect = (color) => {
     setSelectedColor(color.value);
     console.log(`Selected color: ${color.name}`);
     setShowColorPalette(false);
+  };
+
+  const handlePenColorSelect = (color) => {
+    setSelectedPenColor(color);
+    console.log(`Selected pen color: ${color}`);
+    setShowPenColorPalette(false);
   };
 
   const goToPreviousPage = () => {
@@ -304,22 +325,48 @@ const PdfToolbar = ({
             className="fixed top-0 right-0 bottom-0 w-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl border-l border-slate-700/50 shadow-2xl z-20"
           >
             <div className="flex flex-col items-center gap-6 pt-24 px-2">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="group p-3 rounded-xl bg-slate-800/60 hover:bg-blue-600/20 border border-slate-600/50 hover:border-blue-400/50 transition-all duration-300 backdrop-blur-sm"
-              >
-                <FaPen className="w-5 h-5 text-slate-400 group-hover:text-blue-400 transition-colors" />
-              </motion.button>
               <div className="relative">
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`group p-3 rounded-xl ${
-                    showColorPalette
+                  className={`group p-3 rounded-xl ${showPenColorPalette
+                      ? 'bg-blue-600/20 border border-blue-400/50'
+                      : 'bg-slate-800/60 hover:bg-blue-600/20 border border-slate-600/50 hover:border-blue-400/50'
+                    } transition-all duration-300 backdrop-blur-sm`}
+                  onClick={togglePenColorPalette}
+                >
+                  <FaPen className="w-5 h-5" style={{ color: selectedPenColor }} />
+                </motion.button>
+                {showPenColorPalette && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-14 top-0 bg-slate-800/95 backdrop-blur-xl border border-slate-600/50 rounded-lg shadow-xl p-3 z-50"
+                  >
+                    <div className="grid grid-cols-5 gap-2 w-40">
+                      {penColors.map((color, index) => (
+                        <button
+                          key={index}
+                          className="w-6 h-6 rounded-full hover:ring-2 hover:ring-white/50 transition-all border border-slate-600/30"
+                          style={{ backgroundColor: color }}
+                          onClick={() => handlePenColorSelect(color)}
+                          title={`Color ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`group p-3 rounded-xl ${showColorPalette
                       ? `${selectedColorClasses.bgClass} ${selectedColorClasses.borderClass}`
                       : `bg-slate-800/60 border border-slate-600/50 hover:${selectedColorClasses.bgClass} hover:${selectedColorClasses.borderClass}`
-                  } transition-all duration-300 backdrop-blur-sm`}
+                    } transition-all duration-300 backdrop-blur-sm`}
                   onClick={toggleColorPalette}
                 >
                   <MdHighlight className="w-5 h-5" style={{ color: selectedColor }} />
@@ -349,16 +396,24 @@ const PdfToolbar = ({
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="group p-3 rounded-xl bg-slate-800/60 hover:bg-red-600/20 border border-slate-600/50 hover:border-red-400/50 transition-all duration-300 backdrop-blur-sm"
+                className={`group p-3 rounded-xl ${tool === 'hand'
+                    ? 'bg-green-600/20 border border-green-400/50'
+                    : 'bg-slate-800/60 hover:bg-green-600/20 border border-slate-600/50 hover:border-green-400/50'
+                  } transition-all duration-300 backdrop-blur-sm`}
+                onClick={selectHandTool}
               >
-                <FaEraser className="w-5 h-5 text-slate-400 group-hover:text-red-400 transition-colors" />
+                <FaHandPointer className="w-5 h-5 text-slate-400 group-hover:text-green-400 transition-colors" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="group p-3 rounded-xl bg-slate-800/60 hover:bg-green-600/20 border border-slate-600/50 hover:border-green-400/50 transition-all duration-300 backdrop-blur-sm"
+                className={`group p-3 rounded-xl ${tool === 'text'
+                    ? 'bg-blue-600/20 border border-blue-400/50'
+                    : 'bg-slate-800/60 hover:bg-blue-600/20 border border-slate-600/50 hover:border-blue-400/50'
+                  } transition-all duration-300 backdrop-blur-sm`}
+                onClick={selectTextTool}
               >
-                <FaHandPointer className="w-5 h-5 text-slate-400 group-hover:text-green-400 transition-colors" />
+                <MousePointer className="w-5 h-5 text-slate-400 group-hover:text-blue-400 transition-colors" />
               </motion.button>
             </div>
           </motion.div>
@@ -437,6 +492,16 @@ const PdfToolbar = ({
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  title="First Page"
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group disabled:opacity-50"
+                  onClick={goToFirstPage}
+                  disabled={pageNumber <= 1}
+                >
+                  <SquareArrowUp size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   title="Previous Page"
                   className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group disabled:opacity-50"
                   onClick={goToPreviousPage}
@@ -458,6 +523,16 @@ const PdfToolbar = ({
                   disabled={pageNumber >= numPages}
                 >
                   <ChevronLast size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  title="Last Page"
+                  className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group disabled:opacity-50"
+                  onClick={goToLastPage}
+                  disabled={pageNumber >= numPages}
+                >
+                  <SquareArrowDown size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
                 </motion.button>
               </div>
             </div>
@@ -544,6 +619,41 @@ const PdfToolbar = ({
                 </motion.button>
               </div>
               <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-800/40 border border-slate-600/50 backdrop-blur-sm">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
+                    >
+                      <ChevronsRight size={18} className="text-slate-300 group-hover:text-purple-400 transition-colors" />
+                    </motion.button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-white/95 dark:bg-slate-800/95 border border-slate-200/50 dark:border-slate-600/50">
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem onClick={rotateClockwise}>
+                        <RotateCw className="mr-2 h-4 w-4" />
+                        <span>Rotate Clockwise</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={rotateCounterclockwise}>
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        <span>Rotate Counterclockwise</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setScrollMode('vertical')}>
+                        <Rows3 className="mr-2 h-4 w-4" />
+                        <span>Vertical Scroll</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setScrollMode('horizontal')}>
+                        <Columns3 className="mr-2 h-4 w-4" />
+                        <span>Horizontal Scroll</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setScrollMode('wrapped')}>
+                        <StretchHorizontal className="mr-2 h-4 w-4" />
+                        <span>Wrapped Scroll</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Dialog open={dialogOpen} onOpenChange={(open) => {
                   if (open) handleDialogOpen();
                   else handleDialogClose();
@@ -641,57 +751,6 @@ const PdfToolbar = ({
                     <Expand size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
                   }
                 </motion.button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="p-2 hover:bg-slate-700/60 rounded-lg transition-all duration-200 group"
-                    >
-                      <ChevronsRight size={18} className="text-slate-300 group-hover:text-purple-400 transition-colors" />
-                    </motion.button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-600/50 shadow-2xl">
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={goToFirstPage}>
-                        <SquareArrowUp size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Go to First Page</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={goToLastPage}>
-                        <SquareArrowDown size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Go to Last Page</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={rotateClockwise}>
-                        <RotateCw size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Rotate Clockwise</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={rotateCounterclockwise}>
-                        <RotateCcw size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Rotate Counterclockwise</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={selectTextTool}>
-                        <MousePointer size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Text Selection Tool</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={selectHandTool}>
-                        <Hand size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Hand Tool</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setScrollMode('vertical')}>
-                        <Rows3 size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Vertical Scrolling</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setScrollMode('horizontal')}>
-                        <Columns3 size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Horizontal Scrolling</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setScrollMode('wrapped')}>
-                        <StretchHorizontal size={18} className="text-slate-500 mr-3" />
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">Wrapped Scrolling</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -701,4 +760,4 @@ const PdfToolbar = ({
   );
 };
 
-export default React.memo(PdfToolbar);
+export default PdfToolbar;

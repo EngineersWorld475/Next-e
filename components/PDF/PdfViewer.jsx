@@ -39,6 +39,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [scrollMode, setScrollMode] = useState('vertical');
   const [highlightAll, setHighlightAll] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#87CEEB');
+  const [selectedPenColor, setSelectedPenColor] = useState('#87CEEB'); // Added state for pen color
   const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
@@ -300,8 +301,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
       if (!pageContainer) {
         if (retryCount < maxRetries) {
           console.warn(
-            `Page container not found for page ${match.page}, retrying (${
-              retryCount + 1
+            `Page container not found for page ${match.page}, retrying (${retryCount + 1
             }/${maxRetries})`
           );
           setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
@@ -331,8 +331,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           );
         } else if (retryCount < maxRetries) {
           console.warn(
-            `Highlight not found for match on page ${match.page}, retrying (${
-              retryCount + 1
+            `Highlight not found for match on page ${match.page}, retrying (${retryCount + 1
             }/${maxRetries})`
           );
           setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
@@ -343,8 +342,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         }
       } else if (retryCount < maxRetries) {
         console.warn(
-          `Text layer not found for page ${match.page}, retrying (${
-            retryCount + 1
+          `Text layer not found for page ${match.page}, retrying (${retryCount + 1
           }/${maxRetries})`
         );
         setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
@@ -471,6 +469,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           setMatchCase={setMatchCase}
           selectedColor={selectedColor}
           setSelectedColor={setSelectedColor}
+          selectedPenColor={selectedPenColor} // Pass selectedPenColor
+          setSelectedPenColor={setSelectedPenColor} // Pass setter
         />
         <PdfDocument
           pdfUrl={pdfUrl}
@@ -499,6 +499,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           highlightAll={highlightAll}
           matchCase={matchCase}
           selectedColor={selectedColor}
+          selectedPenColor={selectedPenColor} // Pass selectedPenColor
         />
         {showBox && (
           <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate">
@@ -555,4 +556,4 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   );
 };
 
-export default PdfViewer; 
+export default PdfViewer;
