@@ -1,3 +1,4 @@
+
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -29,15 +30,78 @@ export default function PdfDocument({
   highlightAll,
   matchCase,
   selectedColor,
-  selectedPenColor, // Added prop for pen color
+  selectedPenColor,
+  clearAllAnnotations,
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [highlightedText, setHighlightedText] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isErasing, setIsErasing] = useState(false);
   const [lastPoint, setLastPoint] = useState(null);
   const canvasRefs = useRef({});
+  const drawingDataRefs = useRef({}); // Store drawing data for each page
+  const highlightDataRef = useRef([]); // Store highlight data persistently
   const scrollSpeedFactor = 0.3;
+
+  // ... keep existing code (canvas management functions)
+  const saveCanvasData = (pageNum) => {
+    const canvas = canvasRefs.current[pageNum];
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      drawingDataRefs.current[pageNum] = imageData;
+    }
+  };
+
+  const restoreCanvasData = (pageNum) => {
+    const canvas = canvasRefs.current[pageNum];
+    const savedData = drawingDataRefs.current[pageNum];
+    if (canvas && savedData) {
+      const ctx = canvas.getContext('2d');
+      ctx.putImageData(savedData, 0, 0);
+    }
+  };
+
+  const initializeCanvas = (pageNum) => {
+    const canvas = canvasRefs.current[pageNum];
+    if (canvas) {
+      const pageElement = canvas.closest('[data-page-number]');
+      const pdfCanvas = pageElement?.querySelector('.react-pdf__Page__canvas');
+      if (pdfCanvas) {
+        canvas.width = pdfCanvas.width;
+        canvas.height = pdfCanvas.height;
+        canvas.style.width = pdfCanvas.style.width;
+        canvas.style.height = pdfCanvas.style.height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        restoreCanvasData(pageNum);
+      }
+    }
+  };
+
+  // Sync highlightedText with persistent storage
+  useEffect(() => {
+    setHighlightedText([...highlightDataRef.current]);
+  }, [tool]);
+
+  // Effect to restore canvas drawings when tool changes
+  useEffect(() => {
+    Object.keys(canvasRefs.current).forEach(pageNum => {
+      restoreCanvasData(parseInt(pageNum));
+    });
+  }, [tool]);
+
+  // Effect to restore canvas drawings when scale changes
+  useEffect(() => {
+    setTimeout(() => {
+      Object.keys(canvasRefs.current).forEach(pageNum => {
+        initializeCanvas(parseInt(pageNum));
+      });
+    }, 100);
+  }, [scale]);
 
   useEffect(() => {
     const container = pdfContainerRef.current;
@@ -56,6 +120,14 @@ export default function PdfDocument({
         if (canvas) {
           setIsDrawing(true);
           const point = getCanvasCoordinates(e, canvas);
+          setLastPoint(point);
+        }
+      } else if (tool === 'eraser') {
+        const canvas = getCanvasForEvent(e);
+        if (canvas) {
+          setIsErasing(true);
+          const point = getCanvasCoordinates(e, canvas);
+          eraseAtPoint(canvas, point);
           setLastPoint(point);
         }
       }
@@ -89,6 +161,13 @@ export default function PdfDocument({
           drawLine(ctx, lastPoint, currentPoint);
           setLastPoint(currentPoint);
         }
+      } else if (tool === 'eraser' && isErasing) {
+        const canvas = getCanvasForEvent(e);
+        if (canvas && lastPoint) {
+          const currentPoint = getCanvasCoordinates(e, canvas);
+          eraseLineArea(canvas, lastPoint, currentPoint);
+          setLastPoint(currentPoint);
+        }
       }
     };
 
@@ -99,7 +178,24 @@ export default function PdfDocument({
           cancelAnimationFrame(animationFrameId);
         }
       } else if (tool === 'pen') {
+        if (isDrawing) {
+          const canvas = getCanvasForEvent(e);
+          if (canvas) {
+            const pageNum = parseInt(canvas.closest('[data-page-number]').getAttribute('data-page-number'));
+            saveCanvasData(pageNum);
+          }
+        }
         setIsDrawing(false);
+        setLastPoint(null);
+      } else if (tool === 'eraser') {
+        if (isErasing) {
+          const canvas = getCanvasForEvent(e);
+          if (canvas) {
+            const pageNum = parseInt(canvas.closest('[data-page-number]').getAttribute('data-page-number'));
+            saveCanvasData(pageNum);
+          }
+        }
+        setIsErasing(false);
         setLastPoint(null);
       } else if (tool === 'highlight') {
         const selection = window.getSelection();
@@ -120,21 +216,20 @@ export default function PdfDocument({
             selectedColor
           );
           if (pageNum) {
-            setHighlightedText((prev) => [
-              ...prev,
-              {
-                id: Date.now(),
-                text: selectedText,
-                page: pageNum,
-                color: selectedColor,
-              },
-            ]);
-            console.log('Highlight Added:', {
+            const newHighlight = {
               id: Date.now(),
               text: selectedText,
               page: pageNum,
               color: selectedColor,
-            });
+            };
+            
+            // Add to persistent storage
+            highlightDataRef.current = [...highlightDataRef.current, newHighlight];
+            
+            // Update state to trigger re-render
+            setHighlightedText([...highlightDataRef.current]);
+            
+            console.log('Highlight Added:', newHighlight);
             selection.removeAllRanges();
           } else {
             console.warn('Could not determine page number for highlight.');
@@ -172,6 +267,29 @@ export default function PdfDocument({
       ctx.stroke();
     };
 
+    const eraseAtPoint = (canvas, point) => {
+      const ctx = canvas.getContext('2d');
+      const eraseRadius = 10;
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, eraseRadius, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    };
+
+    const eraseLineArea = (canvas, start, end) => {
+      const ctx = canvas.getContext('2d');
+      const eraseRadius = 10;
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.lineWidth = eraseRadius * 2;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over';
+    };
+
     const disablePointerEvents = () => {
       const canvases = container.querySelectorAll('.react-pdf__Page__canvas');
       const textLayers = container.querySelectorAll(
@@ -194,8 +312,8 @@ export default function PdfDocument({
       textLayers.forEach((textLayer) => (textLayer.style.pointerEvents = 'auto'));
     };
 
-    if (tool === 'hand' || tool === 'highlight' || tool === 'text' || tool === 'pen') {
-      if (tool === 'hand' || tool === 'pen') {
+    if (tool === 'hand' || tool === 'highlight' || tool === 'text' || tool === 'pen' || tool === 'eraser') {
+      if (tool === 'hand' || tool === 'pen' || tool === 'eraser') {
         container.style.userSelect = 'none';
         disablePointerEvents();
       } else {
@@ -229,8 +347,9 @@ export default function PdfDocument({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [tool, isPanning, isDrawing, lastPoint, pdfContainerRef, scrollMode, selectedColor, selectedPenColor, showToast]);
+  }, [tool, isPanning, isDrawing, isErasing, lastPoint, pdfContainerRef, scrollMode, selectedColor, selectedPenColor, showToast]);
 
+  // ... keep existing code (onPageRenderSuccess and searchInPDF functions)
   const onPageRenderSuccess = async (pageNumber) => {
     try {
       const page = await pdfjs
@@ -251,16 +370,9 @@ export default function PdfDocument({
       }
       setRenderedPages((prev) => ({ ...prev, [pageNumber]: true }));
 
-      // Initialize canvas for drawing
-      const canvas = canvasRefs.current[pageNumber];
-      if (canvas) {
-        const pageElement = canvas.closest('[data-page-number]');
-        const pdfCanvas = pageElement.querySelector('.react-pdf__Page__canvas');
-        if (pdfCanvas) {
-          canvas.width = pdfCanvas.width;
-          canvas.height = pdfCanvas.height;
-        }
-      }
+      setTimeout(() => {
+        initializeCanvas(pageNumber);
+      }, 100);
     } catch (error) {
       console.error('Error extracting text:', error);
       setHasTextLayer(false);
@@ -334,7 +446,9 @@ export default function PdfDocument({
             ? 'cursor-text'
             : tool === 'pen'
               ? 'cursor-crosshair'
-              : 'cursor-default'
+              : tool === 'eraser'
+                ? 'cursor-pointer'
+                : 'cursor-default'
         }`}
       style={{
         maxHeight: 'calc(100vh - 60px)',
@@ -423,7 +537,7 @@ export default function PdfDocument({
                         customTextRenderer={({ str }) => {
                           let result = str;
 
-                          // Apply search highlights
+                          // ... keep existing code (search highlights logic)
                           if (searchText && searchResults.length > 0) {
                             const searchTextForMatch = matchCase
                               ? searchText
@@ -501,8 +615,8 @@ export default function PdfDocument({
                             }
                           }
 
-                          // Apply manual highlights
-                          highlightedText.forEach((highlight) => {
+                          // Apply manual highlights using persistent data
+                          highlightDataRef.current.forEach((highlight) => {
                             if (highlight.page === pageNum) {
                               const escapedText = highlight.text.replace(
                                 /[.*+?^${}()|[\]\\]/g,
@@ -532,8 +646,8 @@ export default function PdfDocument({
                           position: 'absolute',
                           top: 0,
                           left: 0,
-                          pointerEvents: tool === 'pen' ? 'auto' : 'none',
-                          opacity: tool === 'pen' ? 1 : 0,
+                          pointerEvents: 'auto',
+                          zIndex: tool === 'pen' || tool === 'eraser' ? 10 : 1,
                         }}
                       />
                     </div>

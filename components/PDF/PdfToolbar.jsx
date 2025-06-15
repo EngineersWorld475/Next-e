@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '../ui/button';
 import { Bookmark, Check, ChevronFirst, ChevronLast, ChevronsRight, Copy, DownloadIcon, Expand, Eye, FileUp, Minimize2, Printer, Search, Share, ZoomIn, ZoomOut, Image, SquareArrowUp, SquareArrowDown, RotateCw, RotateCcw, MousePointer, Hand, Rows3, Columns3, StretchHorizontal, PencilLine } from 'lucide-react';
@@ -60,7 +61,9 @@ const PdfToolbar = ({
   setSelectedColor,
   selectedPenColor,
   setSelectedPenColor,
+  clearAllAnnotations,
 }) => {
+  // ... keep existing code (state variables and color arrays)
   const [copied, setCopied] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [radioItem, setRadioItem] = useState('group');
@@ -109,6 +112,11 @@ const PdfToolbar = ({
     setShowPenColorPalette(false);
   };
 
+  const selectEraserTool = () => {
+    setTool('eraser');
+  };
+
+  // ... keep existing code (navigation functions, zoom functions, etc.)
   const goToPreviousPage = () => {
     if (pageNumber > 1) {
       goToPage(pageNumber - 1);
@@ -396,6 +404,18 @@ const PdfToolbar = ({
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
+                className={`group p-3 rounded-xl ${tool === 'eraser'
+                    ? 'bg-red-600/20 border border-red-400/50'
+                    : 'bg-slate-800/60 hover:bg-red-600/20 border border-slate-600/50 hover:border-red-400/50'
+                  } transition-all duration-300 backdrop-blur-sm`}
+                onClick={selectEraserTool}
+                title="Eraser Tool"
+              >
+                <FaEraser className="w-5 h-5 text-slate-400 group-hover:text-red-400 transition-colors" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
                 className={`group p-3 rounded-xl ${tool === 'hand'
                     ? 'bg-green-600/20 border border-green-400/50'
                     : 'bg-slate-800/60 hover:bg-green-600/20 border border-slate-600/50 hover:border-green-400/50'
@@ -419,7 +439,7 @@ const PdfToolbar = ({
           </motion.div>
         )}
       </AnimatePresence>
-
+      
       <motion.div
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

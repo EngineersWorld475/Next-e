@@ -1,3 +1,4 @@
+
 'use client';
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { pdfjs } from 'react-pdf';
@@ -16,6 +17,7 @@ import { throttle } from 'lodash';
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
+  // ... keep existing code (state variables and refs)
   const [isClient, setIsClient] = useState(false);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -39,7 +41,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [scrollMode, setScrollMode] = useState('vertical');
   const [highlightAll, setHighlightAll] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#87CEEB');
-  const [selectedPenColor, setSelectedPenColor] = useState('#87CEEB'); // Added state for pen color
+  const [selectedPenColor, setSelectedPenColor] = useState('#87CEEB');
+  
   const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
@@ -70,6 +73,12 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     []
   );
 
+  const clearAllAnnotations = useCallback(() => {
+    // This function would be passed down to clear all drawings and highlights
+    console.log('Clear all annotations function called');
+  }, []);
+
+  // ... keep existing code (all useEffect hooks and functions)
   useEffect(() => {
     const originalWarn = console.warn;
     const originalError = console.error;
@@ -99,7 +108,9 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   }, [pdfUrl]);
 
   useEffect(() => {
-    dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
+    if (userId && user?.token) {
+      dispatch(getGroupsByUserId({ userId, authToken: user?.token }));
+    }
   }, [dispatch, userId, user?.token]);
 
   useEffect(() => {
@@ -469,8 +480,9 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           setMatchCase={setMatchCase}
           selectedColor={selectedColor}
           setSelectedColor={setSelectedColor}
-          selectedPenColor={selectedPenColor} // Pass selectedPenColor
-          setSelectedPenColor={setSelectedPenColor} // Pass setter
+          selectedPenColor={selectedPenColor}
+          setSelectedPenColor={setSelectedPenColor}
+          clearAllAnnotations={clearAllAnnotations}
         />
         <PdfDocument
           pdfUrl={pdfUrl}
@@ -499,7 +511,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           highlightAll={highlightAll}
           matchCase={matchCase}
           selectedColor={selectedColor}
-          selectedPenColor={selectedPenColor} // Pass selectedPenColor
+          selectedPenColor={selectedPenColor}
+          clearAllAnnotations={clearAllAnnotations}
         />
         {showBox && (
           <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate">
