@@ -1,4 +1,3 @@
-
 'use client';
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { pdfjs } from 'react-pdf';
@@ -17,7 +16,6 @@ import { throttle } from 'lodash';
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
-  // ... keep existing code (state variables and refs)
   const [isClient, setIsClient] = useState(false);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -42,7 +40,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [highlightAll, setHighlightAll] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#87CEEB');
   const [selectedPenColor, setSelectedPenColor] = useState('#87CEEB');
-  
+
   const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
   const textLayerRef = useRef({});
@@ -74,11 +72,9 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   );
 
   const clearAllAnnotations = useCallback(() => {
-    // This function would be passed down to clear all drawings and highlights
     console.log('Clear all annotations function called');
   }, []);
 
-  // ... keep existing code (all useEffect hooks and functions)
   useEffect(() => {
     const originalWarn = console.warn;
     const originalError = console.error;
@@ -170,20 +166,23 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     }
   }, [numPages, showToast]);
 
-  const handleMouseUp = useCallback(() => {
+  const handleTextSelectionMouseUp = useCallback(() => {
     if (tool === 'text') {
-      const selection = window.getSelection().toString();
-      if (selection.length > 0) {
-        setSelectedText(selection);
+      const selection = window.getSelection();
+      const selectedText = selection.toString().trim();
+      if (selectedText.length > 0) {
+        setSelectedText(selectedText);
         setShowBox(true);
+      } else {
+        setShowBox(false);
       }
     }
   }, [tool]);
 
   useEffect(() => {
-    document.addEventListener('mouseup', handleMouseUp);
-    return () => document.removeEventListener('mouseup', handleMouseUp);
-  }, [handleMouseUp]);
+    document.addEventListener('mouseup', handleTextSelectionMouseUp);
+    return () => document.removeEventListener('mouseup', handleTextSelectionMouseUp);
+  }, [handleTextSelectionMouseUp]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -312,8 +311,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
       if (!pageContainer) {
         if (retryCount < maxRetries) {
           console.warn(
-            `Page container not found for page ${match.page}, retrying (${retryCount + 1
-            }/${maxRetries})`
+            `Page container not found for page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`
           );
           setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
         } else {
@@ -342,8 +340,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           );
         } else if (retryCount < maxRetries) {
           console.warn(
-            `Highlight not found for match on page ${match.page}, retrying (${retryCount + 1
-            }/${maxRetries})`
+            `Highlight not found for match on page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`
           );
           setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
         } else {
@@ -353,8 +350,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         }
       } else if (retryCount < maxRetries) {
         console.warn(
-          `Text layer not found for page ${match.page}, retrying (${retryCount + 1
-          }/${maxRetries})`
+          `Text layer not found for page ${match.page}, retrying (${retryCount + 1}/${maxRetries})`
         );
         setTimeout(() => scrollToMatch(match, retryCount + 1), retryDelay);
       } else {

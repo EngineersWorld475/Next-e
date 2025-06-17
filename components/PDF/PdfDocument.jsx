@@ -1,4 +1,3 @@
-
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -40,11 +39,9 @@ export default function PdfDocument({
   const [isErasing, setIsErasing] = useState(false);
   const [lastPoint, setLastPoint] = useState(null);
   const canvasRefs = useRef({});
-  const drawingDataRefs = useRef({}); // Store drawing data for each page
-  const highlightDataRef = useRef([]); // Store highlight data persistently
+  const drawingDataRefs = useRef({});
   const scrollSpeedFactor = 0.3;
 
-  // ... keep existing code (canvas management functions)
   const saveCanvasData = (pageNum) => {
     const canvas = canvasRefs.current[pageNum];
     if (canvas) {
@@ -73,28 +70,30 @@ export default function PdfDocument({
         canvas.height = pdfCanvas.height;
         canvas.style.width = pdfCanvas.style.width;
         canvas.style.height = pdfCanvas.style.height;
-        
+
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         restoreCanvasData(pageNum);
       }
     }
   };
 
-  // Sync highlightedText with persistent storage
-  useEffect(() => {
-    setHighlightedText([...highlightDataRef.current]);
-  }, [tool]);
+  const removeHighlightsAtPoint = (pageNum, pdfX, pdfY) => {
+    setHighlightedText(prev => prev.filter(h =>
+      !(h.page === pageNum && h.areas.some(area =>
+        area.pdfLeft <= pdfX && pdfX <= area.pdfLeft + area.pdfWidth &&
+        area.pdfTop <= pdfY && pdfY <= area.pdfTop + area.pdfHeight
+      ))
+    ));
+  };
 
-  // Effect to restore canvas drawings when tool changes
   useEffect(() => {
     Object.keys(canvasRefs.current).forEach(pageNum => {
       restoreCanvasData(parseInt(pageNum));
     });
   }, [tool]);
 
-  // Effect to restore canvas drawings when scale changes
   useEffect(() => {
     setTimeout(() => {
       Object.keys(canvasRefs.current).forEach(pageNum => {
@@ -129,6 +128,10 @@ export default function PdfDocument({
           const point = getCanvasCoordinates(e, canvas);
           eraseAtPoint(canvas, point);
           setLastPoint(point);
+          const pdfX = point.x / scale;
+          const pdfY = point.y / scale;
+          const pageNum = parseInt(canvas.closest('[data-page-number]').getAttribute('data-page-number'));
+          removeHighlightsAtPoint(pageNum, pdfX, pdfY);
         }
       }
     };
@@ -167,6 +170,10 @@ export default function PdfDocument({
           const currentPoint = getCanvasCoordinates(e, canvas);
           eraseLineArea(canvas, lastPoint, currentPoint);
           setLastPoint(currentPoint);
+          const pdfX = currentPoint.x / scale;
+          const pdfY = currentPoint.y / scale;
+          const pageNum = parseInt(canvas.closest('[data-page-number]').getAttribute('data-page-number'));
+          removeHighlightsAtPoint(pageNum, pdfX, pdfY);
         }
       }
     };
@@ -199,45 +206,31 @@ export default function PdfDocument({
         setLastPoint(null);
       } else if (tool === 'highlight') {
         const selection = window.getSelection();
-        const selectedText = selection.toString().trim();
-        console.log('Highlight MouseUp - Selected Text:', selectedText);
-        if (selectedText) {
-          const anchorNode = selection.anchorNode;
-          const pageElement = anchorNode?.parentElement?.closest(
-            '[data-page-number]'
-          );
-          const pageNum = pageElement
-            ? parseInt(pageElement.getAttribute('data-page-number'))
-            : null;
-          console.log(
-            'Highlight MouseUp - Page Number:',
-            pageNum,
-            'Color:',
-            selectedColor
-          );
-          if (pageNum) {
+        if (selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const pageElement = range.startContainer.parentElement.closest('[data-page-number]');
+          if (pageElement) {
+            const pageNum = parseInt(pageElement.getAttribute('data-page-number'));
+            const pageRect = pageElement.getBoundingClientRect();
+            const rects = Array.from(range.getClientRects());
+            const currentScale = scale;
+            const areas = rects.map(rect => {
+              const pdfLeft = (rect.left - pageRect.left) / currentScale;
+              const pdfTop = (rect.top - pageRect.top) / currentScale;
+              const pdfWidth = rect.width / currentScale;
+              const pdfHeight = rect.height / currentScale;
+              return { pdfLeft, pdfTop, pdfWidth, pdfHeight };
+            });
             const newHighlight = {
               id: Date.now(),
-              text: selectedText,
               page: pageNum,
               color: selectedColor,
+              areas,
             };
-            
-            // Add to persistent storage
-            highlightDataRef.current = [...highlightDataRef.current, newHighlight];
-            
-            // Update state to trigger re-render
-            setHighlightedText([...highlightDataRef.current]);
-            
-            console.log('Highlight Added:', newHighlight);
+            setHighlightedText(prev => [...prev, newHighlight]);
             selection.removeAllRanges();
           } else {
-            console.warn('Could not determine page number for highlight.');
-            showToast({
-              title: 'Highlight Error',
-              description: 'Unable to identify page for highlighting.',
-              variant: 'error',
-            });
+            console.warn('Could not determine personally identifiable information.');
           }
         }
       }
@@ -292,22 +285,16 @@ export default function PdfDocument({
 
     const disablePointerEvents = () => {
       const canvases = container.querySelectorAll('.react-pdf__Page__canvas');
-      const textLayers = container.querySelectorAll(
-        '.react-pdf__Page__textLayer'
-      );
+      const textLayers = container.querySelectorAll('.react-pdf__Page__textLayer');
       canvases.forEach((canvas) => (canvas.style.pointerEvents = 'none'));
       textLayers.forEach(
-        (textLayer) =>
-        (textLayer.style.pointerEvents =
-          tool === 'highlight' || tool === 'text' ? 'auto' : 'none')
+        (textLayer) => (textLayer.style.pointerEvents = tool === 'highlight' || tool === 'text' ? 'auto' : 'none')
       );
     };
 
     const restorePointerEvents = () => {
       const canvases = container.querySelectorAll('.react-pdf__Page__canvas');
-      const textLayers = container.querySelectorAll(
-        '.react-pdf__Page__textLayer'
-      );
+      const textLayers = container.querySelectorAll('.react-pdf__Page__textLayer');
       canvases.forEach((canvas) => (canvas.style.pointerEvents = 'auto'));
       textLayers.forEach((textLayer) => (textLayer.style.pointerEvents = 'auto'));
     };
@@ -330,26 +317,17 @@ export default function PdfDocument({
       if (container) {
         container.style.userSelect = 'auto';
         restorePointerEvents();
-        container.removeEventListener('mousedown', handleMouseDown, {
-          capture: true,
-        });
-        container.removeEventListener('mousemove', handleMouseMove, {
-          capture: true,
-        });
-        container.removeEventListener('mouseup', handleMouseUp, {
-          capture: true,
-        });
-        container.removeEventListener('mouseleave', handleMouseUp, {
-          capture: true,
-        });
+        container.removeEventListener('mousedown', handleMouseDown, { capture: true });
+        container.removeEventListener('mousemove', handleMouseMove, { capture: true });
+        container.removeEventListener('mouseup', handleMouseUp, { capture: true });
+        container.removeEventListener('mouseleave', handleMouseUp, { capture: true });
       }
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [tool, isPanning, isDrawing, isErasing, lastPoint, pdfContainerRef, scrollMode, selectedColor, selectedPenColor, showToast]);
+  }, [tool, isPanning, isDrawing, isErasing, lastPoint, pdfContainerRef, scrollMode, selectedColor, selectedPenColor, showToast, scale]);
 
-  // ... keep existing code (onPageRenderSuccess and searchInPDF functions)
   const onPageRenderSuccess = async (pageNumber) => {
     try {
       const page = await pdfjs
@@ -372,7 +350,7 @@ export default function PdfDocument({
 
       setTimeout(() => {
         initializeCanvas(pageNumber);
-      }, 100);
+      });
     } catch (error) {
       console.error('Error extracting text:', error);
       setHasTextLayer(false);
@@ -430,14 +408,16 @@ export default function PdfDocument({
     searchInPDF(searchText);
   }, [searchText, matchCase]);
 
+  console.log('.....tool', tool)
+
   return (
     <div
       ref={pdfContainerRef}
       className={`flex dark:bg-gray-800 ${scrollMode === 'vertical'
-          ? 'flex-col'
-          : scrollMode === 'horizontal'
-            ? 'flex-row'
-            : 'flex-row flex-wrap'
+        ? 'flex-col'
+        : scrollMode === 'horizontal'
+          ? 'flex-row'
+          : 'flex-row flex-wrap'
         } items-center py-3 overflow-auto will-change-transform ${tool === 'hand'
           ? isPanning
             ? 'cursor-grabbing hand-tool-active'
@@ -461,10 +441,10 @@ export default function PdfDocument({
           file={decodeURIComponent(pdfUrl)}
           onLoadSuccess={onDocumentLoadSuccess}
           className={`flex ${scrollMode === 'vertical'
-              ? 'flex-col'
-              : scrollMode === 'horizontal'
-                ? 'flex-row'
-                : 'flex-row flex-wrap'
+            ? 'flex-col'
+            : scrollMode === 'horizontal'
+              ? 'flex-row'
+              : 'flex-row flex-wrap'
             } items-center`}
           loading={
             <div className="flex items-center justify-center h-screen">
@@ -500,10 +480,10 @@ export default function PdfDocument({
                 ref={(el) => (pageRefs.current[index] = el)}
                 data-page-number={pageNum}
                 className={`mb-6 relative ${scrollMode === 'horizontal'
-                    ? 'mr-6'
-                    : scrollMode === 'wrapped'
-                      ? 'm-2'
-                      : ''
+                  ? 'mr-6'
+                  : scrollMode === 'wrapped'
+                    ? 'm-2'
+                    : ''
                   }`}
                 style={scrollMode === 'wrapped' ? { flex: '0 0 auto', maxWidth: '45%' } : {}}
               >
@@ -537,7 +517,6 @@ export default function PdfDocument({
                         customTextRenderer={({ str }) => {
                           let result = str;
 
-                          // ... keep existing code (search highlights logic)
                           if (searchText && searchResults.length > 0) {
                             const searchTextForMatch = matchCase
                               ? searchText
@@ -615,28 +594,6 @@ export default function PdfDocument({
                             }
                           }
 
-                          // Apply manual highlights using persistent data
-                          highlightDataRef.current.forEach((highlight) => {
-                            if (highlight.page === pageNum) {
-                              const escapedText = highlight.text.replace(
-                                /[.*+?^${}()|[\]\\]/g,
-                                '\\$&'
-                              );
-                              const regex = new RegExp(`(${escapedText})`, 'g');
-                              result = result.replace(
-                                regex,
-                                `<mark class="manual-highlight" style="background-color: ${highlight.color}; color: black; padding: 2px 4px;">$1</mark>`
-                              );
-                              console.log(
-                                `Applying manual highlight on page ${pageNum}:`,
-                                {
-                                  text: highlight.text,
-                                  color: highlight.color,
-                                }
-                              );
-                            }
-                          });
-
                           return result;
                         }}
                       />
@@ -650,15 +607,46 @@ export default function PdfDocument({
                           zIndex: tool === 'pen' || tool === 'eraser' ? 10 : 1,
                         }}
                       />
+                      <div
+                        className="highlight-layer"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          pointerEvents: 'none',
+                          zIndex: 2,
+                        }}
+                      >
+                        {highlightedText
+                          .filter(h => h.page === pageNum)
+                          .map(highlight => (
+                            highlight.areas.map((area, index) => (
+                              <div
+                                key={`${highlight.id}-${index}`}
+                                style={{
+                                  position: 'absolute',
+                                  left: `${area.pdfLeft * scale}px`,
+                                  top: `${area.pdfTop * scale}px`,
+                                  width: `${area.pdfWidth * scale}px`,
+                                  height: `${area.pdfHeight * scale}px`,
+                                  backgroundColor: highlight.color,
+                                  opacity: 0.3,
+                                }}
+                              />
+                            ))
+                          ))}
+                      </div>
                     </div>
                   </>
                 ) : (
                   <div
                     className={`w-[210mm] h-[297mm] bg-gray-100 rounded animate-pulse ${scrollMode === 'horizontal'
-                        ? 'mr-6'
-                        : scrollMode === 'wrapped'
-                          ? 'm-2'
-                          : ''
+                      ? 'mr-6'
+                      : scrollMode === 'wrapped'
+                        ? 'm-2'
+                        : ''
                       }`}
                     style={scrollMode === 'wrapped' ? { flex: '0 0 auto', maxWidth: '45%' } : {}}
                   />

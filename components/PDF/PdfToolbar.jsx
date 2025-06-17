@@ -63,7 +63,6 @@ const PdfToolbar = ({
   setSelectedPenColor,
   clearAllAnnotations,
 }) => {
-  // ... keep existing code (state variables and color arrays)
   const [copied, setCopied] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [radioItem, setRadioItem] = useState('group');
@@ -116,7 +115,6 @@ const PdfToolbar = ({
     setTool('eraser');
   };
 
-  // ... keep existing code (navigation functions, zoom functions, etc.)
   const goToPreviousPage = () => {
     if (pageNumber > 1) {
       goToPage(pageNumber - 1);
@@ -138,7 +136,8 @@ const PdfToolbar = ({
   };
 
   const zoomIn = () => {
-    const zoomLevels = [1.0, 1.5, 2.0, 2.5, 3.0];
+    const zoomLevels = [1.0, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0,
+      2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0]
     const currentIndex = zoomLevels.findIndex((z) => z === scale);
     if (currentIndex < zoomLevels.length - 1) {
       setScale(zoomLevels[currentIndex + 1]);
@@ -338,8 +337,8 @@ const PdfToolbar = ({
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   className={`group p-3 rounded-xl ${showPenColorPalette
-                      ? 'bg-blue-600/20 border border-blue-400/50'
-                      : 'bg-slate-800/60 hover:bg-blue-600/20 border border-slate-600/50 hover:border-blue-400/50'
+                    ? 'bg-blue-600/20 border border-blue-400/50'
+                    : 'bg-slate-800/60 hover:bg-blue-600/20 border border-slate-600/50 hover:border-blue-400/50'
                     } transition-all duration-300 backdrop-blur-sm`}
                   onClick={togglePenColorPalette}
                 >
@@ -372,8 +371,8 @@ const PdfToolbar = ({
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   className={`group p-3 rounded-xl ${showColorPalette
-                      ? `${selectedColorClasses.bgClass} ${selectedColorClasses.borderClass}`
-                      : `bg-slate-800/60 border border-slate-600/50 hover:${selectedColorClasses.bgClass} hover:${selectedColorClasses.borderClass}`
+                    ? `${selectedColorClasses.bgClass} ${selectedColorClasses.borderClass}`
+                    : `bg-slate-800/60 border border-slate-600/50 hover:${selectedColorClasses.bgClass} hover:${selectedColorClasses.borderClass}`
                     } transition-all duration-300 backdrop-blur-sm`}
                   onClick={toggleColorPalette}
                 >
@@ -405,8 +404,8 @@ const PdfToolbar = ({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className={`group p-3 rounded-xl ${tool === 'eraser'
-                    ? 'bg-red-600/20 border border-red-400/50'
-                    : 'bg-slate-800/60 hover:bg-red-600/20 border border-slate-600/50 hover:border-red-400/50'
+                  ? 'bg-red-600/20 border border-red-400/50'
+                  : 'bg-slate-800/60 hover:bg-red-600/20 border border-slate-600/50 hover:border-red-400/50'
                   } transition-all duration-300 backdrop-blur-sm`}
                 onClick={selectEraserTool}
                 title="Eraser Tool"
@@ -417,8 +416,8 @@ const PdfToolbar = ({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className={`group p-3 rounded-xl ${tool === 'hand'
-                    ? 'bg-green-600/20 border border-green-400/50'
-                    : 'bg-slate-800/60 hover:bg-green-600/20 border border-slate-600/50 hover:border-green-400/50'
+                  ? 'bg-green-600/20 border border-green-400/50'
+                  : 'bg-slate-800/60 hover:bg-green-600/20 border border-slate-600/50 hover:border-green-400/50'
                   } transition-all duration-300 backdrop-blur-sm`}
                 onClick={selectHandTool}
               >
@@ -428,8 +427,8 @@ const PdfToolbar = ({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className={`group p-3 rounded-xl ${tool === 'text'
-                    ? 'bg-blue-600/20 border border-blue-400/50'
-                    : 'bg-slate-800/60 hover:bg-blue-600/20 border border-slate-600/50 hover:border-blue-400/50'
+                  ? 'bg-blue-600/20 border border-blue-400/50'
+                  : 'bg-slate-800/60 hover:bg-blue-600/20 border border-slate-600/50 hover:border-blue-400/50'
                   } transition-all duration-300 backdrop-blur-sm`}
                 onClick={selectTextTool}
               >
@@ -439,7 +438,7 @@ const PdfToolbar = ({
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       <motion.div
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
