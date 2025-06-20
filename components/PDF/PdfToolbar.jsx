@@ -68,16 +68,15 @@ const PdfToolbar = ({
   const [radioItem, setRadioItem] = useState('group');
   const [toggleNotesBar, setToggleNotesBar] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [showColorPalette, setShowColorPalette] = useState(false);
   const [showPenColorPalette, setShowPenColorPalette] = useState(false);
   const dispatch = useDispatch();
   const userId = useUserId();
 
   const colors = [
-    { name: 'Yellow', value: '#FFFB99', bgClass: 'bg-yellow-500/20', borderClass: 'border-yellow-400/50' },
-    { name: 'Green', value: '#99FF99', bgClass: 'bg-green-600/20', borderClass: 'border-green-400/50' },
-    { name: 'Skyblue', value: '#87CEEB', bgClass: 'bg-blue-600/20', borderClass: 'border-blue-300/50' },
-    { name: 'Purple', value: '#E0B0FF', bgClass: 'bg-purple-500/20', borderClass: 'border-purple-300/50' },
+    { name: 'Orange', value: '#FF4F0F', bgClass: 'bg-orange-500/20', borderClass: 'border-orange-400/50' },
+    { name: 'Green', value: '#03A791', bgClass: 'bg-green-600/20', borderClass: 'border-green-400/50' },
+    { name: 'Yellow', value: '#FFC107', bgClass: 'bg-yellow-600/20', borderClass: 'border-yellow-300/50' },
+    { name: 'Purple', value: '#725CAD', bgClass: 'bg-purple-500/20', borderClass: 'border-purple-300/50' },
   ];
 
   const penColors = [
@@ -89,20 +88,9 @@ const PdfToolbar = ({
 
   const selectedColorClasses = colors.find((color) => color.value === selectedColor) || colors[0];
 
-  const toggleColorPalette = () => {
-    setShowColorPalette((prev) => !prev);
-    setTool('highlight');
-  };
-
   const togglePenColorPalette = () => {
     setShowPenColorPalette((prev) => !prev);
     setTool('pen');
-  };
-
-  const handleColorSelect = (color) => {
-    setSelectedColor(color.value);
-    console.log(`Selected color: ${color.name}`);
-    setShowColorPalette(false);
   };
 
   const handlePenColorSelect = (color) => {
@@ -360,40 +348,6 @@ const PdfToolbar = ({
                           style={{ backgroundColor: color }}
                           onClick={() => handlePenColorSelect(color)}
                           title={`Color ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-              <div className="relative">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`group p-3 rounded-xl ${showColorPalette
-                    ? `${selectedColorClasses.bgClass} ${selectedColorClasses.borderClass}`
-                    : `bg-slate-800/60 border border-slate-600/50 hover:${selectedColorClasses.bgClass} hover:${selectedColorClasses.borderClass}`
-                    } transition-all duration-300 backdrop-blur-sm`}
-                  onClick={toggleColorPalette}
-                >
-                  <MdHighlight className="w-5 h-5" style={{ color: selectedColor }} />
-                </motion.button>
-                {showColorPalette && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute right-14 top-7 bg-slate-800/95 backdrop-blur-xl border border-slate-600/50 rounded-lg shadow-xl p-2 z-50"
-                  >
-                    <div className="flex flex-col gap-2">
-                      {colors.map((color) => (
-                        <button
-                          key={color.name}
-                          className="w-8 h-8 rounded-full hover:ring-2 hover:ring-white/50 transition-all"
-                          style={{ backgroundColor: color.value }}
-                          onClick={() => handleColorSelect(color)}
-                          title={color.name}
                         />
                       ))}
                     </div>

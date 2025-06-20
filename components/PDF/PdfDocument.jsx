@@ -35,7 +35,6 @@ export default function PdfDocument({
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [highlightedText, setHighlightedText] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
   const [lastPoint, setLastPoint] = useState(null);
@@ -80,15 +79,6 @@ export default function PdfDocument({
     }
   };
 
-  const removeHighlightsAtPoint = (pageNum, pdfX, pdfY) => {
-    setHighlightedText(prev => prev.filter(h =>
-      !(h.page === pageNum && h.areas.some(area =>
-        area.pdfLeft <= pdfX && pdfX <= area.pdfLeft + area.pdfWidth &&
-        area.pdfTop <= pdfY && pdfY <= area.pdfTop + area.pdfHeight
-      ))
-    ));
-  };
-
   useEffect(() => {
     Object.keys(canvasRefs.current).forEach(pageNum => {
       restoreCanvasData(parseInt(pageNum));
@@ -129,10 +119,6 @@ export default function PdfDocument({
           const point = getCanvasCoordinates(e, canvas);
           eraseAtPoint(canvas, point);
           setLastPoint(point);
-          const pdfX = point.x / scale;
-          const pdfY = point.y / scale;
-          const pageNum = parseInt(canvas.closest('[data-page-number]').getAttribute('data-page-number'));
-          removeHighlightsAtPoint(pageNum, pdfX, pdfY);
         }
       }
     };
@@ -171,10 +157,6 @@ export default function PdfDocument({
           const currentPoint = getCanvasCoordinates(e, canvas);
           eraseLineArea(canvas, lastPoint, currentPoint);
           setLastPoint(currentPoint);
-          const pdfX = currentPoint.x / scale;
-          const pdfY = currentPoint.y / scale;
-          const pageNum = parseInt(canvas.closest('[data-page-number]').getAttribute('data-page-number'));
-          removeHighlightsAtPoint(pageNum, pdfX, pdfY);
         }
       }
     };
@@ -205,35 +187,6 @@ export default function PdfDocument({
         }
         setIsErasing(false);
         setLastPoint(null);
-      } else if (tool === 'highlight') {
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          const pageElement = range.startContainer.parentElement.closest('[data-page-number]');
-          if (pageElement) {
-            const pageNum = parseInt(pageElement.getAttribute('data-page-number'));
-            const pageRect = pageElement.getBoundingClientRect();
-            const rects = Array.from(range.getClientRects());
-            const currentScale = scale;
-            const areas = rects.map(rect => {
-              const pdfLeft = (rect.left - pageRect.left) / currentScale;
-              const pdfTop = (rect.top - pageRect.top) / currentScale;
-              const pdfWidth = rect.width / currentScale;
-              const pdfHeight = rect.height / currentScale;
-              return { pdfLeft, pdfTop, pdfWidth, pdfHeight };
-            });
-            const newHighlight = {
-              id: Date.now(),
-              page: pageNum,
-              color: selectedColor,
-              areas,
-            };
-            setHighlightedText(prev => [...prev, newHighlight]);
-            selection.removeAllRanges();
-          } else {
-            console.warn('Could not determine personally identifiable information.');
-          }
-        }
       }
     };
 
@@ -609,56 +562,6 @@ export default function PdfDocument({
                           zIndex: tool === 'pen' || tool === 'eraser' ? 10 : 1,
                         }}
                       />
-                      <div
-                        className="highlight-layer"
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          pointerEvents: 'none',
-                          zIndex: 2,
-                        }}
-                      >
-                        {highlightedText
-                          .filter((highlight) => highlight.page === pageNum)
-                          .flatMap((highlight) =>
-                            highlight.areas.map((area, index) => (
-                              <div
-                                key={`${highlight.id}-${index}`}
-                                className="absolute rounded cursor-pointer"
-                                style={{
-                                  top: `${area.pdfTop * scale}px`,
-                                  left: `${area.pdfLeft * scale}px`,
-                                  width: `${area.pdfWidth * scale}px`,
-                                  height: `${area.pdfHeight * scale}px`,
-                                  backgroundColor: highlight.color,
-                                  opacity: 0.3,
-                                  zIndex: 50,
-                                  pointerEvents: 'auto',
-                                  mixBlendMode: 'multiply',
-                                }}
-                                onContextMenu={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  onHighlightContextMenu?.(e, {
-                                    ...highlight,
-                                    text: 'Highlighted text',
-                                    position: {
-                                      x: area.pdfLeft * scale,
-                                      y: area.pdfTop * scale,
-                                      width: area.pdfWidth * scale,
-                                      height: area.pdfHeight * scale,
-                                    },
-                                  });
-                                }}
-                              />
-                            ))
-                          )}
-
-
-                      </div>
                     </div>
                   </>
                 ) : (

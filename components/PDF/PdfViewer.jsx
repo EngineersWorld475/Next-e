@@ -12,6 +12,7 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { v4 as uuid } from 'uuid';
 import { throttle } from 'lodash';
+import { Copy, Highlighter, StickyNote } from 'lucide-react';
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
@@ -78,18 +79,6 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const clearAllAnnotations = useCallback(() => {
     setAnnotations([]); // Clear all annotations
     console.log('Clear all annotations function called');
-  }, []);
-
-  // Handle context menu for highlighted text
-  const handleContextMenu = useCallback((event, highlight) => {
-    event.preventDefault();
-    setCurrentHighlight(highlight);
-    const menu = contextMenuRef.current;
-    if (menu) {
-      menu.style.left = `${event.pageX}px`;
-      menu.style.top = `${event.pageY}px`;
-      menu.style.display = 'block';
-    }
   }, []);
 
   const handleAddNote = useCallback(() => {
@@ -212,21 +201,33 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     if (tool === 'text') {
       const selection = window.getSelection();
       const selectedText = selection.toString().trim();
-      if (selectedText.length > 0) {
-        const range = selection.getRangeAt(0);
+
+      if (selectedText.length > 0 && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0); // ✅ define the range
         const rect = range.getBoundingClientRect();
+
         setSelectedText(selectedText);
         setCurrentHighlight({
           text: selectedText,
           page: pageNumber,
           position: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
         });
-        setShowBox(true);
+
+        const menu = contextMenuRef.current;
+        if (menu) {
+          menu.style.display = 'block';
+          menu.style.position = 'absolute';
+          menu.style.top = `${rect.top + window.scrollY - 40}px`;
+          menu.style.left = `${rect.left + window.scrollX}px`;
+        }
+
+        setShowBox(false);
       } else {
         setShowBox(false);
       }
     }
   }, [tool, pageNumber]);
+
 
   useEffect(() => {
     document.addEventListener('mouseup', handleTextSelectionMouseUp);
@@ -469,6 +470,17 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     );
   }
 
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(selectedText);
+    contextMenuRef.current.style.display = 'none';
+  };
+
+  const handleHighlight = () => {
+    // Optional: Add highlight logic to `annotations`
+    contextMenuRef.current.style.display = 'none';
+  };
+
+
   return (
     <div className="relative w-full h-screen flex overflow-hidden">
       <PdfSidebar
@@ -567,68 +579,79 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           selectedPenColor={selectedPenColor}
           clearAllAnnotations={clearAllAnnotations}
           annotations={annotations}
-          onHighlightContextMenu={handleContextMenu}
         />
-        {showBox && (
-          <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate">
-            <p className="mb-2 text-sm text-gray-700 font-medium">
-              Selected: <i>{selectedText}</i>
-            </p>
-            <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              rows={3}
-              className="w-full border p-2 rounded text-sm mb-2 dark:bg-white text-black"
-              placeholder="Ask your question here..."
-            />
-            <button
-              onClick={handleSubmit}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-            >
-              Submit Question
-            </button>
-          </div>
-        )}
-        {/* Context Menu */}
         <div
           ref={contextMenuRef}
-          className="fixed bg-white border shadow-md rounded z-50 hidden"
+          className="fixed bg-white border border-gray-200 shadow-lg rounded-lg z-50 hidden p-2 flex gap-5 items-center transform -translate-x-1/2 -translate-y-1/4"
+          style={{ minWidth: "fit-content" }}
         >
-          <ul className="text-sm">
-            <li
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              onClick={handleAddNote}
-            >
-              Add Note
-            </li>
-          </ul>
+          <button
+            className="p-2 hover:bg-blue-50 active:bg-blue-100 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            onClick={handleAddNote}
+            title="Add Note"
+          >
+            <StickyNote size={16} strokeWidth={1.75} /> <span className="sr-only">Add Note</span>
+          </button>
+          <button
+            className="p-2 hover:bg-green-50 active:bg-green-100 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-200"
+            onClick={handleHighlight}
+            title="Highlight"
+          >
+            <Highlighter size={16} strokeWidth={1.75} /> <span className="sr-only">Highlight</span>
+          </button>
+          <button
+            className="p-2 hover:bg-purple-50 active:bg-purple-100 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
+            onClick={handleCopyText}
+            title="Copy"
+          >
+            <Copy size={16} strokeWidth={1.75} /> <span className="sr-only">Copy</span>
+          </button>
         </div>
         {/* Note Input Form */}
         {showNoteForm && currentHighlight && (
-          <div className="fixed bottom-6 right-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate note-form">
-            <h3 className="text-lg font-semibold mb-2">Add Note</h3>
-            <p className="mb-2 text-sm text-gray-700">
-              Highlight: <i>{currentHighlight.text}</i>
-            </p>
-            <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              rows={3}
-              className="w-full border p-2 rounded text-sm mb-2 dark:bg-white text-black"
-              placeholder="Write your note here..."
-            />
-            <button
-              onClick={() => handleNoteSubmit(question)}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-            >
-              Save Note
-            </button>
-            <button
-              onClick={() => setShowNoteForm(false)}
-              className="ml-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-            >
-              Cancel
-            </button>
+          <div className="fixed bottom-6 right-6 bg-white border border-gray-200 shadow-lg rounded-lg w-80 z-50 overflow-hidden note-form">
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-gray-200 bg-green-500">
+              <h3 className="text-base font-medium text-white">Add Note</h3>
+            </div>
+            {/* Content */}
+            <div className="p-4 space-y-3">
+              {/* Highlighted text with scrollbar */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 max-h-24 overflow-y-auto">
+                <p className="text-xs text-gray-600 mb-1">Selected text:</p>
+                <p className="text-sm text-gray-800 italic">
+                  {currentHighlight.text}
+                </p>
+              </div>
+              {/* Note textarea */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your note
+                </label>
+                <textarea
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  placeholder="Write your thoughts here..."
+                />
+              </div>
+            </div>
+            {/* Footer with buttons */}
+            <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex flex-row justify-end space-x-2">
+              <button
+                onClick={() => setShowNoteForm(false)}
+                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleNoteSubmit(question)}
+                className="px-3 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                Save Note
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -682,6 +705,21 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           justify-content: center;
           font-size: 12px;
         }
+          .context-menu {
+  background: white;
+  border-radius: 8px;
+  padding: 4px 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  gap: 8px;
+}
+.context-menu button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
       `}</style>
     </div>
   );
