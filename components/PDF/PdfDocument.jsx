@@ -31,6 +31,7 @@ export default function PdfDocument({
   selectedColor,
   selectedPenColor,
   clearAllAnnotations,
+  onHighlightContextMenu
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
@@ -432,6 +433,7 @@ export default function PdfDocument({
         }`}
       style={{
         maxHeight: 'calc(100vh - 60px)',
+        backgroundColor: '#e5e7eb',
         ...(scrollMode === 'horizontal' ? { overflowY: 'hidden' } : {}),
         ...(scrollMode === 'wrapped' ? { justifyContent: 'center', gap: '1rem' } : {}),
       }}
@@ -508,7 +510,7 @@ export default function PdfDocument({
                     >
                       <Page
                         pageNumber={pageNum}
-                        canvasBackground="#f2f2f2"
+                        canvasBackground="#ffffff"
                         renderTextLayer={true}
                         renderAnnotationLayer={!isZoomingRef.current}
                         scale={scale}
@@ -620,23 +622,42 @@ export default function PdfDocument({
                         }}
                       >
                         {highlightedText
-                          .filter(h => h.page === pageNum)
-                          .map(highlight => (
+                          .filter((highlight) => highlight.page === pageNum)
+                          .flatMap((highlight) =>
                             highlight.areas.map((area, index) => (
                               <div
                                 key={`${highlight.id}-${index}`}
+                                className="absolute rounded cursor-pointer"
                                 style={{
-                                  position: 'absolute',
-                                  left: `${area.pdfLeft * scale}px`,
                                   top: `${area.pdfTop * scale}px`,
+                                  left: `${area.pdfLeft * scale}px`,
                                   width: `${area.pdfWidth * scale}px`,
                                   height: `${area.pdfHeight * scale}px`,
                                   backgroundColor: highlight.color,
                                   opacity: 0.3,
+                                  zIndex: 50,
+                                  pointerEvents: 'auto',
+                                  mixBlendMode: 'multiply',
+                                }}
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  onHighlightContextMenu?.(e, {
+                                    ...highlight,
+                                    text: 'Highlighted text',
+                                    position: {
+                                      x: area.pdfLeft * scale,
+                                      y: area.pdfTop * scale,
+                                      width: area.pdfWidth * scale,
+                                      height: area.pdfHeight * scale,
+                                    },
+                                  });
                                 }}
                               />
                             ))
-                          ))}
+                          )}
+
+
                       </div>
                     </div>
                   </>

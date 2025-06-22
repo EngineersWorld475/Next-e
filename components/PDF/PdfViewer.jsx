@@ -40,6 +40,9 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const [highlightAll, setHighlightAll] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#87CEEB');
   const [selectedPenColor, setSelectedPenColor] = useState('#87CEEB');
+  const [annotations, setAnnotations] = useState([]); // Store annotations (highlights with notes)
+  const [showNoteForm, setShowNoteForm] = useState(false); // State for showing note form
+  const [currentHighlight, setCurrentHighlight] = useState(null); // Current highlighted text for note
 
   const { showToast } = useCustomToast();
   const searchInputRef = useRef(null);
@@ -48,6 +51,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   const fileInputRef = useRef(null);
   const pdfContainerRef = useRef(null);
   const containerRef = useRef(null);
+  const contextMenuRef = useRef(null); // Ref for context menu
   const dispatch = useDispatch();
   const { groupList } = useSelector((state) => state.group);
   const userId = useUserId();
@@ -72,8 +76,46 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   );
 
   const clearAllAnnotations = useCallback(() => {
+    setAnnotations([]); // Clear all annotations
     console.log('Clear all annotations function called');
   }, []);
+
+  // Handle context menu for highlighted text
+  const handleContextMenu = useCallback((event, highlight) => {
+    event.preventDefault();
+    setCurrentHighlight(highlight);
+    const menu = contextMenuRef.current;
+    if (menu) {
+      menu.style.left = `${event.pageX}px`;
+      menu.style.top = `${event.pageY}px`;
+      menu.style.display = 'block';
+    }
+  }, []);
+
+  const handleAddNote = useCallback(() => {
+    setShowNoteForm(true);
+    setShowBox(false); // Hide the question box if shown
+    const menu = contextMenuRef.current;
+    if (menu) menu.style.display = 'none'; // Hide context menu
+  }, []);
+
+  const handleNoteSubmit = useCallback((note) => {
+    if (currentHighlight) {
+      setAnnotations((prev) => [
+        ...prev,
+        {
+          id: uuid(),
+          text: currentHighlight.text,
+          page: currentHighlight.page,
+          note: note,
+          color: selectedColor,
+          position: currentHighlight.position, // Store position for rendering
+        },
+      ]);
+      setShowNoteForm(false);
+      setCurrentHighlight(null);
+    }
+  }, [currentHighlight, selectedColor]);
 
   useEffect(() => {
     const originalWarn = console.warn;
@@ -171,13 +213,20 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
       const selection = window.getSelection();
       const selectedText = selection.toString().trim();
       if (selectedText.length > 0) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
         setSelectedText(selectedText);
+        setCurrentHighlight({
+          text: selectedText,
+          page: pageNumber,
+          position: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+        });
         setShowBox(true);
       } else {
         setShowBox(false);
       }
     }
-  }, [tool]);
+  }, [tool, pageNumber]);
 
   useEffect(() => {
     document.addEventListener('mouseup', handleTextSelectionMouseUp);
@@ -189,16 +238,24 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
       if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
         setShowSearchInput(false);
       }
+      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+        contextMenuRef.current.style.display = 'none';
+      }
+      if (showNoteForm && !event.target.closest('.note-form')) {
+        setShowNoteForm(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [showSearchInput, showNoteForm]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setShowSearchInput(false);
         setSearchText('');
+        setShowNoteForm(false);
+        contextMenuRef.current.style.display = 'none';
       }
       if (event.key === 'Enter' && showSearchInput) {
         goToNextMatch();
@@ -509,6 +566,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           selectedColor={selectedColor}
           selectedPenColor={selectedPenColor}
           clearAllAnnotations={clearAllAnnotations}
+          annotations={annotations}
+          onHighlightContextMenu={handleContextMenu}
         />
         {showBox && (
           <div className="fixed bottom-6 left-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate">
@@ -527,6 +586,48 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
             >
               Submit Question
+            </button>
+          </div>
+        )}
+        {/* Context Menu */}
+        <div
+          ref={contextMenuRef}
+          className="fixed bg-white border shadow-md rounded z-50 hidden"
+        >
+          <ul className="text-sm">
+            <li
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              onClick={handleAddNote}
+            >
+              Add Note
+            </li>
+          </ul>
+        </div>
+        {/* Note Input Form */}
+        {showNoteForm && currentHighlight && (
+          <div className="fixed bottom-6 right-6 p-4 bg-white border shadow-md rounded w-96 z-50 animate note-form">
+            <h3 className="text-lg font-semibold mb-2">Add Note</h3>
+            <p className="mb-2 text-sm text-gray-700">
+              Highlight: <i>{currentHighlight.text}</i>
+            </p>
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              rows={3}
+              className="w-full border p-2 rounded text-sm mb-2 dark:bg-white text-black"
+              placeholder="Write your note here..."
+            />
+            <button
+              onClick={() => handleNoteSubmit(question)}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+            >
+              Save Note
+            </button>
+            <button
+              onClick={() => setShowNoteForm(false)}
+              className="ml-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+            >
+              Cancel
             </button>
           </div>
         )}
@@ -559,6 +660,27 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         .page-transition {
           transition: transform 0.2s ease-out;
           transform: scale(1.02);
+        }
+        /* Style for highlights with notes */
+        .highlight-with-note {
+          position: relative;
+          background-color: ${selectedColor} !important;
+          border: 2px solid #ff00ff; /* Visual indicator for notes (e.g., purple border) */
+        }
+        .highlight-with-note::after {
+          content: '📝';
+          position: absolute;
+          top: -10px;
+          right: -10px;
+          background: #ff00ff;
+          color: white;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
         }
       `}</style>
     </div>
