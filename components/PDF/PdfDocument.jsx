@@ -30,8 +30,7 @@ export default function PdfDocument({
   matchCase,
   selectedColor,
   selectedPenColor,
-  clearAllAnnotations,
-  onHighlightContextMenu
+  annotations
 }) {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
@@ -429,6 +428,10 @@ export default function PdfDocument({
             const isRendered = renderedPages[pageNum];
             const isInView = true;
 
+            // Find annotations for this page
+            const pageAnnotations = annotations.filter((ann) => ann.page === pageNum);
+
+
             return (
               <div
                 key={pageNum}
@@ -445,8 +448,7 @@ export default function PdfDocument({
                 {(isInView || renderedPages[pageNum]) ? (
                   <>
                     <Card
-                      className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-md shadow-md flex flex-col justify-center items-center p-6 mx-auto ${isRendered ? 'hidden' : 'block'
-                        }`}
+                      className={`w-[210mm] h-[297mm] max-w-[90vw] bg-white border border-gray-300 rounded-md shadow-md flex flex-col justify-center items-center p-6 mx-auto ${isRendered ? 'hidden' : 'block'}`}
                       style={{ transition: 'opacity 0.3s ease' }}
                     >
                       <CardContent className="w-full relative z-10">
@@ -458,8 +460,7 @@ export default function PdfDocument({
                       </CardContent>
                     </Card>
                     <div
-                      className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'
-                        } relative`}
+                      className={`transition-opacity duration-300 ${isRendered ? 'opacity-100' : 'opacity-0'} relative`}
                     >
                       <Page
                         pageNumber={pageNum}
@@ -472,10 +473,9 @@ export default function PdfDocument({
                         customTextRenderer={({ str }) => {
                           let result = str;
 
+                          // Handle search highlights
                           if (searchText && searchResults.length > 0) {
-                            const searchTextForMatch = matchCase
-                              ? searchText
-                              : searchText.toLowerCase();
+                            const searchTextForMatch = matchCase ? searchText : searchText.toLowerCase();
                             const parts = [];
                             let index = 0;
                             const pageText = textLayerRef.current[pageNum] || '';
@@ -509,25 +509,13 @@ export default function PdfDocument({
                                       ? 'background-color: #4169E1; color: white; padding: 2px 4px;'
                                       : '';
 
-                                console.log(
-                                  `Applying search highlight on page ${pageNum}:`,
-                                  {
-                                    text: matchText,
-                                    isActive: match.matchIndex === currentMatch,
-                                    style: highlightStyle,
-                                    matchIndex: match.matchIndex,
-                                    absoluteStartIndex,
-                                  }
-                                );
-
                                 if (highlightStyle) {
                                   parts.push(str.slice(index, searchIndex));
                                   parts.push(
                                     `<mark class="search-match${match.matchIndex === currentMatch
                                       ? ' active-match'
                                       : ''
-                                    }" data-match-index="${match.matchIndex
-                                    }" style="${highlightStyle}">${matchText}</mark>`
+                                    }" data-match-index="${match.matchIndex}" style="${highlightStyle}">${matchText}</mark>`
                                   );
                                 } else {
                                   parts.push(
@@ -548,6 +536,25 @@ export default function PdfDocument({
                               result = parts.join('');
                             }
                           }
+                          // Handle annotations with notes
+                          pageAnnotations.forEach((ann) => {
+                            const hasNote = typeof ann.note === 'string' && ann.note.trim().length > 0;
+                            console.log('...annotation123', ann);
+                            console.log('check', hasNote);
+                            console.log('...str', str)
+                            if (
+                              hasNote &&
+                              ann.text.includes(str) && // match fragment within annotation
+                              str.length > 4 &&         // ignore short words
+                              /\w/.test(str) &&         // must contain a letter/number
+                              str.trim().length > 0     // not just whitespace
+                            ) {
+                              const style = `background-color: ${ann.color}; color: black;`;
+                              result = `<span class="highlight-with-note" style="${style}">${str}</span>`;
+                              console.log('...greenresult', result);
+                            }
+
+                          });
 
                           return result;
                         }}

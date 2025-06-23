@@ -97,14 +97,14 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           text: currentHighlight.text,
           page: currentHighlight.page,
           note: note,
-          color: selectedColor,
-          position: currentHighlight.position, // Store position for rendering
+          color: '#00FF00', // Set to green for notes
+          position: currentHighlight.position,
         },
       ]);
       setShowNoteForm(false);
       setCurrentHighlight(null);
     }
-  }, [currentHighlight, selectedColor]);
+  }, [currentHighlight]);
 
   useEffect(() => {
     const originalWarn = console.warn;
@@ -203,7 +203,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
       const selectedText = selection.toString().trim();
 
       if (selectedText.length > 0 && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0); // ✅ define the range
+        const range = selection.getRangeAt(0); 
         const rect = range.getBoundingClientRect();
 
         setSelectedText(selectedText);
@@ -267,18 +267,45 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
   }, [showSearchInput]);
 
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(observerCallback, { threshold: 0.6 });
+  // Initialize IntersectionObserver
+  observerRef.current = new IntersectionObserver(
+    (entries) => {
+      if (isZoomingRef.current) return;
 
-    pageRefs.current.forEach((ref) => {
-      if (ref) observerRef.current.observe(ref);
-    });
+      // Find the entry with the highest intersection ratio
+      let maxRatio = 0;
+      let visiblePageNum = pageNumber;
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+          maxRatio = entry.intersectionRatio;
+          visiblePageNum = parseInt(entry.target.getAttribute('data-page-number'));
+        }
+      });
+
+      if (visiblePageNum !== pageNumber) {
+        console.log(`Updating pageNumber to ${visiblePageNum}`);
+        setPageNumber(visiblePageNum);
       }
-    };
-  }, [numPages, observerCallback]);
+    },
+    {
+      threshold: [0.3, 0.5, 0.7], // Multiple thresholds for smoother detection
+      root: pdfContainerRef.current, // Observe within the PDF container
+    }
+  );
+
+  // Observe all pageRefs
+  pageRefs.current.forEach((ref) => {
+    if (ref) observerRef.current.observe(ref);
+  });
+
+  // Cleanup
+  return () => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+  };
+}, [numPages, pageNumber]); // Re-run when numPages or pageNumber changes
 
   const onDocumentLoadSuccess = useCallback(({ numPages }) => {
     setNumPages(numPages);
@@ -479,8 +506,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
     // Optional: Add highlight logic to `annotations`
     contextMenuRef.current.style.display = 'none';
   };
-
-
+  console.log('...currentHighlight', currentHighlight);
   return (
     <div className="relative w-full h-screen flex overflow-hidden">
       <PdfSidebar
@@ -582,29 +608,49 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         />
         <div
           ref={contextMenuRef}
-          className="fixed bg-white border border-gray-200 shadow-lg rounded-lg z-50 hidden p-2 flex gap-5 items-center transform -translate-x-1/2 -translate-y-1/4"
-          style={{ minWidth: "fit-content" }}
+          className="fixed bg-white/95 backdrop-blur-sm border border-gray-200/80 shadow-xl rounded-xl z-50 hidden p-1 flex items-center gap-1 transform -translate-x-1/2 -translate-y-1/4 min-w-fit"
         >
           <button
-            className="p-2 hover:bg-blue-50 active:bg-blue-100 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="group p-3 hover:bg-blue-50 active:bg-green-100 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-300/50 focus:bg-green-50"
             onClick={handleAddNote}
             title="Add Note"
           >
-            <StickyNote size={16} strokeWidth={1.75} /> <span className="sr-only">Add Note</span>
+            <StickyNote
+              size={18}
+              strokeWidth={1.5}
+              className="text-gray-600 group-hover:text-green-600 transition-colors duration-200"
+            />
+            <span className="sr-only">Add Note</span>
           </button>
+
+          <div className="h-px w-full bg-gray-200"></div>
+
           <button
-            className="p-2 hover:bg-green-50 active:bg-green-100 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-200"
+            className="group p-3 hover:bg-blue-50 active:bg-blue-100 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300/50 focus:bg-green-50"
             onClick={handleHighlight}
             title="Highlight"
           >
-            <Highlighter size={16} strokeWidth={1.75} /> <span className="sr-only">Highlight</span>
+            <Highlighter
+              size={18}
+              strokeWidth={1.5}
+              className="text-gray-600 group-hover:text-blue-600 transition-colors duration-200"
+            />
+            <span className="sr-only">Highlight</span>
           </button>
+
+          <div className="h-px w-full bg-gray-200"></div>
+
           <button
-            className="p-2 hover:bg-purple-50 active:bg-purple-100 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
+            className="group p-3 hover:bg-purple-50 active:bg-purple-100 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-300/50 focus:bg-purple-50"
             onClick={handleCopyText}
             title="Copy"
           >
-            <Copy size={16} strokeWidth={1.75} /> <span className="sr-only">Copy</span>
+            <Copy
+              size={18}
+              strokeWidth={1.5}
+              className="text-gray-600 group-hover:text-purple-600 transition-colors duration-200"
+            />
+            <span className="sr-only">Copy</span>
           </button>
         </div>
         {/* Note Input Form */}
@@ -647,7 +693,7 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
               </button>
               <button
                 onClick={() => handleNoteSubmit(question)}
-                className="px-3 py-2 text-sm font-medium text-white bg-green-500 border border-gray-300 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="px-3 py-2 text-sm font-medium text-white bg-green-500 hover:bg-green-600 border border-gray-300 rounded-md focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 Save Note
               </button>
@@ -687,8 +733,8 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
         /* Style for highlights with notes */
         .highlight-with-note {
           position: relative;
-          background-color: ${selectedColor} !important;
-          border: 2px solid #ff00ff; /* Visual indicator for notes (e.g., purple border) */
+          background-color: #aaffaa;
+          border: none; /* Visual indicator for notes (e.g., purple border) */
         }
         .highlight-with-note::after {
           content: '📝';
@@ -705,21 +751,20 @@ const PdfViewer = ({ pdfUrl: initialPdfUrl }) => {
           justify-content: center;
           font-size: 12px;
         }
-          .context-menu {
-  background: white;
-  border-radius: 8px;
-  padding: 4px 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  display: flex;
-  gap: 8px;
-}
-.context-menu button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-}
-
+        .context-menu {
+          background: white;
+          border-radius: 8px;
+          padding: 4px 8px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+          display: flex;
+          gap: 8px;
+        }
+        .context-menu button {
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          font-size: 18px;
+        }
       `}</style>
     </div>
   );
