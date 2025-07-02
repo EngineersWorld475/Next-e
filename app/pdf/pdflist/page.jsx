@@ -189,7 +189,7 @@ const PdfList = () => {
         <SearchPdf handleSearchCollection={handleSearchCollection} setSearchingCollections={setSearchingCollections} searchedCollectionList={searchedCollectionList} setSearchedCollectionList={setSearchedCollectionList} searchingCollections={searchingCollections} />
       </div> */}
       {/* List PDFs */}
-      <div className="group border-l-4 border-transparent bg-white shadow-lg flex flex-col px-7 flex-1 dark:bg-gray-900 rounded-lg">
+      <div className="group border-l-4 border-transparent bg-transparent flex flex-col px-0 md:px-7 lg:px-7 flex-1 rounded-lg">
         <h1 className='font-semibold text-blue-600 my-3'>My collections</h1>
         {loadingCollections ? (
           <div className="py-5">

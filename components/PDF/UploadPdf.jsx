@@ -106,33 +106,33 @@ const UploadPdf = ({
   );
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
-      <Card className="shadow-xl border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
-        <CardHeader className="space-y-4 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Upload className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+    <div className="w-full sm:max-w-4xl sm:mx-auto p-0 sm:p-6">
+      <Card className="shadow-none sm:shadow-xl border-0 sm:border bg-transparent sm:bg-gradient-to-br sm:from-white sm:to-gray-50/50 sm:dark:from-gray-900 sm:dark:to-gray-800/50 rounded-none sm:rounded-lg">
+        <CardHeader className="space-y-3 sm:space-y-4 pb-4 sm:pb-6 px-3 sm:px-6 pt-3 sm:pt-6">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="hidden md:block lg:block p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg shrink-0">
+              <Upload className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <div>
-              <CardTitle className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:text-white leading-tight">
                 Upload Academic Paper
               </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Add your research paper with metadata for better organization
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <Badge variant="outline" className="text-xs font-medium">
+          <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <Badge variant="outline" className="text-xs font-medium w-fit dark:border-white">
               Step 1 of 2
             </Badge>
-            <Separator className="flex-1" />
-            <div className="flex flex-col md:flex-row items-center gap-2">
+            <Separator className="hidden sm:block sm:flex-1" />
+            <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center gap-2">
               <span className="text-xs text-gray-500 font-medium">SOURCE TYPE</span>
               <RadioGroup
                 value={uploadType}
-                className="flex items-center gap-4"
+                className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center gap-2 sm:gap-4"
                 onValueChange={handleUploadTypeChange}
               >
                 <div className="flex items-center space-x-2">
@@ -160,14 +160,14 @@ const UploadPdf = ({
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-6 sm:space-y-8 px-3 sm:px-6 pb-3 sm:pb-6">
           {/* File/URL Upload Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Document Source</h3>
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Document Source</h3>
 
             {uploadType === 'file' ? (
               <div
-                className={`relative border-2 border-dashed rounded-xl p-8 transition-all duration-200 ${
+                className={`relative border-2 border-dashed rounded-xl p-4 sm:p-8 transition-all duration-200 ${
                   dragActive
                     ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
@@ -177,25 +177,27 @@ const UploadPdf = ({
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
               >
-                <div className="text-center space-y-4">
+                <div className="text-center space-y-3 sm:space-y-4">
                   {formData?.file ? (
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-                        <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
+                        <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
                       </div>
-                      <div className="text-left">
-                        <p className="font-medium text-green-700 dark:text-green-300">{formData.file.name}</p>
-                        <p className="text-sm text-green-600 dark:text-green-400">
+                      <div className="text-center sm:text-left min-w-0 flex-1">
+                        <p className="font-medium text-green-700 dark:text-green-300 text-sm sm:text-base truncate">
+                          {formData.file.name}
+                        </p>
+                        <p className="text-xs sm:text-sm text-green-600 dark:text-green-400">
                           {(formData.file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>
                       {fileUrl && (
-                        <Button variant="outline" size="sm" asChild className="ml-auto">
+                        <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
                           <a
                             href={fileUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1"
+                            className="flex items-center justify-center gap-1"
                           >
                             <ExternalLink className="h-3 w-3" />
                             Preview
@@ -205,11 +207,11 @@ const UploadPdf = ({
                     </div>
                   ) : (
                     <>
-                      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full w-fit mx-auto">
-                        <Upload className="h-8 w-8 text-gray-400" />
+                      <div className="p-3 sm:p-4 bg-gray-100 dark:bg-gray-800 rounded-full w-fit mx-auto">
+                        <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
                       </div>
                       <div>
-                        <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                        <p className="text-sm sm:text-base md:text-lg font-medium text-gray-700 dark:text-gray-300">
                           Drop your PDF here, or{' '}
                           <label
                             htmlFor="fileUpload"
@@ -218,7 +220,7 @@ const UploadPdf = ({
                             browse files
                           </label>
                         </p>
-                        <p className="text-sm text-gray-500 mt-1">Supports PDF files up to 50MB</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">Supports PDF files up to 50MB</p>
                       </div>
                     </>
                   )}
@@ -256,10 +258,10 @@ const UploadPdf = ({
           <Separator />
 
           {/* Metadata Section */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Paper Metadata</h3>
+          <div className="space-y-4 sm:space-y-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Paper Metadata</h3>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <div className="lg:col-span-2 space-y-2">
                 <Label htmlFor="article-input" className="text-sm font-medium flex items-center gap-2">
                   <FileText className="h-4 w-4" />
@@ -272,7 +274,7 @@ const UploadPdf = ({
                   name="article"
                   value={formData?.article || ''}
                   onChange={handleChange}
-                  className="text-base"
+                  className="text-sm sm:text-base dark:border-white"
                 />
               </div>
 
@@ -288,7 +290,7 @@ const UploadPdf = ({
                   name="author"
                   value={formData?.author || ''}
                   onChange={handleChange}
-                  className="text-base"
+                  className="text-sm sm:text-base dark:border-white"
                 />
               </div>
 
@@ -304,7 +306,7 @@ const UploadPdf = ({
                   name="doi"
                   value={formData?.doi || ''}
                   onChange={handleChange}
-                  className="text-base"
+                  className="text-sm sm:text-base dark:border-white"
                 />
               </div>
 
@@ -320,13 +322,13 @@ const UploadPdf = ({
                   name="pubmedid"
                   value={formData?.pubmedid || ''}
                   onChange={handleChange}
-                  className="text-base"
+                  className="text-sm sm:text-base dark:border-white"
                 />
               </div>
             </div>
           </div>
 
-          <Separator />
+          <Separator className="dark:bg-gray-200"/>
 
           {/* Submit Section */}
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
@@ -343,7 +345,7 @@ const UploadPdf = ({
               onClick={handleUploadCollection}
               disabled={isButtonDisabled}
               size="lg"
-              className="w-full sm:w-auto min-w-[120px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full sm:w-auto min-w-[120px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 dark:text-white"
             >
               {isSubmitting ? (
                 <>

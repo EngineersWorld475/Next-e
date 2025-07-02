@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import ConfirmDialog from '@/common/ConfirmDialog';
 import { useCustomToast } from '@/hooks/useCustomToast';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 
 const PdfCard = ({
@@ -81,7 +82,7 @@ const PdfCard = ({
   };
 
   return (
-    <Card className="w-full mb-6 hover:shadow-lg  bg-gradient-r from-gray-100 to-gray-200 dark:bg-gray-800">
+    <Card className="w-full mb-6 hover:shadow-lg  bg-gradient-r from-gray-100 to-gray-200 dark:bg-gray-800 dark:border-white">
       <CardContent className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Article Information */}
@@ -99,14 +100,14 @@ const PdfCard = ({
                 </button>
               </div>
 
-              <div>
+              <div className='hidden md:block lg:block'>
                 <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
                   Author
                 </h3>
                 <p className="text-gray-800 dark:text-white font-medium">{author}</p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="hidden md:flex lg:flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs">
                   Annotations: 0
                 </Badge>
@@ -115,7 +116,7 @@ const PdfCard = ({
           </div>
 
           {/* Metadata */}
-          <div className="lg:col-span-1">
+          <div className="hidden md:block lg:block lg:col-span-1">
             <div className="space-y-4">
               <div>
                 <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
@@ -143,6 +144,78 @@ const PdfCard = ({
               </div>
             </div>
           </div>
+          <Accordion type="single"
+            collapsible
+            className="block md:hidden lg:hidden w-full"
+            defaultValue="item-1">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>
+                Collection Details
+              </AccordionTrigger>
+              <AccordionContent className="flex flex-col gap-4 text-balance">
+                <div className="lg:col-span-1">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                        Article
+                      </h3>
+                      <button
+                        onClick={handlePdfClick}
+                        className="text-blue-600 hover:text-blue-800 font-semibold text-lg leading-tight hover:underline transition-colors duration-200 text-left"
+                      >
+                        {article}
+                      </button>
+                    </div>
+
+
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                        Author
+                      </h3>
+                      <p className="text-gray-800 dark:text-white font-medium">{author}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        Annotations: 0
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Metadata */}
+                  <div className="lg:col-span-1">
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                          PubMed ID
+                        </h3>
+                        <p className="text-gray-800 font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+                          {pubmedId || 'N/A'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                          DOI Number
+                        </h3>
+                        <p className="text-gray-800 font-mono text-sm bg-gray-100 px-2 py-1 rounded break-all">
+                          {doi || 'N/A'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+                          Comments
+                        </h3>
+                        <p className="text-gray-600 text-sm italic">No comments yet</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+          </Accordion>
 
           {/* Actions & Status */}
           <div className="lg:col-span-1">
@@ -295,3 +368,79 @@ const PdfCard = ({
 };
 
 export default React.memo(PdfCard);
+
+
+
+
+// {/* <Accordion type="single"
+//             collapsible
+//             className="block md:hidden lg:hidden w-full"
+//             defaultValue="item-1">
+//             <AccordionItem>
+//               <AccordionTrigger>
+//                 Collection Details
+//               </AccordionTrigger>
+//               <AccordionContent className="flex flex-col gap-4 text-balance">
+//                 <div className="lg:col-span-1">
+//                   <div className="space-y-4">
+//                     <div>
+//                       <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+//                         Article
+//                       </h3>
+//                       <button
+//                         onClick={handlePdfClick}
+//                         className="text-blue-600 hover:text-blue-800 font-semibold text-lg leading-tight hover:underline transition-colors duration-200 text-left"
+//                       >
+//                         {article}
+//                       </button>
+//                     </div>
+
+
+//                     <div>
+//                       <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+//                         Author
+//                       </h3>
+//                       <p className="text-gray-800 dark:text-white font-medium">{author}</p>
+//                     </div>
+
+//                     <div className="flex items-center gap-2">
+//                       <Badge variant="secondary" className="text-xs">
+//                         Annotations: 0
+//                       </Badge>
+//                     </div>
+//                   </div>
+
+//                   {/* Metadata */}
+//                   <div className="lg:col-span-1">
+//                     <div className="space-y-4">
+//                       <div>
+//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+//                           PubMed ID
+//                         </h3>
+//                         <p className="text-gray-800 font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+//                           {pubmedId || 'N/A'}
+//                         </p>
+//                       </div>
+
+//                       <div>
+//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+//                           DOI Number
+//                         </h3>
+//                         <p className="text-gray-800 font-mono text-sm bg-gray-100 px-2 py-1 rounded break-all">
+//                           {doi || 'N/A'}
+//                         </p>
+//                       </div>
+
+//                       <div>
+//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
+//                           Comments
+//                         </h3>
+//                         <p className="text-gray-600 text-sm italic">No comments yet</p>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </AccordionContent>
+//             </AccordionItem>
+
+// </Accordion> */}

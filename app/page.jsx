@@ -74,7 +74,7 @@ export default function Home() {
 
         {/* Hero Section */}
         <motion.div
-          className="relative flex flex-col justify-center items-center min-h-screen gap-8 text-center px-6 pt-10 pb-19 -mt-10"
+          className="relative flex flex-col justify-center items-center min-h-screen gap-8 text-center px-6 pt-10 pb-19 -mt-20 md:-mt-10 lg:-mt-10"
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
@@ -171,7 +171,7 @@ export default function Home() {
                 transition={{ duration: 0.3 }}
               >
                 <div className="relative p-8 bg-gradient-to-br from-white/10 to-white/5 rounded-3xl backdrop-blur-xl border border-white/20 shadow-2xl">
-                  <div className="w-full h-80 bg-gradient-to-br from-violet-400/20 to-purple-400/20 rounded-2xl flex items-center justify-center">
+                  <div className="w-full h-80 bg-white rounded-2xl flex items-center justify-center">
                     <div className="text-center">
                       <Image src="/images/annotation-img.jpg" alt="annotation-image" className="rounded-2xl" width={600} height={500} />
 
@@ -193,7 +193,7 @@ export default function Home() {
           <CarouselComponent />
         </motion.div>
 
-        {/* Who Should Use Scholarly - Enhanced */}
+        {/* Who Should Use Scholarly */}
         <motion.div
           className="relative backdrop-blur-xl bg-gradient-to-l from-indigo-800/50 to-slate-800/30 py-20 border-y border-white/10"
           initial="hidden"
@@ -210,7 +210,7 @@ export default function Home() {
                 transition={{ duration: 0.3 }}
               >
                 <div className="relative p-8 bg-gradient-to-br from-white/10 to-white/5 rounded-3xl backdrop-blur-xl border border-white/20 shadow-2xl">
-                  <div className="w-full h-80 bg-gradient-to-br from-indigo-400/20 to-blue-400/20 rounded-2xl flex items-center justify-center overflow-hidden">
+                  <div className="w-full h-80 bg-white rounded-2xl flex items-center justify-center overflow-hidden">
                     <div className="object-contain">
                       <Image src="/images/searching-img.jpg" alt="searching-image" width={600} height={200} />
                     </div>
@@ -219,7 +219,7 @@ export default function Home() {
               </motion.div>
               <motion.div variants={itemVariants} className="space-y-6 order-1 lg:order-2">
                 <div className="relative flex gap-3 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center mt-1.5">
+                  <div className="w-16 h-10 md:w-14 md:h-12 lg:w-14 lg:h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center mt-1.5">
                     <Users className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-4xl md:text-5xl font-bold text-white">
@@ -244,7 +244,7 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Who Are We - Refined */}
+        {/* Who Are We */}
         <motion.div
           className="relative bg-gradient-to-br from-white via-gray-50 to-purple-50 py-20 text-gray-900"
           initial="hidden"
@@ -305,7 +305,7 @@ export default function Home() {
           <SummaryStats />
         </motion.div>
 
-        {/* Enhanced Footer */}
+        {/* Footer */}
         <footer className="relative bg-gradient-to-t from-slate-900 via-purple-900/50 to-slate-800 py-2 border-t border-white/10">
           <div className="max-w-7xl mx-auto px-6 text-center">
             <motion.div
@@ -324,7 +324,7 @@ export default function Home() {
                 Empowering researchers worldwide with intelligent annotation tools
               </p>
               <p className="text-gray-500 text-xs">
-                Copyright © 2025 Scholarly Web Book. Powered by xAI.
+                Copyright © 2025 Scholarly Web Book.
               </p>
             </motion.div>
           </div>
