@@ -132,29 +132,29 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
 
   return (
     <Card className="w-full max-w-lg mx-auto shadow-xl border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 overflow-hidden">
-      <CardHeader className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-b border-blue-100 dark:border-blue-800/50">
-        <CardTitle className="flex items-center gap-3 text-xl font-semibold text-gray-800 dark:text-gray-100">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-            <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+      <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-b border-blue-100 dark:border-blue-800/50">
+        <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100">
+          <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <span>Create New Group</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(createGroup)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(createGroup)} className="space-y-4 sm:space-y-6">
             {/* Group name */}
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  <FormLabel className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                     Group Name
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 transition-all duration-200"
+                      className="h-10 sm:h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 transition-all duration-200 text-sm sm:text-base"
                       placeholder="Enter group name..."
                       {...field}
                       required
@@ -171,30 +171,32 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
               name="emails"
               render={() => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    Email Addresses
+                  <FormLabel className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span>Email Addresses</span>
+                    </div>
                     {emails.length > 0 && (
-                      <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full text-xs font-medium">
+                      <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full text-xs font-medium w-fit">
                         {emails.length} {emails.length === 1 ? 'email' : 'emails'}
                       </span>
                     )}
                   </FormLabel>
-                  <div className="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-all duration-200 bg-gray-50/50 dark:bg-gray-800/50">
+                  <div className="border-2 border-gray-200 dark:border-gray-700 rounded-lg p-3 sm:p-4 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-all duration-200 bg-gray-50/50 dark:bg-gray-800/50">
                     {emails.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
                         {emails.map((email, index) => (
                           <div
                             key={index}
-                            className="flex items-center bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-2 rounded-full text-sm font-medium shadow-sm group hover:shadow-md transition-all duration-200"
+                            className="flex items-center bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium shadow-sm group hover:shadow-md transition-all duration-200 max-w-full"
                           >
-                            <span className="flex-1">{email}</span>
+                            <span className="flex-1 truncate mr-1">{email}</span>
                             <button
                               type="button"
                               onClick={() => removeEmail(email)}
-                              className="ml-2 p-1 hover:bg-white/20 rounded-full transition-colors duration-200"
+                              className="ml-1 p-0.5 sm:p-1 hover:bg-white/20 rounded-full transition-colors duration-200 flex-shrink-0"
                             >
-                              <X size={14} />
+                              <X size={12} className="sm:w-3.5 sm:h-3.5" />
                             </button>
                           </div>
                         ))}
@@ -206,13 +208,14 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
                         onChange={(e) => setEmailInput(e.target.value)}
                         onKeyDown={addEmail}
                         rows={2}
-                        className="bg-transparent resize-none p-0 text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-0 focus-visible:outline-none"
+                        className="bg-transparent resize-none p-0 text-sm sm:text-base text-gray-700 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-0 focus-visible:outline-none min-h-12 sm:min-h-16"
                         placeholder={emails.length === 0 ? "Type email address and press Enter to add..." : "Add another email..."}
                       />
 
-                      <div className="absolute bottom-2 right-2 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                        <Plus size={12} />
-                        Press Enter to add
+                      <div className="absolute bottom-1 sm:bottom-2 right-1 sm:right-2 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                        <Plus size={10} className="sm:w-3 sm:h-3" />
+                        <span className="hidden sm:inline">Press Enter to add</span>
+                        <span className="sm:hidden">Enter to add</span>
                       </div>
                     </div>
                   </div>
@@ -223,17 +226,17 @@ const CreateGroup = ({ setIsMounting, listOfGroups, setListOfGroups }) => {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg"
+              className="w-full h-11 sm:h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg text-sm sm:text-base"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <div className="flex items-center gap-3">
-                  <Loader2 className="animate-spin h-5 w-5" />
-                  <span>Creating Group...</span>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Loader2 className="animate-spin h-4 w-4 sm:h-5 sm:w-5" />
+                  <span>Creating...</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
-                  <Plus className="h-5 w-5" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                   <span>Create Group</span>
                 </div>
               )}

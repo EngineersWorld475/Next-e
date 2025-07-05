@@ -167,7 +167,7 @@ const UploadPdf = ({
 
             {uploadType === 'file' ? (
               <div
-                className={`relative border-2 border-dashed rounded-xl p-4 sm:p-8 transition-all duration-200 ${
+                className={`relative border-2 border-dashed rounded-xl p-4 sm:p-8 transition-all duration-200 overflow-hidden ${
                   dragActive
                     ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'

@@ -144,12 +144,13 @@ const PdfCard = ({
               </div>
             </div>
           </div>
+          {/* collection details mobile view */}
           <Accordion type="single"
             collapsible
             className="block md:hidden lg:hidden w-full"
-            defaultValue="item-1">
+            >
             <AccordionItem value="item-1">
-              <AccordionTrigger>
+              <AccordionTrigger className="border border-none">
                 Collection Details
               </AccordionTrigger>
               <AccordionContent className="flex flex-col gap-4 text-balance">
@@ -368,79 +369,3 @@ const PdfCard = ({
 };
 
 export default React.memo(PdfCard);
-
-
-
-
-// {/* <Accordion type="single"
-//             collapsible
-//             className="block md:hidden lg:hidden w-full"
-//             defaultValue="item-1">
-//             <AccordionItem>
-//               <AccordionTrigger>
-//                 Collection Details
-//               </AccordionTrigger>
-//               <AccordionContent className="flex flex-col gap-4 text-balance">
-//                 <div className="lg:col-span-1">
-//                   <div className="space-y-4">
-//                     <div>
-//                       <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
-//                         Article
-//                       </h3>
-//                       <button
-//                         onClick={handlePdfClick}
-//                         className="text-blue-600 hover:text-blue-800 font-semibold text-lg leading-tight hover:underline transition-colors duration-200 text-left"
-//                       >
-//                         {article}
-//                       </button>
-//                     </div>
-
-
-//                     <div>
-//                       <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
-//                         Author
-//                       </h3>
-//                       <p className="text-gray-800 dark:text-white font-medium">{author}</p>
-//                     </div>
-
-//                     <div className="flex items-center gap-2">
-//                       <Badge variant="secondary" className="text-xs">
-//                         Annotations: 0
-//                       </Badge>
-//                     </div>
-//                   </div>
-
-//                   {/* Metadata */}
-//                   <div className="lg:col-span-1">
-//                     <div className="space-y-4">
-//                       <div>
-//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
-//                           PubMed ID
-//                         </h3>
-//                         <p className="text-gray-800 font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-//                           {pubmedId || 'N/A'}
-//                         </p>
-//                       </div>
-
-//                       <div>
-//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
-//                           DOI Number
-//                         </h3>
-//                         <p className="text-gray-800 font-mono text-sm bg-gray-100 px-2 py-1 rounded break-all">
-//                           {doi || 'N/A'}
-//                         </p>
-//                       </div>
-
-//                       <div>
-//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">
-//                           Comments
-//                         </h3>
-//                         <p className="text-gray-600 text-sm italic">No comments yet</p>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </AccordionContent>
-//             </AccordionItem>
-
-// </Accordion> */}

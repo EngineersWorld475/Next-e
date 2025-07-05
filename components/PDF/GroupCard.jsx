@@ -1,4 +1,3 @@
-
 'use client'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
@@ -162,21 +161,29 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
             <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="card-1" className="border-none">
                     <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
-                        <CardHeader className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-b border-blue-100 dark:border-blue-800/50">
+                        <CardHeader className="p-3 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-b border-blue-100 dark:border-blue-800/50">
                             <AccordionTrigger className="w-full text-left hover:no-underline group/trigger">
-                                <CardTitle className="w-full flex flex-row justify-between items-center">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg group-hover/trigger:bg-blue-200 dark:group-hover/trigger:bg-blue-800/70 transition-colors duration-200">
-                                            <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                <CardTitle className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+                                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                                        <div className="relative p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg group-hover/trigger:bg-blue-200 dark:group-hover/trigger:bg-blue-800/70 transition-colors duration-200">
+                                            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
+                                            {/* Mobile badge - positioned on top-left of icon */}
+                                            <Badge
+                                                variant="secondary"
+                                                className="absolute -top-1 -left-2 bg-red-400 dark:bg-gray-900 text-white border-0 px-1 py-0 rounded-full font-medium shadow-sm text-xs h-4 w-4 flex items-center justify-center min-w-4 sm:hidden"
+                                            >
+                                                {count}
+                                            </Badge>
                                         </div>
-                                        <span className="text-sm md:text-sm lg:text-sm font-semibold text-gray-800 dark:text-gray-100 group-hover/trigger:text-blue-700 dark:group-hover/trigger:text-blue-300 transition-colors duration-200">
+                                        <span className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100 group-hover/trigger:text-blue-700 dark:group-hover/trigger:text-blue-300 transition-colors duration-200 truncate">
                                             {groupName}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2 mx-1">
+                                    {/* Desktop badge - positioned on the right */}
+                                    <div className="hidden sm:flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
                                         <Badge
                                             variant="secondary"
-                                            className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 px-3 py-1 rounded-full font-medium shadow-sm"
+                                            className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 px-3 py-1 rounded-full font-medium shadow-sm text-sm"
                                         >
                                             {count} {count === 1 ? 'member' : 'members'}
                                         </Badge>
@@ -186,29 +193,29 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
                         </CardHeader>
 
                         <AccordionContent className="overflow-hidden">
-                            <CardContent className="p-6 space-y-6">
+                            <CardContent className="p-3 sm:p-6 space-y-4 sm:space-y-6">
                                 {/* Email List */}
                                 {emails && emails.length > 0 && (
-                                    <div className="space-y-3">
-                                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                                    <div className="space-y-2 sm:space-y-3">
+                                        <h4 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                                             Group Members
                                         </h4>
-                                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                                        <div className="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
                                             {emails.map((item, index) => (
                                                 <div
                                                     key={item?.GroupEmailId}
-                                                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-200 group/email"
+                                                    className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-200 group/email"
                                                 >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                        <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                                                        <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-medium truncate">
                                                             {item?.Email}
                                                         </span>
                                                     </div>
                                                     <ConfirmDialog
                                                         iconTrigger={
-                                                            <div className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md transition-colors duration-200 opacity-0 group-hover/email:opacity-100">
-                                                                <Trash className="h-4 w-4 text-red-500 hover:text-red-600 cursor-pointer" />
+                                                            <div className="p-1.5 sm:p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md transition-colors duration-200 sm:opacity-0 sm:group-hover/email:opacity-100 flex-shrink-0">
+                                                                <Trash className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500 hover:text-red-600 cursor-pointer" />
                                                             </div>
                                                         }
                                                         title="Are you sure you want to delete this email?"
@@ -222,30 +229,30 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
                                 )}
 
                                 {/* Add Email Section */}
-                                <div className="space-y-4">
-                                    <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                                <div className="space-y-3 sm:space-y-4">
+                                    <h4 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                                         Add New Member
                                     </h4>
-                                    <div className="flex flex-col sm:flex-row gap-3">
-                                        <div className="flex-1">
+                                    <div className="flex flex-col gap-2 sm:gap-3">
+                                        <div className="w-full">
                                             <Input
                                                 disabled={isAddingEmail}
                                                 type="email"
                                                 placeholder="Enter email address..."
                                                 value={newEmail}
                                                 onChange={handleChange}
-                                                className="h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 transition-all duration-200"
+                                                className="h-10 sm:h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 transition-all duration-200 text-sm sm:text-base"
                                             />
                                         </div>
                                         <Button
                                             onClick={handleAddEmail}
                                             disabled={newEmail === '' || isAddingEmail}
-                                            className="h-11 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px]"
+                                            className="h-10 sm:h-11 px-4 sm:px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto sm:min-w-[100px] text-sm sm:text-base"
                                             aria-busy={isAddingEmail}
                                         >
                                             {isAddingEmail ? (
-                                                <div className="flex items-center gap-2">
-                                                    <Loader2 className="animate-spin h-4 w-4" />
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <Loader2 className="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                                     <span>Adding...</span>
                                                 </div>
                                             ) : (
@@ -256,14 +263,14 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
                                 </div>
 
                                 {/* Delete Group Section */}
-                                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                                    <div className="flex justify-end">
+                                <div className="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="flex justify-center sm:justify-end">
                                         <ConfirmDialog
                                             triggerText="Delete Group"
                                             title="Are you sure you want to delete this group?"
                                             onConfirm={handleDeleteGroup}
                                             onCancel={() => console.log("Cancelled")}
-                                            ButtonStyle="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 px-6 py-2"
+                                            ButtonStyle="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 px-4 sm:px-6 py-2 text-sm sm:text-base w-full sm:w-auto"
                                         />
                                     </div>
                                 </div>

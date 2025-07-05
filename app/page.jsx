@@ -74,7 +74,7 @@ export default function Home() {
 
         {/* Hero Section */}
         <motion.div
-          className="relative flex flex-col justify-center items-center min-h-screen gap-8 text-center px-6 pt-10 pb-19 -mt-20 md:-mt-10 lg:-mt-10"
+          className="relative flex flex-col justify-center items-center min-h-screen gap-8 text-center px-6 pt-10 pb-19 -mt-10"
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
