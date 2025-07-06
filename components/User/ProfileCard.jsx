@@ -1,4 +1,3 @@
-
 'use client'
 import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -7,85 +6,103 @@ import EditProfileModal from "./EditProfileModal";
 import { User, GraduationCap, MapPin, Mail, Building, Briefcase, Code } from "lucide-react";
 
 const ProfileCard = ({userProfileData}) => {
-
   // EditProfileModal only updates when userProfileData changes
   const memoizedEditProfileModal = useMemo(() => {
     return <EditProfileModal editProfileData={userProfileData} />
   }, [userProfileData]);
 
   return (
-    <div className="w-[350px] md:w-[500px] lg:w-[500px] mx-auto">
-      <Card className="shadow-2xl rounded-2xl border-0 bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
-        {/* Personal Information Section */}
-        <CardHeader className="relative bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 text-white py-8 px-6">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-              <User className="h-6 w-6 text-white" />
+    <div className="w-full max-w-2xl mx-auto px-0 sm:px-6 lg:px-8">
+      <Card className="bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        {/* Profile Header */}
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 md:py-8 lg:py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="h-12 w-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <User className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl md:text-2xl lg:text-2xl font-bold">
+                  {userProfileData?.FirstName} {userProfileData?.LastName}
+                </h2>
+                <p className="text-blue-100 mt-1">
+                  {userProfileData?.CurrentPosition || "Professional"}
+                </p>
+              </div>
             </div>
-            <CardTitle className="text-xl font-bold tracking-wide">Personal Information</CardTitle>
           </div>
-          <div className="absolute -bottom-1 left-0 right-0 h-4 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"></div>
         </CardHeader>
-        
-        <CardContent className="p-6 space-y-5">
-          <div className="grid gap-4">
-            <ProfileField 
-              icon={<User className="h-4 w-4 text-blue-500" />}
-              label="Firstname" 
-              value={userProfileData?.FirstName} 
-            />
-            <ProfileField 
-              icon={<User className="h-4 w-4 text-purple-500" />}
-              label="Lastname" 
-              value={userProfileData?.LastName} 
-            />
-            <ProfileField 
-              icon={<Mail className="h-4 w-4 text-green-500" />}
-              label="Email ID" 
-              value={userProfileData?.EmailID} 
-            />
-          </div>
-        </CardContent>
 
-        {/* Educational Information Section */}
-        <CardHeader className="relative bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white py-8 px-6 mt-6">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-              <GraduationCap className="h-6 w-6 text-white" />
+        <CardContent className="p-6">
+          {/* Personal Information Section */}
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">
+                <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Personal Information
+              </h3>
             </div>
-            <CardTitle className="text-xl font-bold tracking-wide">Educational Information</CardTitle>
-          </div>
-          <div className="absolute -bottom-1 left-0 right-0 h-4 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"></div>
-        </CardHeader>
-        
-        <CardContent className="p-6 space-y-5">
-          <div className="grid gap-4">
-            <ProfileField 
-              icon={<Building className="h-4 w-4 text-emerald-500" />}
-              label="University" 
-              value={userProfileData?.University} 
-            />
-            <ProfileField 
-              icon={<Briefcase className="h-4 w-4 text-teal-500" />}
-              label="Current Position" 
-              value={userProfileData?.CurrentPosition} 
-            />
-            <ProfileField 
-              icon={<MapPin className="h-4 w-4 text-cyan-500" />}
-              label="Location" 
-              value={userProfileData?.CurrentLocation} 
-            />
-            <ProfileField 
-              icon={<Code className="h-4 w-4 text-indigo-500" />}
-              label="Area of expertise" 
-              value="Computer programming" 
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ProfileField 
+                icon={<User className="h-4 w-4 text-blue-500" />}
+                label="First Name" 
+                value={userProfileData?.FirstName} 
+              />
+              <ProfileField 
+                icon={<User className="h-4 w-4 text-purple-500" />}
+                label="Last Name" 
+                value={userProfileData?.LastName} 
+              />
+              <ProfileField 
+                icon={<Mail className="h-4 w-4 text-green-500" />}
+                label="Email" 
+                value={userProfileData?.EmailID} 
+                isEmail={true}
+              />
+              <ProfileField 
+                icon={<MapPin className="h-4 w-4 text-red-500" />}
+                label="Location" 
+                value={userProfileData?.CurrentLocation} 
+              />
+            </div>
           </div>
 
-          <div className="flex justify-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-            {memoizedEditProfileModal}
+          {/* Educational Information Section */}
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-3">
+                <GraduationCap className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Educational Information
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ProfileField 
+                icon={<Building className="h-4 w-4 text-emerald-500" />}
+                label="University" 
+                value={userProfileData?.University} 
+              />
+              <ProfileField 
+                icon={<Briefcase className="h-4 w-4 text-teal-500" />}
+                label="Position" 
+                value={userProfileData?.CurrentPosition} 
+              />
+              <ProfileField 
+                icon={<Code className="h-4 w-4 text-indigo-500" />}
+                label="Area of Expertise" 
+                value="Computer Programming" 
+              />
+            </div>
+          </div>
+
+          {/* Edit Profile Button */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <div className="flex justify-center">
+              {memoizedEditProfileModal}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -94,17 +111,23 @@ const ProfileCard = ({userProfileData}) => {
 };
 
 const ProfileField = React.memo(
-  ({ icon, label, value }) => (
-    <div className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-750 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 ease-out">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 group-hover:scale-110 transition-transform duration-200">
+  ({ icon, label, value, isEmail = false }) => (
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0 p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
           {icon}
         </div>
-        <Label className="text-gray-700 dark:text-gray-300 font-medium text-sm">{label}</Label>
+        <div className="flex-1 min-w-0">
+          <Label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            {label}
+          </Label>
+          <p className={`mt-1 text-sm font-medium text-gray-900 dark:text-gray-100 ${
+            isEmail ? 'break-all' : 'truncate'
+          }`}>
+            {value || "Not specified"}
+          </p>
+        </div>
       </div>
-      <span className="text-gray-900 dark:text-gray-100 font-semibold bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm">
-        {value || "Not specified"}
-      </span>
     </div>
   )
 );

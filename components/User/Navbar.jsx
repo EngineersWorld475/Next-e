@@ -63,7 +63,6 @@ const Navbar = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-8 w-8 ring-2 ring-background transition-all hover:ring-primary/20">
-                  <AvatarImage src="/placeholder-avatar.jpg" alt="User avatar" />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                     <CircleUser className="h-5 w-5" />
                   </AvatarFallback>
@@ -77,7 +76,6 @@ const Navbar = () => {
             >
               <div className="flex items-center space-x-2 p-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder-avatar.jpg" alt="User avatar" />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs">
                     {userData?.FirstName[0].toUpperCase()}{userData?.LastName[0].toUpperCase()}
                   </AvatarFallback>
@@ -132,7 +130,6 @@ const Navbar = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-8 w-8 ring-2 ring-background transition-all hover:ring-primary/20">
-                <AvatarImage src="/placeholder-avatar.jpg" alt="User avatar" />
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                   <CircleUser className="h-5 w-5" />
                 </AvatarFallback>
@@ -146,7 +143,6 @@ const Navbar = () => {
           >
             <div className="flex items-center space-x-2 p-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder-avatar.jpg" alt="User avatar" />
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs">
                   {userData?.FirstName[0].toUpperCase()}{userData?.LastName[0].toUpperCase()}
                 </AvatarFallback>

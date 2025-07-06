@@ -16,7 +16,6 @@ const page = () => {
 
   return (
     <div className='flex flex-col justify-center items-center mt-2 dark:bg-gray-800'>
-      <h1 className='text-2xl font-semibold'>User profile</h1>
       <div className='mt-5'>
         <ProfileCard userProfileData={userData} />
       </div>

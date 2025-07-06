@@ -233,7 +233,7 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
                                     <h4 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                                         Add New Member
                                     </h4>
-                                    <div className="flex flex-col gap-2 sm:gap-3">
+                                    <div className="flex flex-col md:flex-row lg:flex-row gap-2 sm:gap-3">
                                         <div className="w-full">
                                             <Input
                                                 disabled={isAddingEmail}

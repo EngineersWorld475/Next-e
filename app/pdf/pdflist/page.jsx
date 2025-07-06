@@ -181,7 +181,6 @@ const PdfList = () => {
 
   return (
     <div className="flex flex-col gap-5 h-full bg-white dark:bg-gray-800 dark:text-white">
-      {/* <h1 className='flex items-center justify-center text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>Dashboard</h1> */}
       {/* Upload PDF */}
         <UploadPdf setFile={setFile} fileUrl={fileUrl} setFileUrl={setFileUrl} formData={formData} setFormData={setFormData} isSubmitting={isSubmitting} fileInputRef={fileInputRef} handleUploadCollection={handleUploadCollection} />
       {/* Search PDF */}

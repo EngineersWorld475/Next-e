@@ -138,17 +138,20 @@ const RegisterPage = () => {
         </div>
         <div className="flex flex-row gap-2">
           <div className="w-1/2">
-            <label htmlFor="currentLocation" className="block text-xs font-medium text-gray-700">Location</label>
-            <input
-              type="text"
-              id="currentLocation"
-              name="currentLocation"
+            <label htmlFor="gender" className="block text-xs font-medium text-gray-700">Gender</label>
+            <select
+              id="gender"
+              name="gender"
               className="mt-0.5 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none text-sm p-2 bg-white text-black"
-              value={formData.currentLocation}
+              value={formData.gender}
               onChange={handleChange}
-              placeholder="Location"
               required
-            />
+            >
+              <option value="">Select Gender</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+              <option value="O">Other</option>
+            </select>
           </div>
           <div className="w-1/2">
             <label htmlFor="currentPosition" className="block text-xs font-medium text-gray-700">Position</label>
@@ -166,15 +169,15 @@ const RegisterPage = () => {
         </div>
         <div className="flex flex-row gap-2">
           <div className="w-1/2">
-            <label htmlFor="university" className="block text-xs font-medium text-gray-700">University</label>
+            <label htmlFor="currentLocation" className="block text-xs font-medium text-gray-700">Location</label>
             <input
               type="text"
-              id="university"
-              name="university"
+              id="currentLocation"
+              name="currentLocation"
               className="mt-0.5 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none text-sm p-2 bg-white text-black"
-              value={formData.university}
+              value={formData.currentLocation}
               onChange={handleChange}
-              placeholder="University"
+              placeholder="Location"
               required
             />
           </div>
@@ -192,21 +195,18 @@ const RegisterPage = () => {
             />
           </div>
         </div>
-        <div>
-          <label htmlFor="gender" className="block text-xs font-medium text-gray-700">Gender</label>
-          <select
-            id="gender"
-            name="gender"
+        <div className="w-full">
+          <label htmlFor="university" className="block text-xs font-medium text-gray-700">University</label>
+          <input
+            type="text"
+            id="university"
+            name="university"
             className="mt-0.5 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none text-sm p-2 bg-white text-black"
-            value={formData.gender}
+            value={formData.university}
             onChange={handleChange}
+            placeholder="University"
             required
-          >
-            <option value="">Select Gender</option>
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-            <option value="O">Other</option>
-          </select>
+          />
         </div>
         <button
           type="submit"

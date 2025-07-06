@@ -29,16 +29,16 @@ const GroupList = () => {
   }, [groupList]);
 
   return (
-    <div className='group border-l-4 border-l-transparent bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg relative'>
-      <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-gray-100 mt-5 p-4 shadow-sm rounded-xl dark:bg-gray-900 dark:text-white'>
+    <div className='group bg-white text-black dark:bg-gray-800 dark:text-white rounded-lg relative'>
+      <div className='flex flex-col gap-3 md:flex-row lg:flex-row w-full bg-white mt-5 p-0 md:p-1 lg:p-1 shadow-sm rounded-xl dark:bg-gray-800 dark:text-white'>
         {isLoading && isMounting ? (
-          <div className='w-full md:w-2/3 lg:w-2/3 bg-white flex justify-center items-center gap-1 dark:bg-gray-800 dark:text-white dark:rounded-lg px-3 py-2'>
+          <div className='w-full md:w-2/3 lg:w-2/3 bg-white flex justify-center items-center gap-1 dark:bg-gray-800 dark:text-white dark:rounded-lg px-0 md:px-3 lg:px-3 py-0'>
             <Loader className="animate-spin text-gray-600 w-7 h-7 text-center" />
           </div>
         ) : (
-          <div className='w-full md:w-2/3 lg:w-2/3 bg-white dark:bg-gray-800 dark:text-white dark:rounded-lg px-3 py-2'>
-            <h1 className='font-semibold text-gray-500 mt-2'>Groups</h1>
-            <p className='text-sm text-gray-500 mb-3'>Total Groups: <span>{listOfGroups?.length}</span></p>
+          <div className='w-full md:w-2/3 lg:w-2/3 bg-white dark:bg-gray-800 dark:text-white dark:rounded-lg px-0 md:px-3 lg:px-3 py-0'>
+            <h1 className='font-semibold text-gray-500 dark:text-white mt-2'>Groups</h1>
+            <p className='text-sm text-gray-500 dark:text-white mb-3'>Total Groups: <span>{listOfGroups?.length}</span></p>
             {listOfGroups?.length > 0 ? (
               listOfGroups?.map((group) => (
                 <GroupCard
