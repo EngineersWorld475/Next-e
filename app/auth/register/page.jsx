@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useCustomToast } from '@/hooks/useCustomToast';
+import CustomButton from '@/common/CustomButton';
 
 const RegisterPage = () => {
   const dispatch = useDispatch();
@@ -62,7 +63,7 @@ const RegisterPage = () => {
       showToast({
         description: error?.message || 'An error occurred. Please try again.',
         variant: 'destructive',
-      });
+      }); 
       setIsSubmitting(false);
     }
   };
@@ -208,20 +209,7 @@ const RegisterPage = () => {
             required
           />
         </div>
-        <button
-          type="submit"
-          className="mt-2 w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none text-sm p-2 bg-gradient-to-r from-indigo-700 to-purple-800 hover:from-indigo-800 hover:to-purple-900 text-white flex justify-center items-center gap-2"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="animate-spin h-4 w-4 text-center" />
-              Loading...
-            </>
-          ) : (
-            'Register'
-          )}
-        </button>
+        <CustomButton variant='purpleGradient' loading={isSubmitting}>Register</CustomButton>
       </form>
       <div className="flex justify-center mt-2 text-blue-500 text-sm w-full">
         <p>Already have an account?</p>

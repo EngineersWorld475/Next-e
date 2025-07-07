@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useCustomToast } from '@/hooks/useCustomToast';
+import CustomButton from '@/common/CustomButton';
 
 const LoginPage = () => {
   const initialState = {
@@ -141,14 +142,7 @@ const LoginPage = () => {
             <input type="checkbox" className='cursor-pointer bg-white' checked={rememberMe} onChange={handleRememberMe} />
             <span className='text-gray-500 text-sm font-geist tracking-tight'>stay logged in</span>
           </div>
-          <button type='submit' className='mt-3 w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none sm:text-sm p-2  bg-gradient-to-r from-indigo-700 to-purple-800 hover:from-indigo-800 hover:to-purple-900 text-white flex justify-center items-center gap-2' disabled={submitting}>{submitting ? (
-            <>
-              <Loader2 className="animate-spin h-5 w-5 text-center" />
-              Loading...
-            </>
-          ) : (
-            'Login'
-          )}</button>
+          <CustomButton variant='purpleGradient' loading={submitting}>Login</CustomButton>
         </form>
         <div className='flex flex-col md:flex-row lg:flex-row justify-center items-center gap-3 md:gap-0 lg:gap-0 mt-4 text-blue-500 text-sm w-full'>
           <p>you don't have an account?</p>

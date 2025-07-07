@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import ConfirmDialog from '@/common/ConfirmDialog';
 import { useCustomToast } from '@/hooks/useCustomToast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import CustomButton from '@/common/CustomButton';
 
 
 const PdfCard = ({
@@ -244,9 +245,12 @@ const PdfCard = ({
                   <div className="flex flex-wrap gap-2">
                     {/* confirm delete dialog */}
                     <ConfirmDialog
-                      iconTrigger={<Button variant="outline" size="sm" className="hover:bg-red-50 hover:text-red-600 hover:border-red-200">
-                        <TrashIcon size={16} />
-                      </Button>}
+                      iconTrigger={<CustomButton
+                          variant="outline"
+                          size="sm"
+                          icon={TrashIcon}
+                          className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                        />}
                       title="Do you want to delete this collection?"
                       onConfirm={() => handleDeleteCollection(id)}
                       onCancel={() => console.log("Cancelled")}
@@ -344,19 +348,19 @@ const PdfCard = ({
                       </DialogContent>
                     </Dialog>
 
-                    <Button
+                    <CustomButton
                       variant="outline"
                       size="sm"
+                      icon={Globe}
                       onClick={toggleAccess}
-                      className={`hover:bg-green-50 hover:text-green-600 hover:border-green-200 ${openAccess ? 'text-green-600 border-green-200' : ''
-                        }`}
-                    >
-                      <Globe size={16} />
-                    </Button>
-
-                    <Button variant="outline" size="sm" className="hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200">
-                      <Download size={16} />
-                    </Button>
+                      className={`hover:bg-green-50 hover:text-green-600 hover:border-green-200 ${openAccess ? 'text-green-600 border-green-200' : ''}`}
+                    />
+                    <CustomButton
+                      variant="outline"
+                      size="sm"
+                      icon={Download}
+                      className="hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200"
+                    />
                   </div>
                 </div>
               )}

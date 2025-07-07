@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, Upload, FileText, Link, User, Hash, Calendar, ExternalLink } from 'lucide-react';
+import CustomButton from '@/common/CustomButton';
 
 const UploadPdf = ({
   setFile,
@@ -341,24 +342,18 @@ const UploadPdf = ({
               )}
             </div>
 
-            <Button
+            <CustomButton
+              variant="gradient"
+              size="lg"
+              icon={Upload}
+              iconPosition="left"
               onClick={handleUploadCollection}
               disabled={isButtonDisabled}
-              size="lg"
-              className="w-full sm:w-auto min-w-[120px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 dark:text-white"
+              loading={isSubmitting}
+              fullWidth
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Paper
-                </>
-              )}
-            </Button>
+              Upload Paper
+            </CustomButton>
           </div>
         </CardContent>
       </Card>

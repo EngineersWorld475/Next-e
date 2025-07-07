@@ -13,6 +13,7 @@ import { useCustomToast } from '@/hooks/useCustomToast';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import ConfirmDialog from '@/common/ConfirmDialog';
+import CustomButton from '@/common/CustomButton';
 
 const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting, listOfGroups, setListOfGroups }) => {
     const dispatch = useDispatch();
@@ -244,21 +245,16 @@ const GroupCard = React.memo(({ groupName, emails, count, groupId, setIsMounting
                                                 className="h-10 sm:h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 transition-all duration-200 text-sm sm:text-base"
                                             />
                                         </div>
-                                        <Button
+                                        <CustomButton
+                                            variant="gradient"
+                                            size="lg"
                                             onClick={handleAddEmail}
                                             disabled={newEmail === '' || isAddingEmail}
-                                            className="h-10 sm:h-11 px-4 sm:px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto sm:min-w-[100px] text-sm sm:text-base"
-                                            aria-busy={isAddingEmail}
+                                            loading={isAddingEmail}
+                                            fullWidth
                                         >
-                                            {isAddingEmail ? (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <Loader2 className="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                                    <span>Adding...</span>
-                                                </div>
-                                            ) : (
-                                                'Add Member'
-                                            )}
-                                        </Button>
+                                            Add Member
+                                        </CustomButton>
                                     </div>
                                 </div>
 
